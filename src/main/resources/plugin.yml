@@ -1,0 +1,23 @@
+name: PvE-Arena
+version: '1.0-BETA'
+main: me.awabi2048.kota_arena.Main
+api-version: '1.21'
+authors: [ awabi2048 ]
+
+commands:
+  arena:
+    description: "Main arena command."
+
+permissions:
+  kota_arena.main.admin:
+    description: ""
+
+  kota_arena.main.menu:
+    description: ""
+
+  kota_arena.command.main:
+    description: ""
+
+  kota_arena.command.config:
+    description: ""
+

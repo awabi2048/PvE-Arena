@@ -1,0 +1,32 @@
+easy:
+  name: "§aイージー"
+  mob_multiplier: 0.8
+  reward_multiplier: 0.8
+  wave: 3
+  reward_ticket: easy
+  reward_point: false
+
+normal:
+  name: "§eノーマル"
+  mob_multiplier: 1.1
+  reward_multiplier: 1.0
+  wave: 5
+  reward_ticket: normal
+  reward_point: true
+
+hard:
+  name: "§cハード"
+  mob_multiplier: 1.5
+  reward_multiplier: 1.2
+  wave: 5
+  reward_ticket: hard
+  reward_point: true
+
+extra_hard:
+  name: "§dエキストラハード"
+  mob_multiplier: 2.0
+  reward_multiplier: 1.5
+  wave: 8
+  reward_ticket: hard
+  reward_point: true
+

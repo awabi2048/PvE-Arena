@@ -1,0 +1,20 @@
+zombie:
+  name: "§aゾンビ"
+  base_health: 20.0f
+  base_attack: 2.0f
+  base_speed: 0.1f
+  reward_ticket: 3
+  reward_point: 2
+  level_experience: 10
+  base_cost: 2
+
+skeleton:
+  name: "§aスケルトン"
+  base_health: 20.0f
+  base_attack: 2.0f
+  base_speed: 0.1f
+  reward_ticket: 3
+  reward_point: 2
+  level_experience: 10
+  base_cost: 2
+

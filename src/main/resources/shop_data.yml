@@ -1,0 +1,15 @@
+name:
+  item:
+    steel_sword:
+
+      #
+      buy:
+        - ticket_hard/5
+        - quest_point/5
+
+      # アドレスで指定
+      sell:
+        "0, 0, 0": 1
+
+      # 
+      buy_limit:
