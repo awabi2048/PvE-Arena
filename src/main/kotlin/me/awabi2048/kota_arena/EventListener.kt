@@ -17,6 +17,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerAnimationType
 import org.bukkit.event.player.PlayerInteractEntityEvent
+import org.bukkit.event.player.PlayerMoveEvent
 
 object EventListener: Listener {
     @EventHandler
@@ -61,8 +62,14 @@ object EventListener: Listener {
 
     }
 
+    @EventHandler
     fun onCloseInventory(event: InventoryCloseEvent) {
         playerMenuStatus.remove(event.player)
+    }
+
+    @EventHandler
+    fun onPortalEnter(event: PlayerMoveEvent) {
+
     }
 
 }

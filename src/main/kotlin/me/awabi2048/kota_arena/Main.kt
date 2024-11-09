@@ -1,11 +1,10 @@
 package me.awabi2048.kota_arena
 
-import jdk.jfr.Event
 import me.awabi2048.kota_arena.command.MainCommand
+import me.awabi2048.kota_arena.misc.SessionData
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
-import org.bukkit.structure.StructureManager
 
 class Main : JavaPlugin() {
     companion object {
@@ -13,7 +12,7 @@ class Main : JavaPlugin() {
 
         var configFile: FileConfiguration? = null
         var playerMenuStatus: MutableMap<Player, String> = mutableMapOf()
-        var preSessionData: MutableMap<String, Int> = mutableMapOf()
+        var sessionDataMap: MutableMap<String, SessionData> = mutableMapOf()
         lateinit var instance: JavaPlugin
     }
 

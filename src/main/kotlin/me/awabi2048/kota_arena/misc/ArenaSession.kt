@@ -1,34 +1,21 @@
 package me.awabi2048.kota_arena.misc
 
 import me.awabi2048.kota_arena.Main
+import me.awabi2048.kota_arena.Main.Companion.sessionDataMap
 import me.awabi2048.kota_arena.config.YamlUtil
 import org.bukkit.*
 import org.bukkit.block.structure.Mirror
 import org.bukkit.block.structure.StructureRotation
-import org.bukkit.entity.Player
 import org.bukkit.generator.ChunkGenerator
 import java.io.File
 import java.util.*
 import javax.annotation.Nonnull
 
-class ArenaSession(private val uuid: String) {
-    fun register(players: List<Player>, mobType: Int, difficulty: Int, type: String): Boolean {
+object ArenaSession {
+    fun register(uuid: String, mobType: MobType, difficulty: StageDifficulty, type: StageType): Boolean {
         try {
-            val sessionData = YamlUtil("session_data.yml").get()
-
-            if (sessionData.contains(uuid)) return false
-
-            val playerUUIDList: MutableList<String> = mutableListOf()
-            for (player in players) {
-                playerUUIDList + player.uniqueId.toString()
-            }
-
-            sessionData.set("$uuid.players", playerUUIDList)
-            sessionData.set("$uuid.mob_type", mobType)
-            sessionData.set("$uuid.difficulty", difficulty)
-            sessionData.set("$uuid.type", type)
-
-            YamlUtil("session_data.yml").save(sessionData)
+            if (sessionDataMap.contains(uuid)) return false
+            sessionDataMap[uuid] = SessionData(mobType, difficulty, type)
 
             return true
         } catch (e: Exception) {
@@ -39,7 +26,7 @@ class ArenaSession(private val uuid: String) {
     fun prepareWorld(uuid: String): Boolean {
 
         // セッションの種類を取得
-        val type = YamlUtil("session_data.yml").get().getString("$uuid.type") ?: return false
+        val type = sessionDataMap[uuid]?.type ?: return false
 
         // Voidワールドの生成
         try {
@@ -53,12 +40,14 @@ class ArenaSession(private val uuid: String) {
             sessionWorldCreator.createWorld()
 
             // ゲームルール設定
-            Bukkit.getWorld("arena_session.$uuid")!!.setGameRule(GameRule.DO_MOB_SPAWNING, false)
-            Bukkit.getWorld("arena_session.$uuid")!!.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false)
-            Bukkit.getWorld("arena_session.$uuid")!!.setGameRule(GameRule.DO_WEATHER_CYCLE, false)
-            Bukkit.getWorld("arena_session.$uuid")!!.setGameRule(GameRule.MOB_GRIEFING, false)
-            Bukkit.getWorld("arena_session.$uuid")!!.setGameRule(GameRule.REDUCED_DEBUG_INFO, true)
-            Bukkit.getWorld("arena_session.$uuid")!!.setGameRule(GameRule.DO_FIRE_TICK, true)
+            val sessionWorld = Bukkit.getWorld("arena_session.$uuid")?: return false
+
+            sessionWorld.setGameRule(GameRule.DO_MOB_SPAWNING, false)
+            sessionWorld.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false)
+            sessionWorld.setGameRule(GameRule.DO_WEATHER_CYCLE, false)
+            sessionWorld.setGameRule(GameRule.MOB_GRIEFING, false)
+            sessionWorld.setGameRule(GameRule.REDUCED_DEBUG_INFO, true)
+            sessionWorld.setGameRule(GameRule.DO_FIRE_TICK, true)
 
             // ストラクチャ読み込み
             val structureManager = Bukkit.getStructureManager()
@@ -86,7 +75,7 @@ class ArenaSession(private val uuid: String) {
         }
     }
 
-    class EmptyChunkGenerator : ChunkGenerator() {
+    private class EmptyChunkGenerator : ChunkGenerator() {
         @Nonnull
         fun chunkDataGeneration(
             @Nonnull world: World?,
@@ -100,3 +89,5 @@ class ArenaSession(private val uuid: String) {
     }
 
 }
+
+data class SessionData(val mobType: MobType, val difficulty: StageDifficulty, val type: StageType)

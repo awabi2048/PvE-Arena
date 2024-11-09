@@ -4,13 +4,13 @@ import me.awabi2048.kota_arena.Main
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
 
-class YamlUtil(private val filePath: String) {
-    fun get(): YamlConfiguration {
+object YamlUtil {
+    fun get(filePath: String): YamlConfiguration {
         val settingDataFile = File(Main.instance.dataFolder.toString() + File.separator + filePath.replace("/", File.separator))
         return YamlConfiguration.loadConfiguration(settingDataFile)
     }
 
-    fun save(yamlSection: YamlConfiguration): Boolean {
+    fun save(filePath: String, yamlSection: YamlConfiguration): Boolean {
         try {
             val settingDataFile =
                 File(Main.instance.dataFolder.toString() + File.separator + filePath.replace("/", File.separator))
