@@ -1,0 +1,75 @@
+normal_zombie:
+  entity_type: ZOMBIE
+  equipment:
+    hand: AIR
+    offhand: AIR
+    helmet: AIR
+    chestplate: AIR
+    leggings: AIR
+    boots: AIR
+  base_stats:
+    health: 20.0
+    strength: 4.0
+    speed: 0.23
+  display_name: ""
+
+armored_zombie:
+  entity_type: ZOMBIE
+  equipment:
+    hand: WOODEN_SWORD
+    offhand: AIR
+    helmet: LEATHER_HELMET
+    chestplate: AIR
+    leggings: AIR
+    boots: LEATHER_BOOTS
+  base_stats:
+    health: 30.0
+    strength: 4.0
+    speed: 0.2
+  display_name: ""
+
+
+zombie_soldier:
+  entity_type: ZOMBIE
+  equipment:
+    hand: IRON_SWORD
+    offhand: AIR
+    helmet: LEATHER_HELMET
+    chestplate: LEATHER_HELMET
+    leggings: LEATHER_LEGGINGS
+    boots: LEATHER_BOOTS
+  base_stats:
+    health: 40.0
+    strength: 4.0
+    speed: 0.2
+  display_name: ""
+
+zombie_knight:
+  entity_type: ZOMBIE
+  equipment:
+    hand: IRON_SWORD
+    offhand: SHIELD
+    helmet: GOLDEN_HELMET
+    chestplate: CHAINMAIL_CHESTPLATE
+    leggings: CHAINMAIL_LEGGINGS
+    boots: LEATHER_BOOTS
+  base_stats:
+    health: 50.0
+    strength: 4.0
+    speed: 0.25
+  display_name: ""
+
+mutant_zombie:
+  entity_type: ZOMBIE
+  equipment:
+    hand: AIR
+    offhand: AIR
+    helmet: AIR
+    chestplate: AIR
+    leggings: AIR
+    boots: AIR
+  base_stats:
+    health: 65.0
+    strength: 8.0
+    speed: 0.26
+  display_name: ""

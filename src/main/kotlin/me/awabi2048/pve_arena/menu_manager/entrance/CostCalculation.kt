@@ -1,14 +1,14 @@
-package me.awabi2048.kota_arena.menu_manager.entrance
+package me.awabi2048.pve_arena.menu_manager.entrance
 
-import me.awabi2048.kota_arena.config.YamlUtil
+import me.awabi2048.pve_arena.config.YamlUtil
 import kotlin.math.roundToInt
 
 class EntranceCostCalculation {
     private fun calculatePureCost(mobType: Int, difficulty: Int, playerCount: Int): Int {
-        val yaml = YamlUtil().get("stage_data/mob_type.yml")
+        val yaml = YamlUtil.load("stage_data/mob_type.yml")
 
-        val mobTypeSection = YamlUtil().get("stage_data/mob_type.yml")
-        val difficultySection = YamlUtil().get("stage_data/difficulty.yml")
+        val mobTypeSection = YamlUtil.load("stage_data/mob_type.yml")
+        val difficultySection = YamlUtil.load("stage_data/difficulty.yml")
 
         val mobTypeKey = mobTypeSection.getKeys(false).toList()[mobType]
         val difficultyKey = difficultySection.getKeys(false).toList()[difficulty]

@@ -1,6 +1,5 @@
-package me.awabi2048.kota_arena.misc
+package me.awabi2048.pve_arena.misc
 
-import io.papermc.paper.command.brigadier.argument.ArgumentTypes.world
 import org.bukkit.Bukkit.getWorld
 import org.bukkit.block.Barrel
 import org.bukkit.inventory.ItemStack

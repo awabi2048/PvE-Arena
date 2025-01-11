@@ -1,4 +1,4 @@
-package me.awabi2048.kota_arena.menu_manager.entrance
+package me.awabi2048.pve_arena.menu_manager.entrance
 
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack

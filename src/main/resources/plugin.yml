@@ -1,6 +1,6 @@
 name: PvE-Arena
 version: '1.0-BETA'
-main: me.awabi2048.kota_arena.Main
+main: me.awabi2048.pve_arena.Main
 api-version: '1.21'
 authors: [ awabi2048 ]
 
@@ -9,15 +9,32 @@ commands:
     description: "Main arena command."
 
 permissions:
-  kota_arena.main.admin:
+  pve_arena.main.admin:
     description: ""
 
-  kota_arena.main.menu:
+  pve_arena.main.menu:
     description: ""
 
-  kota_arena.command.main:
+  pve_arena.main.receive_announce:
     description: ""
 
-  kota_arena.command.config:
+  pve_arena.command.main:
+    description: ""
+    children:
+      - pve_arena.command.config
+      - pve_arena.command.start_session
+      - pve_arena.command.join_session
+      - pve_arena.command.stop_session
+
+  pve_arena.command.config:
+    description: ""
+
+  pve_arena.command.start_session:
+    description: ""
+
+  pve_arena.command.join_session:
+    description: ""
+
+  pve_arena.command.stop_session:
     description: ""
 

@@ -17,16 +17,23 @@ normal:
 hard:
   name: "§cハード"
   mob_multiplier: 1.5
-  reward_multiplier: 1.2
+  reward_multiplier: 1.5
   wave: 5
   reward_ticket: hard
   reward_point: true
 
-extra_hard:
-  name: "§dエキストラハード"
+expert:
+  name: "§dエキスパート"
   mob_multiplier: 2.0
-  reward_multiplier: 1.5
+  reward_multiplier: 1.8
   wave: 8
-  reward_ticket: hard
+  reward_ticket: extreme
   reward_point: true
 
+nightmare:
+  name: "§4ナイトメア"
+  mob_multiplier: 3.0
+  reward_multiplier: 3.0
+  wave: 8
+  reward_ticket: extreme
+  reward_point: false

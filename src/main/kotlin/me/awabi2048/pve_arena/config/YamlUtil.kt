@@ -1,11 +1,11 @@
-package me.awabi2048.kota_arena.config
+package me.awabi2048.pve_arena.config
 
-import me.awabi2048.kota_arena.Main
+import me.awabi2048.pve_arena.Main
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
 
 object YamlUtil {
-    fun get(filePath: String): YamlConfiguration {
+    fun load(filePath: String): YamlConfiguration {
         val settingDataFile = File(Main.instance.dataFolder.toString() + File.separator + filePath.replace("/", File.separator))
         return YamlConfiguration.loadConfiguration(settingDataFile)
     }

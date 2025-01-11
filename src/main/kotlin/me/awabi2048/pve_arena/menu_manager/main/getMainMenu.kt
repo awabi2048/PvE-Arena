@@ -1,4 +1,4 @@
-package me.awabi2048.kota_arena.menu_manager.main
+package me.awabi2048.pve_arena.menu_manager.main
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player

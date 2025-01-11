@@ -1,0 +1,12 @@
+profession_exp_multiplier: 1.4
+
+mob_stats:
+  modifiers:
+    # playerCountModifier = 1.0 + (({PlayerCount} - 1) * {per_player_count})
+    per_player_count: 0.1
+
+    # WaveModifier = 1.0 + (({Wave} - 1) * {per_wave})
+    per_wave: 0.1
+
+    # Speed = {BaseValue} * {TotalModifier} ^ {speed_modifier_pow}
+    speed_modifier_pow: 0.1

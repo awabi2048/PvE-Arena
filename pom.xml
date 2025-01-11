@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>me.awabi2048</groupId>
-    <artifactId>pve-arena</artifactId>
+    <artifactId>PvE-Arena</artifactId>
     <version>1.0-BETA</version>
     <packaging>jar</packaging>
 
