@@ -1,10 +1,8 @@
 package me.awabi2048.pve_arena.game
 
 import me.awabi2048.pve_arena.Main
-import me.awabi2048.pve_arena.Main.Companion.activeSession
-import me.awabi2048.pve_arena.Main.Companion.arenaStatusMap
-import me.awabi2048.pve_arena.Main.Companion.mobDefinitionConfig
 import me.awabi2048.pve_arena.Main.Companion.prefix
+import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.*
 import org.bukkit.attribute.Attribute
@@ -16,7 +14,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.scoreboard.Objective
 import javax.annotation.Nullable
 
-abstract class Generic(val uuid: String, var status: Status = Status.Standby) {
+abstract class Generic(val uuid: String, val players: Set<Player>, var status: Status = Status.Standby) {
 
     val originLocation = Location(Bukkit.getWorld("arena_session.${uuid}"), 0.5, 0.0, 0.5)
 
@@ -27,7 +25,7 @@ abstract class Generic(val uuid: String, var status: Status = Status.Standby) {
     fun summonMob(id: String, location: Location): LivingEntity {
         //
         println(id)
-        val mobData = mobDefinitionConfig!!.getConfigurationSection(id)!!
+        val mobData = DataFile.mobDefinition.getConfigurationSection(id)!!
 
         // get world
         val world = Bukkit.getWorld("arena_session.${uuid}")!!
@@ -107,17 +105,18 @@ abstract class Generic(val uuid: String, var status: Status = Status.Standby) {
     }
 
     fun timeTracking() {
-        if (status !is Status.InGame) return
-        status.timeElapsed += 1
-        val timeBefore = Lib.timeToClock(status.timeElapsed - 1)
-        val time = Lib.timeToClock(status.timeElapsed)
+        (status as Status.InGame).timeElapsed += 1
+        val timeElapsed = (status as Status.InGame).timeElapsed
+
+        val timeBefore = Lib.timeToClock(timeElapsed - 1)
+        val time = Lib.timeToClock(timeElapsed)
 
         // scoreboard
         getSessionWorld()!!.players.forEach {
             val displayScoreboard = Main.displayScoreboardMap[it]!!
 
             displayScoreboard.scoreboard!!.resetScores("§fTime §7$timeBefore")
-            if (status.timeElapsed == 1) displayScoreboard.scoreboard!!.resetScores("§fTime §700:00.0")
+            if (timeElapsed == 1) displayScoreboard.scoreboard!!.resetScores("§fTime §700:00.0")
 
             displayScoreboard.getScore("§fTime §7$time").score = 3
         }
@@ -136,6 +135,7 @@ abstract class Generic(val uuid: String, var status: Status = Status.Standby) {
     abstract fun generate()
     abstract fun start()
     abstract fun setupScoreboard(player: Player): Objective
+    abstract fun stop()
 
     enum class StatusCode {
         WAITING_GENERATION,
@@ -165,5 +165,4 @@ abstract class Generic(val uuid: String, var status: Status = Status.Standby) {
         ) : Status()
         data object WaitingFinish : Status()
     }
-
 }

@@ -1,16 +1,11 @@
 package me.awabi2048.pve_arena
 
 import me.awabi2048.pve_arena.command.MainCommand
-import me.awabi2048.pve_arena.config.ConfigLoader
 import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.game.Generic
-import me.awabi2048.pve_arena.game.NormalArena
-import me.awabi2048.pve_arena.game.QuickArena
 import me.awabi2048.pve_arena.game.Reward
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.configuration.ConfigurationSection
-import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scoreboard.Objective

@@ -1,27 +1,27 @@
 package me.awabi2048.pve_arena.game
 
-import me.awabi2048.pve_arena.Main
-import me.awabi2048.pve_arena.Main.Companion.arenaStatusMap
-import me.awabi2048.pve_arena.Main.Companion.difficultyConfig
 import me.awabi2048.pve_arena.Main.Companion.displayScoreboardMap
 import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.Main.Companion.lobbyOriginLocation
-import me.awabi2048.pve_arena.Main.Companion.mainConfig
-import me.awabi2048.pve_arena.Main.Companion.mobTypeConfig
 import me.awabi2048.pve_arena.Main.Companion.prefix
 import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.game.NormalArena.MobDifficulty.*
 import me.awabi2048.pve_arena.misc.Lib
 import me.awabi2048.pve_arena.misc.PlayerData
-import org.bukkit.*
+import org.bukkit.Bukkit
+import org.bukkit.Location
+import org.bukkit.Particle
+import org.bukkit.Sound
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.Player
-import org.bukkit.scoreboard.*
+import org.bukkit.scoreboard.Criteria
+import org.bukkit.scoreboard.DisplaySlot
+import org.bukkit.scoreboard.Objective
 import org.codehaus.plexus.util.FileUtils
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
-class NormalArena(uuid: String, val mobType: MobType, val difficulty: MobDifficulty, val sacrifice: Int = 0) : Generic(uuid) {
+class NormalArena(uuid: String, players: Set<Player>, val mobType: MobType, val difficulty: MobDifficulty, val sacrifice: Int = 0) : Generic(uuid, players) {
 
     val lastWave = DataFile.difficulty.getInt("${mobDifficultyToString(difficulty)}.wave")
 
@@ -217,21 +217,21 @@ class NormalArena(uuid: String, val mobType: MobType, val difficulty: MobDifficu
         val difficultyModifier =
             difficultySection.getDouble("mob_multiplier", 1.0)
         val waveModifier =
-            1.0 + status.wave * mainConfig!!.getDouble("mob_stats.per_wave", 0.1)
+            1.0 + (status as Status.InGame).wave * DataFile.config.getDouble("mob_stats.per_wave", 0.1)
         val playerCountModifier =
-            1.0 + (generationData.players.size - 1) * mainConfig!!.getDouble("mob_stats.per_player_count", 0.1)
+            1.0 + (players.size - 1) * DataFile.config.getDouble("mob_stats.per_player_count", 0.1)
 
         val totalModifier = difficultyModifier * waveModifier * playerCountModifier
 
         val modifiedValue = when (data) {
-            "speed" -> baseValue * totalModifier.pow(mainConfig!!.getDouble("mob_stats.speed_modifier_pow", 0.1))
+            "speed" -> baseValue * totalModifier.pow(DataFile.config.getDouble("mob_stats.speed_modifier_pow", 0.1))
             else -> baseValue * totalModifier
         }
 
         return modifiedValue
     }
 
-    fun summonCountCalc(wave: Int): Int {
+    private fun summonCountCalc(wave: Int): Int {
         val mobData = DataFile.mobType.getConfigurationSection(mobTypeToString(mobType))!!
         val baseValue = mobData.getInt("base_summon_count")
 
@@ -260,20 +260,20 @@ class NormalArena(uuid: String, val mobType: MobType, val difficulty: MobDifficu
     }
 
     private fun mobSelect(): String {
-        val availableMobSet = DataFile.mobType
-            .getConfigurationSection("${mobTypeToString(mobType)}.mobs")!!.getKeys(false)
-        val availableMobSection = DataFile.mobType
-            .getConfigurationSection("${generationData.mobType.toString().lowercase()}.mobs")!!
+        val availableMobSection = mobTypeSection.getConfigurationSection("mobs")!!
+        val availableMobSet = availableMobSection.getKeys(false)
 
-        val status = arenaStatusMap[generationData.uuid]!!
-        val wave = status.wave
+        val wave = (status as Status.InGame).wave
 
         val spawnCandidate: MutableList<String> = mutableListOf()
         for (key in availableMobSet) {
+            // wave check
             val waveRangeString = availableMobSection.getString("$key.wave")!!
             val waveRangeMin = waveRangeString.substringBefore("..").toInt()
             val waveRangeMax = waveRangeString.substringAfter("..").toInt()
             val waveRange = waveRangeMin..waveRangeMax
+
+            // difficulty check
 
             if (wave in waveRange) spawnCandidate += key
         }
@@ -321,17 +321,15 @@ class NormalArena(uuid: String, val mobType: MobType, val difficulty: MobDifficu
     }
 
     private fun endProcession() {
-        val status = arenaStatusMap[generationData.uuid]!!
-
         // announce
-        val difficultyName = difficultyConfig!!.getString("${mobDifficultyToString(difficulty)}.name")!!
-        val mobTypeName = mobTypeConfig!!.getString("${mobTypeToString(generationData.mobType)}.name")!!
+        val difficultyName = difficultySection.getString("name")!!
+        val mobTypeName = mobTypeSection.getString("name")!!
         val arenaName = when (difficulty) {
             EASY -> "§a$difficultyName・${mobTypeName}アリーナ"
             NORMAL -> "§e$difficultyName・${mobTypeName}アリーナ"
             HARD -> "§c§l$difficultyName・${mobTypeName}アリーナ"
-            EXPERT -> "§d$difficultyName・${mobTypeName}アリーナ"
-            NIGHTMARE -> "§b$difficultyName・${mobTypeName}アリーナ"
+            EXPERT -> "§d§l$difficultyName・${mobTypeName}アリーナ"
+            NIGHTMARE -> "§b§l$difficultyName・${mobTypeName}アリーナ"
         }
 
         val players: MutableList<String> = mutableListOf()
@@ -343,17 +341,17 @@ class NormalArena(uuid: String, val mobType: MobType, val difficulty: MobDifficu
             it.sendMessage(
                 "$prefix §e${players.joinToString()}§7さんが$arenaName§7をクリアしました！§f<§e${
                     Lib.timeToClock(
-                        status.timeElapsed
+                        (status as Status.InGame).timeElapsed
                     )
                 }§f>"
             )
         }
 
         // end session
-        stopSession()
+        stop()
     }
 
-    fun stopSession() {
+    override fun stop() {
         // teleport back
         getSessionWorld()!!.players.forEach {
             it.teleport(lobbyOriginLocation)
@@ -367,7 +365,7 @@ class NormalArena(uuid: String, val mobType: MobType, val difficulty: MobDifficu
         FileUtils.deleteDirectory(sessionWorld.name)
     }
 
-    private fun setupScoreboard(player: Player): Objective {
+    override fun setupScoreboard(player: Player): Objective {
         val scoreboard = Bukkit.getScoreboardManager().newScoreboard.registerNewObjective(
             "arena_scoreboard_display.${player.uniqueId}",
             Criteria.DUMMY,
@@ -376,14 +374,14 @@ class NormalArena(uuid: String, val mobType: MobType, val difficulty: MobDifficu
         scoreboard.displaySlot = DisplaySlot.SIDEBAR
 //        scoreboard.numberFormat(NumberFormat.blank())
 
-        val mobTypeName = "§b${mobTypeToString(mobType).lowercase().capitalize()}"
+        val mobTypeName = "§b${mobTypeToString(mobType).capitalize()}"
 
-        val difficultyName = when (generationData.difficulty) {
-            EASY -> "§a${mobDifficultyToString(difficulty).lowercase().capitalize()}"
-            NORMAL -> "§e${mobDifficultyToString(difficulty).lowercase().capitalize()}"
-            HARD -> "§c${mobDifficultyToString(difficulty).lowercase().capitalize()}"
-            EXPERT -> "§d${mobDifficultyToString(difficulty).lowercase().capitalize()}"
-            NIGHTMARE -> "§4${mobDifficultyToString(difficulty).lowercase().capitalize()}"
+        val difficultyName = when (difficulty) {
+            EASY -> "§a${mobDifficultyToString(difficulty).capitalize()}"
+            NORMAL -> "§e${mobDifficultyToString(difficulty).capitalize()}"
+            HARD -> "§c${mobDifficultyToString(difficulty).capitalize()}"
+            EXPERT -> "§d${mobDifficultyToString(difficulty).capitalize()}"
+            NIGHTMARE -> "§4${mobDifficultyToString(difficulty).capitalize()}"
         }
 
         scoreboard.getScore("").score = 6

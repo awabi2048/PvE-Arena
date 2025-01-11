@@ -15,8 +15,7 @@ import org.bukkit.scoreboard.Objective
 class QuickArena(private val generationData: GenerationData): Generic(generationData.uuid) {
 
     override fun generate() {
-        val initialStatus = Status(0, StatusCode.WAITING_GENERATION, 0)
-        Main.quickArenaStatusMap[generationData.uuid] = initialStatus
+
 
         val launcher = Launcher(Launcher.StageType.QUICK)
         launcher.prepareWorld(generationData.uuid)
