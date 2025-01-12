@@ -43,9 +43,6 @@ interface WaveProcessingMode {
                 it.playSound(it, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f)
                 it.playSound(it, Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.1f)
 
-                // scoreboard
-//                println("ELAPSED: ${currentStatus.timeElapsed}")
-
                 // reward
                 rewardDistribute()
 
@@ -67,8 +64,6 @@ interface WaveProcessingMode {
     fun startSpawnSession()
 
     fun randomSpawn(world: World, wave: Int, mobType: MobType, difficulty: MobDifficulty) {
-        spawnSessionKillCount[world.name.substringAfter("arena_session.")] = spawnSessionKillCount[world.name.substringAfter("arena_session.")]!! + 1
-
         fun mobStatsCalc(id: String, data: String): Double {
 
             val difficultySection = DataFile.difficulty.getConfigurationSection(mobDifficultyToString(difficulty))!!
@@ -159,10 +154,10 @@ interface WaveProcessingMode {
         mob.equipment!!.boots =
             ItemStack(Material.getMaterial(mobData.getString("equipment.boots") ?: "AIR") ?: Material.AIR)
 
-        mob.equipment!!.helmetDropChance = 0.0f
-        mob.equipment!!.chestplateDropChance = 0.0f
-        mob.equipment!!.leggingsDropChance = 0.0f
-        mob.equipment!!.bootsDropChance = 0.0f
+        mob.equipment!!.helmetDropChance = -1.0f
+        mob.equipment!!.chestplateDropChance = -1.0f
+        mob.equipment!!.leggingsDropChance = -1.0f
+        mob.equipment!!.bootsDropChance = -1.0f
 
         // hands
         mob.equipment!!.setItemInMainHand(
@@ -180,10 +175,16 @@ interface WaveProcessingMode {
             )
         )
 
+        mob.equipment!!.itemInMainHandDropChance = -1.0f
+        mob.equipment!!.itemInOffHandDropChance = -1.0f
+
         // attribute
         mob.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.baseValue = mobStatsCalc(spawnMobId, "health")
         mob.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.baseValue = mobStatsCalc(spawnMobId, "strength")
         mob.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)!!.baseValue = mobStatsCalc(spawnMobId, "speed")
+
+        val scaleModifier = (90..110).random().toDouble() / 100
+        mob.getAttribute(Attribute.GENERIC_SCALE)!!.baseValue = mobData.getDouble("scale") * scaleModifier
 
         mob.health = mob.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.baseValue
 
@@ -236,7 +237,6 @@ interface WaveProcessingMode {
         SKELETON,
         SPIDER,
         BLAZE,
-        CREEPER,
         GUARDIAN,
         ENDERMAN;
     }

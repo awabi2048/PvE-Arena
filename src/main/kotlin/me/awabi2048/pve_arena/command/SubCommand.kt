@@ -33,6 +33,8 @@ class SubCommand(private val sender: Player, private val args: Array<out String>
 
         fun startSession() {
             try {
+                sender.sendMessage("$prefix §7セッションの開始処理を行っています...")
+
                 val stageType = Launcher.StageType.valueOf(args[1])
 
                 val uuid = sender.uniqueId.toString()
@@ -45,8 +47,6 @@ class SubCommand(private val sender: Player, private val args: Array<out String>
 
 //                    val initialStatus = NormalArena.Status(0, players.toMutableSet(), Generic.StatusCode.WAITING_GENERATION)
                     val session = NormalArena(uuid, players, mobType, difficulty, sacrifice)
-
-                    sender.sendMessage("$prefix §7セッションの開始処理を行っています...")
 
                     activeSession += session
                     session.generate()
@@ -77,8 +77,6 @@ class SubCommand(private val sender: Player, private val args: Array<out String>
                         40L
                     )
                 }
-
-                sender.sendMessage("$prefix §7セッションの開始処理を行っています...")
 
             } catch (e: Exception) {
                 sender.sendError("無効なセッション情報です: start_session <TYPE> <MobType> <Difficulty> <Sacrifice>")

@@ -1,20 +1,14 @@
 package me.awabi2048.pve_arena.game
 
 import me.awabi2048.pve_arena.Main
+import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.Main.Companion.lobbyOriginLocation
 import me.awabi2048.pve_arena.Main.Companion.prefix
-import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.*
-import org.bukkit.attribute.Attribute
-import org.bukkit.entity.EntityType
-import org.bukkit.entity.LivingEntity
-import org.bukkit.entity.Monster
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 import org.bukkit.scoreboard.Objective
 import org.codehaus.plexus.util.FileUtils
-import javax.annotation.Nullable
 
 abstract class Generic(val uuid: String, val players: Set<Player>, var status: Status = Status.Standby) {
 
@@ -28,15 +22,15 @@ abstract class Generic(val uuid: String, val players: Set<Player>, var status: S
         (status as Status.InGame).timeElapsed += 1
         val timeElapsed = (status as Status.InGame).timeElapsed
 
-        val timeBefore = Lib.timeToClock(timeElapsed - 1)
-        val time = Lib.timeToClock(timeElapsed)
+        val timeBefore = Lib.tickToClock(timeElapsed - 1)
+        val time = Lib.tickToClock(timeElapsed)
 
         // scoreboard
         getSessionWorld()!!.players.forEach {
             val displayScoreboard = Main.displayScoreboardMap[it]!!
 
             displayScoreboard.scoreboard!!.resetScores("§fTime §7$timeBefore")
-            if (timeElapsed == 1) displayScoreboard.scoreboard!!.resetScores("§fTime §700:00.0")
+            if (timeElapsed == 1) displayScoreboard.scoreboard!!.resetScores("§fTime §700:00.00")
 
             displayScoreboard.getScore("§fTime §7$time").score = 3
         }
@@ -46,7 +40,7 @@ abstract class Generic(val uuid: String, val players: Set<Player>, var status: S
             Runnable {
                 timeTracking()
             },
-            2L
+            1L
         )
     }
 
@@ -64,6 +58,24 @@ abstract class Generic(val uuid: String, val players: Set<Player>, var status: S
         FileUtils.deleteDirectory(sessionWorld.name)
     }
 
+    fun afkCheck() {
+        if (players.filter { it.noActionTicks >= 5 * 60 * 20 }.size == players.size) {
+            players.forEach{
+                it.sendMessage("$prefix §cセッションがタイムアウトしました。")
+                it.playSound(it, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 0.5f)
+            }
+            stop()
+        } else {
+            Bukkit.getScheduler().runTaskLater(
+                instance,
+                Runnable {
+                    afkCheck()
+                },
+                5 * 60 * 20L
+            )
+        }
+    }
+
     abstract fun joinPlayer(player: Player)
     abstract fun generate()
     abstract fun start()
@@ -78,8 +90,9 @@ abstract class Generic(val uuid: String, val players: Set<Player>, var status: S
             var mobType: WaveProcessingMode.MobType,
             var difficulty: WaveProcessingMode.MobDifficulty,
             var timeElapsed: Int,
-            var wave: Int
+            var wave: Int,
         ) : Status()
+
         data object WaitingFinish : Status()
     }
 }

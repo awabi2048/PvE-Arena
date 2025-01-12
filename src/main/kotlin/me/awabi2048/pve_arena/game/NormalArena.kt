@@ -5,8 +5,8 @@ import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.Main.Companion.prefix
 import me.awabi2048.pve_arena.Main.Companion.spawnSessionKillCount
 import me.awabi2048.pve_arena.config.DataFile
+import me.awabi2048.pve_arena.game.WaveProcessingMode.MobDifficulty.*
 import me.awabi2048.pve_arena.misc.Lib
-import me.awabi2048.pve_arena.misc.PlayerData
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Sound
@@ -43,6 +43,8 @@ class NormalArena(
             },
             20L
         )
+
+        afkCheck()
     }
 
     override fun start() {
@@ -132,9 +134,9 @@ class NormalArena(
             DataFile.difficulty.getDouble("${mobDifficultyToString(difficulty)}.reward_multiplier")
         val sacrificeMultiplier = (1.0 + sacrifice).pow(0.5)
 
-        val ticket = when (difficulty) {
-            WaveProcessingMode.MobDifficulty.EXPERT -> (baseTicket * Reward.RewardMultiplier.ticket).roundToInt()
-            WaveProcessingMode.MobDifficulty.NIGHTMARE -> (baseTicket * difficultyMultiplier * Reward.RewardMultiplier.ticket / 2).roundToInt()
+        val ticketCount = when (difficulty) {
+            EXPERT -> (baseTicket * Reward.RewardMultiplier.ticket).roundToInt()
+            NIGHTMARE -> (baseTicket * difficultyMultiplier * Reward.RewardMultiplier.ticket / 2).roundToInt()
             else -> (baseTicket * Reward.RewardMultiplier.ticket).roundToInt()
         }
 
@@ -144,26 +146,15 @@ class NormalArena(
             (baseProfessionExp * difficultyMultiplier * Reward.RewardMultiplier.professionExp * sacrificeMultiplier).roundToInt()
 
         // distribute
-        val ticketItem = Reward.getTicketItem(
-            DataFile.difficulty.getString("${mobDifficultyToString(difficulty)}.reward_ticket") ?: ""
-        )
-        ticketItem.amount = ticket
-
-        // announce
-        getSessionWorld()!!.players.forEach {
-            it.inventory.addItem(ticketItem)
-
-            val playerStats = PlayerData(it)
-            playerStats.addExp(professionExp)
-            playerStats.addArenaPoint(point)
-
-            it.sendMessage("§8-----------------------------------------")
-            it.sendMessage("$prefix §e報酬を受け取りました！")
-            it.sendMessage("§7➠ ${ticketItem.itemMeta.itemName} §fx${ticket}")
-            it.sendMessage("§7➠ §bアリーナポイント $point Point")
-            it.sendMessage("§7➠ §aアリーナ経験値 $professionExp")
-            it.sendMessage("§8-----------------------------------------")
+        val ticketType = when(difficulty) {
+            EASY -> Reward.TicketType.EASY
+            NORMAL -> Reward.TicketType.NORMAL
+            HARD -> Reward.TicketType.HARD
+            EXPERT -> Reward.TicketType.EXTREME
+            NIGHTMARE -> Reward.TicketType.EXTREME
         }
+
+        Reward.distribute(getSessionWorld()!!.players.toSet(), Pair(ticketType, ticketCount), point, professionExp)
     }
 
     fun summonCountCalc(wave: Int): Int {
@@ -172,7 +163,7 @@ class NormalArena(
 
         val difficultyModifier =
             DataFile.difficulty.getDouble("${mobDifficultyToString(difficulty)}.mob_multiplier")
-        val waveModifier = 1.0 + wave * 0.1
+        val waveModifier = 1.0 + wave * DataFile.config.getDouble("mob_stats.per_wave", 0.1)
 
         val modifiedValue = (baseValue * difficultyModifier * waveModifier).roundToInt()
 
@@ -203,11 +194,11 @@ class NormalArena(
         val difficultyName = difficultySection.getString("name")!!
         val mobTypeName = mobTypeSection.getString("name")!!
         val arenaName = when (difficulty) {
-            WaveProcessingMode.MobDifficulty.EASY -> "§a$difficultyName・${mobTypeName}アリーナ"
-            WaveProcessingMode.MobDifficulty.NORMAL -> "§e$difficultyName・${mobTypeName}アリーナ"
-            WaveProcessingMode.MobDifficulty.HARD -> "§c§l$difficultyName・${mobTypeName}アリーナ"
-            WaveProcessingMode.MobDifficulty.EXPERT -> "§d§l$difficultyName・${mobTypeName}アリーナ"
-            WaveProcessingMode.MobDifficulty.NIGHTMARE -> "§b§l$difficultyName・${mobTypeName}アリーナ"
+            EASY -> "§a$difficultyName・${mobTypeName}アリーナ"
+            NORMAL -> "§e$difficultyName・${mobTypeName}アリーナ"
+            HARD -> "§c§l$difficultyName・${mobTypeName}アリーナ"
+            EXPERT -> "§d§l$difficultyName・${mobTypeName}アリーナ"
+            NIGHTMARE -> "§b§l$difficultyName・${mobTypeName}アリーナ"
         }
 
         val players: MutableList<String> = mutableListOf()
@@ -217,11 +208,11 @@ class NormalArena(
 
         Bukkit.getServer().onlinePlayers.filter { it.hasPermission("pve_arena.main.receive_announce") }.forEach {
             it.sendMessage(
-                "$prefix §e${players.joinToString()}§7さんが$arenaName§7をクリアしました！§f<§e${
-                    Lib.timeToClock(
+                "$prefix §e${players.joinToString()}§7さんが$arenaName§7をクリアしました！ §7[§e${
+                    Lib.tickToClock(
                         (status as Status.InGame).timeElapsed
                     )
-                }§f>"
+                }§7]"
             )
         }
 
@@ -241,17 +232,17 @@ class NormalArena(
         val mobTypeName = "§b${mobTypeToString(mobType).capitalize()}"
 
         val difficultyName = when (difficulty) {
-            WaveProcessingMode.MobDifficulty.EASY -> "§a${mobDifficultyToString(difficulty).capitalize()}"
-            WaveProcessingMode.MobDifficulty.NORMAL -> "§e${mobDifficultyToString(difficulty).capitalize()}"
-            WaveProcessingMode.MobDifficulty.HARD -> "§c${mobDifficultyToString(difficulty).capitalize()}"
-            WaveProcessingMode.MobDifficulty.EXPERT -> "§d${mobDifficultyToString(difficulty).capitalize()}"
-            WaveProcessingMode.MobDifficulty.NIGHTMARE -> "§4${mobDifficultyToString(difficulty).capitalize()}"
+            EASY -> "§a${mobDifficultyToString(difficulty).capitalize()}"
+            NORMAL -> "§e${mobDifficultyToString(difficulty).capitalize()}"
+            HARD -> "§c${mobDifficultyToString(difficulty).capitalize()}"
+            EXPERT -> "§d${mobDifficultyToString(difficulty).capitalize()}"
+            NIGHTMARE -> "§4${mobDifficultyToString(difficulty).capitalize()}"
         }
 
         scoreboard.getScore("").score = 6
         scoreboard.getScore("$mobTypeName §7| $difficultyName").score = 5
         scoreboard.getScore("").score = 4
-        scoreboard.getScore("§fTime §700:00.0").score = 3
+        scoreboard.getScore("§fTime §700:00.00").score = 3
         scoreboard.getScore("§fWave §7---").score = 2
         scoreboard.getScore("§fMobs §7---").score = 1
 

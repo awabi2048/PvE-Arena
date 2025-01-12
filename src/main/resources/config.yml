@@ -10,3 +10,7 @@ mob_stats:
 
     # Speed = {BaseValue} * {TotalModifier} ^ {speed_modifier_pow}
     speed_modifier_pow: 0.1
+
+misc:
+  game:
+    quick_arena_wave: 10

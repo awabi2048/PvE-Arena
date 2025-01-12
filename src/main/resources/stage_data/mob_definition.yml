@@ -11,6 +11,7 @@ normal_zombie:
     health: 20.0
     strength: 4.0
     speed: 0.23
+  scale: 1.0
   display_name: ""
 
 armored_zombie:
@@ -26,8 +27,8 @@ armored_zombie:
     health: 30.0
     strength: 4.0
     speed: 0.2
+  scale: 1.0
   display_name: ""
-
 
 zombie_soldier:
   entity_type: ZOMBIE
@@ -42,6 +43,7 @@ zombie_soldier:
     health: 40.0
     strength: 4.0
     speed: 0.2
+  scale: 1.0
   display_name: ""
 
 zombie_knight:
@@ -57,6 +59,7 @@ zombie_knight:
     health: 50.0
     strength: 4.0
     speed: 0.25
+  scale: 1.0
   display_name: ""
 
 tank_zombie:
@@ -72,20 +75,389 @@ tank_zombie:
     health: 65.0
     strength: 8.0
     speed: 0.26
+  scale: 1.1
   display_name: ""
 
 normal_skeleton:
   entity_type: SKELETON
   equipment:
-    hand: AIR
+    hand: BOW
     offhand: AIR
     helmet: CHAINMAIL_HELMET
-    chestplate: CHAINMAIL_CHESTPLATE
-    leggings: CHAINMAIL_LEGGINGS
-    boots: CHAINMAIL_BOOTS
+    chestplate: AIR
+    leggings: AIR
+    boots: AIR
   base_stats:
-    health: 65.0
-    strength: 8.0
-    speed: 0.26
+    health: 20.0
+    strength: 4.0
+    speed: 0.23
+  scale: 1.0
   display_name: ""
 
+armored_skeleton:
+  entity_type: SKELETON
+  equipment:
+    hand: IRON_AXE
+    offhand: AIR
+    helmet: CHAINMAIL_HELMET
+    chestplate: AIR
+    leggings: AIR
+    boots: IRON_BOOTS
+  base_stats:
+    health: 30.0
+    strength: 4.0
+    speed: 0.18
+  scale: 1.0
+  display_name: ""
+
+skeleton_soldier:
+  entity_type: SKELETON
+  equipment:
+    hand: IRON_SWORD
+    offhand: SHIELD
+    helmet: IRON_HELMET
+    chestplate: CHAINMAIL_CHESTPLATE
+    leggings: CHAINMAIL_LEGGINGS
+    boots: IRON_BOOTS
+  base_stats:
+    health: 40.0
+    strength: 4.0
+    speed: 0.2
+  scale: 1.0
+  display_name: ""
+
+stray_soldier:
+  entity_type: STRAY
+  equipment:
+    hand: BOW
+    offhand: AIR
+    helmet: IRON_HELMET
+    chestplate: AIR
+    leggings: AIR
+    boots: IRON_BOOTS
+  base_stats:
+    health: 40.0
+    strength: 4.0
+    speed: 0.2
+  scale: 1.0
+  display_name: ""
+
+bogged_soldier:
+  entity_type: BOGGED
+  equipment:
+    hand: BOW
+    offhand: AIR
+    helmet: IRON_HELMET
+    chestplate: AIR
+    leggings: AIR
+    boots: IRON_BOOTS
+  base_stats:
+    health: 40.0
+    strength: 4.0
+    speed: 0.2
+  scale: 1.0
+  display_name: ""
+
+skeleton_knight:
+  entity_type: SKELETON
+  equipment:
+    hand: GOLDEN_SWORD
+    offhand: SHIELD
+    helmet: DIAMOND_HELMET
+    chestplate: AIR
+    leggings: AIR
+    boots: DIAMOND_BOOTS
+  base_stats:
+    health: 60.0
+    strength: 6.0
+    speed: 0.25
+  scale: 1.1
+  display_name: ""
+
+normal_spider:
+  entity_type: SPIDER
+  equipment:
+    hand: AIR
+    offhand: AIR
+    helmet: AIR
+    chestplate: AIR
+    leggings: AIR
+    boots: AIR
+  base_stats:
+    health: 20.0
+    strength: 4.0
+    speed: 0.24
+  scale: 1.0
+  display_name: ""
+
+cave_spider:
+  entity_type: CAVE_SPIDER
+  equipment:
+    hand: AIR
+    offhand: AIR
+    helmet: AIR
+    chestplate: AIR
+    leggings: AIR
+    boots: AIR
+  base_stats:
+    health: 15.0
+    strength: 2.0
+    speed: 0.25
+  scale: 1.0
+  display_name: ""
+
+mother_spider:
+  entity_type: SPIDER
+  equipment:
+    hand: AIR
+    offhand: AIR
+    helmet: AIR
+    chestplate: AIR
+    leggings: AIR
+    boots: AIR
+  base_stats:
+    health: 50.0
+    strength: 6.0
+    speed: 0.18
+  scale: 1.5
+  display_name: ""
+
+silverfish:
+  entity_type: SILVERFISH
+  equipment:
+    hand: AIR
+    offhand: AIR
+    helmet: AIR
+    chestplate: AIR
+    leggings: AIR
+    boots: AIR
+  base_stats:
+    health: 15.0
+    strength: 4.0
+    speed: 0.25
+  scale: 1.0
+  display_name: ""
+
+witch:
+  entity_type: WITCH
+  equipment:
+    hand: AIR
+    offhand: AIR
+    helmet: AIR
+    chestplate: AIR
+    leggings: AIR
+    boots: AIR
+  base_stats:
+    health: 40.0
+    strength: 4.0
+    speed: 0.2
+  scale: 1.0
+  display_name: ""
+
+normal_blaze:
+  entity_type: BLAZE
+  equipment:
+    hand: AIR
+    offhand: AIR
+    helmet: AIR
+    chestplate: AIR
+    leggings: AIR
+    boots: AIR
+  base_stats:
+    health: 20.0
+    strength: 4.0
+    speed: 0.2
+  scale: 1.0
+  display_name: ""
+
+normal_breeze:
+  entity_type: BREEZE
+  equipment:
+    hand: AIR
+    offhand: AIR
+    helmet: AIR
+    chestplate: AIR
+    leggings: AIR
+    boots: AIR
+  base_stats:
+    health: 20.0
+    strength: 4.0
+    speed: 0.2
+  scale: 1.0
+  display_name: ""
+
+mutant_blaze:
+  entity_type: BLAZE
+  equipment:
+    hand: AIR
+    offhand: AIR
+    helmet: AIR
+    chestplate: AIR
+    leggings: AIR
+    boots: AIR
+  base_stats:
+    health: 40.0
+    strength: 6.0
+    speed: 0.2
+  scale: 1.25
+  display_name: ""
+
+wither_skeleton:
+  entity_type: WITHER_SKELETON
+  equipment:
+    hand: IRON_SWORD
+    offhand: AIR
+    helmet: IRON_HELMET
+    chestplate: AIR
+    leggings: AIR
+    boots: CHAINMAIL_BOOTS
+  base_stats:
+    health: 30.0
+    strength: 4.0
+    speed: 0.2
+  scale: 1.0
+  display_name: ""
+
+wither_skeleton_archer:
+  entity_type: WITHER_SKELETON
+  equipment:
+    hand: BOW
+    offhand: AIR
+    helmet: IRON_HELMET
+    chestplate: AIR
+    leggings: AIR
+    boots: CHAINMAIL_BOOTS
+  base_stats:
+    health: 30.0
+    strength: 6.0
+    speed: 0.25
+  scale: 1.0
+  display_name: ""
+
+guardian:
+  entity_type: GUARDIAN
+  equipment:
+    hand: AIR
+    offhand: AIR
+    helmet: AIR
+    chestplate: AIR
+    leggings: AIR
+    boots: AIR
+  base_stats:
+    health: 25.0
+    strength: 3.0
+    speed: 0.25
+  scale: 1.0
+  display_name: ""
+
+elder_guardian:
+  entity_type: ELDER_GUARDIAN
+  equipment:
+    hand: AIR
+    offhand: AIR
+    helmet: AIR
+    chestplate: AIR
+    leggings: AIR
+    boots: AIR
+  base_stats:
+    health: 35.0
+    strength: 4.0
+    speed: 0.2
+  scale: 1.0
+  display_name: ""
+
+drowned:
+  entity_type: DROWNED
+  equipment:
+    hand: TRIDENT
+    offhand: AIR
+    helmet: IRON_HELMET
+    chestplate: AIR
+    leggings: AIR
+    boots: IRON_BOOTS
+  base_stats:
+    health: 30.0
+    strength: 4.0
+    speed: 0.25
+  scale: 1.0
+  display_name: ""
+
+phantom:
+  entity_type: PHANTOM
+  equipment:
+    hand: AIR
+    offhand: AIR
+    helmet: AIR
+    chestplate: AIR
+    leggings: AIR
+    boots: AIR
+  base_stats:
+    health: 30.0
+    strength: 6.0
+    speed: 0.2
+  scale: 1.25
+  display_name: ""
+
+enderman:
+  entity_type: ENDERMAN
+  equipment:
+    hand: AIR
+    offhand: AIR
+    helmet: AIR
+    chestplate: AIR
+    leggings: AIR
+    boots: AIR
+  base_stats:
+    health: 30.0
+    strength: 6.0
+    speed: 0.2
+  scale: 1.0
+  display_name: ""
+
+endermite:
+  entity_type: ENDERMITE
+  equipment:
+    hand: AIR
+    offhand: AIR
+    helmet: AIR
+    chestplate: AIR
+    leggings: AIR
+    boots: AIR
+  base_stats:
+    health: 30.0
+    strength: 6.0
+    speed: 0.15
+  scale: 1.0
+  display_name: ""
+
+shulker:
+  entity_type: SHULKER
+  equipment:
+    hand: AIR
+    offhand: AIR
+    helmet: AIR
+    chestplate: AIR
+    leggings: AIR
+    boots: AIR
+  base_stats:
+    health: 50.0
+    strength: 4.0
+    speed: 0.2
+  scale: 1.0
+  display_name: ""
+
+mutant_enderman:
+  entity_type: ENDERMAN
+  equipment:
+    hand: AIR
+    offhand: AIR
+    helmet: AIR
+    chestplate: AIR
+    leggings: AIR
+    boots: AIR
+  base_stats:
+    health: 50.0
+    strength: 10.0
+    speed: 0.15
+  scale: 1.3
+  display_name: ""

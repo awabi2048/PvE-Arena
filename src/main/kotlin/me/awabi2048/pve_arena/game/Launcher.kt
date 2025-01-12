@@ -32,6 +32,8 @@ class Launcher(private val stageType: StageType) {
         sessionWorld.setGameRule(GameRule.REDUCED_DEBUG_INFO, true)
         sessionWorld.setGameRule(GameRule.DO_FIRE_TICK, true)
 
+        sessionWorld.setGameRule(GameRule.KEEP_INVENTORY, true)
+
 //        when (stageType) {
 //            NORMAL -> TODO()
 //            BOSS -> TODO()

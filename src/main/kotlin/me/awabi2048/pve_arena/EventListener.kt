@@ -5,6 +5,7 @@ import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.Main.Companion.lobbyOriginLocation
 import me.awabi2048.pve_arena.Main.Companion.prefix
 import me.awabi2048.pve_arena.Main.Companion.spawnSessionKillCount
+import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.game.Generic
 import me.awabi2048.pve_arena.game.NormalArena
 import me.awabi2048.pve_arena.game.QuickArena
@@ -96,9 +97,11 @@ object EventListener : Listener {
             if (event.entity.world.entities.none { it.scoreboardTags.contains("arena.mob") } && session is WaveProcessingMode) {
                 val lastWave = when(session) {
                     is NormalArena -> session.lastWave
-                    is QuickArena -> 10
+                    is QuickArena -> DataFile.config.getInt("misc.game.quick_arena", 10)
                     else -> 1
                 }
+
+                if (session is QuickArena && (session.status as Generic.Status.InGame).wave != lastWave) return
 
                 // ウェーブ終了処理
                 Bukkit.getScheduler().runTaskLater(
@@ -129,11 +132,11 @@ object EventListener : Listener {
                 spawnSessionKillCount[uuid] = spawnSessionKillCount[uuid]!! + 1
 
                 for (count in 0..totalMobCount) {
-                    displayScoreboard.scoreboard!!.resetScores("§fMobs §c$${totalMobCount}§7/$totalMobCount")
+                    displayScoreboard.scoreboard!!.resetScores("§fMobs §c${count}§7/$totalMobCount")
                 }
 
-                displayScoreboard.getScore("§fMobs §c${totalMobCount  - spawnSessionKillCount[uuid]!!}§7/$totalMobCount").score = 1
-                if  (spawnSessionKillCount[uuid]!! == 0)  spawnSessionKillCount.remove(uuid)
+                displayScoreboard.getScore("§fMobs §c${totalMobCount - spawnSessionKillCount[uuid]!!}§7/$totalMobCount").score = 1
+                if  (spawnSessionKillCount[uuid]!! == totalMobCount) spawnSessionKillCount.remove(uuid)
             }
         }
     }
@@ -153,6 +156,16 @@ object EventListener : Listener {
             if (!session.players.contains(event.player)) {
                 event.player.teleport(lobbyOriginLocation)
                 event.player.sendMessage("$prefix §c§lWARNING: §cあなたは入場を許可されていません。")
+            }
+        }
+
+        for (world in Bukkit.getWorlds().filter{it.name.startsWith("arena_session.")}) {
+            if (world.players.isEmpty()) {
+                println("SESSION SIZE: ${activeSession.size}")
+
+                val uuid = event.from.name.substringAfter("arena_session.")
+                val session = Lib.lookForSession(uuid)
+                session.stop()
             }
         }
     }

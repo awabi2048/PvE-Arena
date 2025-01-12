@@ -1,5 +1,6 @@
 package me.awabi2048.pve_arena.game
 
+import io.papermc.paper.scoreboard.numbers.NumberFormat
 import me.awabi2048.pve_arena.Main
 import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.Main.Companion.prefix
@@ -33,6 +34,8 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
             },
             20L
         )
+
+        afkCheck()
     }
 
     override fun joinPlayer(player: Player) {
@@ -114,8 +117,6 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
                 },
                 600L
             )
-        } else {
-
         }
 
         if (wave == 1) {
@@ -124,7 +125,7 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
                 Runnable {
                     timeTracking()
                 },
-                2L
+                1L
             )
         }
     }
@@ -132,9 +133,10 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
     override fun setupScoreboard(player: Player): Objective {
         val scoreboard = Bukkit.getScoreboardManager().newScoreboard.registerNewObjective("arena_scoreboard_display.${player.uniqueId}", Criteria.DUMMY, "§7« §e§lQuick Arena §7»")
         scoreboard.displaySlot = DisplaySlot.SIDEBAR
+        scoreboard.numberFormat(NumberFormat.blank())
 
         scoreboard.getScore("").score = 5
-        scoreboard.getScore("§fTime §700:00.0").score = 4
+        scoreboard.getScore("§fTime §700:00.00").score = 4
         scoreboard.getScore("").score = 3
         scoreboard.getScore("§fWave §7---").score = 2
         scoreboard.getScore("§fMobs §7---").score = 1
@@ -143,7 +145,12 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
     }
 
     override fun rewardDistribute() {
-        TODO("Not yet implemented")
+        val ticketCount = 5
+        val ticketType = Reward.TicketType.HARD
+        val point = 5
+        val exp = 20
+
+        Reward.distribute(getSessionWorld()!!.players.toSet(), Pair(ticketType, ticketCount), point, exp)
     }
 
     override fun startSpawnSession() {
@@ -176,11 +183,11 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
 
         Bukkit.getServer().onlinePlayers.filter { it.hasPermission("pve_arena.main.receive_announce") }.forEach {
             it.sendMessage(
-                "$prefix §e${players.joinToString()}§7さんが§eクイックアリーナ§7をクリアしました！§f<§e${
-                    Lib.timeToClock(
+                "$prefix §e${players.joinToString()}§7さんが§eクイックアリーナ§7をクリアしました！ §7[§e${
+                    Lib.tickToClock(
                         (status as Status.InGame).timeElapsed
                     )
-                }§f>"
+                }§7]"
             )
         }
 
