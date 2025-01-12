@@ -24,7 +24,6 @@ object Lib {
     }
 
     fun lookForSession(uuid: String): Generic {
-        println("SEIA: ${activeSession.filter{it.uuid == uuid}.size}")
         return activeSession.filter{it.uuid == uuid}.toList()[0]
     }
 }

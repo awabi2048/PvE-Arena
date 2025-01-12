@@ -5,6 +5,7 @@ import me.awabi2048.pve_arena.Main
 import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.Main.Companion.prefix
 import me.awabi2048.pve_arena.Main.Companion.spawnSessionKillCount
+import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -80,7 +81,7 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
     }
 
     override fun waveProcession() {
-        if (status is Status.WaitingStart) status = Status.InGame(WaveProcessingMode.MobType.entries.random(), WaveProcessingMode.MobDifficulty.HARD, 0, 0)
+        if (status is Status.WaitingStart) status = Status.InGame(WaveProcessingMode.MobType.entries.random(), WaveProcessingMode.MobDifficulty.NORMAL, 0, 0)
 
         (status as Status.InGame).wave += 1
         val wave = (status as Status.InGame).wave
@@ -97,14 +98,11 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
             val displayScoreboard = Main.displayScoreboardMap[it]!!
             if (wave == 1) {
                 displayScoreboard.scoreboard!!.resetScores("§fWave §7---")
-                displayScoreboard.scoreboard!!.resetScores("§fMobs §7---")
             } else {
                 displayScoreboard.scoreboard!!.resetScores("§fWave §6${wave - 1}§7/10")
-                displayScoreboard.scoreboard!!.resetScores("§fMobs §c0§7/10")
             }
 
             displayScoreboard.getScore("§fWave §6${wave}§7/10").score = 2
-            displayScoreboard.getScore("§fMobs §c10§7/10").score = 1
         }
 
         startSpawnSession()
@@ -115,7 +113,7 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
                 Runnable {
                     waveProcession()
                 },
-                600L
+                (DataFile.config.getInt("misc.game.quick_arena_time") * 20).toLong()
             )
         }
 
@@ -133,13 +131,12 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
     override fun setupScoreboard(player: Player): Objective {
         val scoreboard = Bukkit.getScoreboardManager().newScoreboard.registerNewObjective("arena_scoreboard_display.${player.uniqueId}", Criteria.DUMMY, "§7« §e§lQuick Arena §7»")
         scoreboard.displaySlot = DisplaySlot.SIDEBAR
-        scoreboard.numberFormat(NumberFormat.blank())
+//        scoreboard.numberFormat(NumberFormat.blank()) → 1.21.4までおあずけ
 
         scoreboard.getScore("").score = 5
         scoreboard.getScore("§fTime §700:00.00").score = 4
         scoreboard.getScore("").score = 3
         scoreboard.getScore("§fWave §7---").score = 2
-        scoreboard.getScore("§fMobs §7---").score = 1
 
         return scoreboard
     }
@@ -162,12 +159,14 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
             Bukkit.getScheduler().runTaskLater(
                 instance,
                 Runnable {
-                    randomSpawn(
-                        world = getSessionWorld()!!,
-                        wave = (status as Status.InGame).wave,
-                        mobType = mobType,
-                        difficulty = WaveProcessingMode.MobDifficulty.HARD
-                    )
+                    if (getSessionWorld()!!.players.isNotEmpty()) {
+                        randomSpawn(
+                            world = getSessionWorld()!!,
+                            wave = (status as Status.InGame).wave,
+                            mobType = mobType,
+                            difficulty = WaveProcessingMode.MobDifficulty.NORMAL
+                        )
+                    }
                 },
                 (10 * i).toLong()
             )

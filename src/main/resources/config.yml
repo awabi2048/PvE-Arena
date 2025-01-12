@@ -14,3 +14,4 @@ mob_stats:
 misc:
   game:
     quick_arena_wave: 10
+    quick_arena_time: 45

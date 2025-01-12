@@ -179,7 +179,9 @@ class NormalArena(
             Bukkit.getScheduler().runTaskLater(
                 instance,
                 Runnable {
-                    randomSpawn(getSessionWorld()!!, (status as Status.InGame).wave, mobType, difficulty)
+                    if (getSessionWorld()!!.players.isNotEmpty()) {
+                        randomSpawn(getSessionWorld()!!, (status as Status.InGame).wave, mobType, difficulty)
+                    }
                 },
                 (10 * i).toLong()
             )

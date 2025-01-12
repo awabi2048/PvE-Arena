@@ -82,7 +82,7 @@ spider:
     mother_spider:
       base_multiplier: 1.0
       wave: 3..8
-      weight: 2
+      weight: 3
     silverfish:
       base_multiplier: 1.0
       wave: 3..8
@@ -90,7 +90,7 @@ spider:
     witch:
       base_multiplier: 1.0
       wave: 3..8
-      weight: 5
+      weight: 2
 
 blaze:
   name: "ブレイズ"
@@ -161,10 +161,6 @@ enderman:
       base_multiplier: 1.0
       wave: 1..8
       weight: 10
-    endermite:
-      base_multiplier: 1.0
-      wave: 1..8
-      weight: 3
     shulker:
       base_multiplier: 1.0
       wave: 3..8

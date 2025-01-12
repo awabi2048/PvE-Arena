@@ -89,7 +89,7 @@ interface WaveProcessingMode {
         }
 
         val mobTypeSection = DataFile.mobType.getConfigurationSection(mobTypeToString(mobType))!!
-
+w
         val spawnLocation =
             listOf(
                 Location(world, 18.5, 0.25, 0.5),
@@ -127,7 +127,7 @@ interface WaveProcessingMode {
         var weightSumPreliminary = 0
         var spawnMobId = ""
         for (key in spawnCandidate) {
-            if (seed in weightSumPreliminary..<weightSumPreliminary + availableMobSection.getInt("$key.weight")) {
+            if (seed in weightSumPreliminary..<(weightSumPreliminary + availableMobSection.getInt("$key.weight"))) {
                 spawnMobId = key
                 break
             }
@@ -137,11 +137,11 @@ interface WaveProcessingMode {
         // spawn
         val mobData = DataFile.mobDefinition.getConfigurationSection(spawnMobId)!!
 
-//        println("ENTITY TYPE: ${mobData.getString("entity_type")}")
+        println("ENTITY TYPE: ${mobData.getString("entity_type")}, $mobData")
         val entityType = EntityType.valueOf(mobData.getString("entity_type") ?: "".uppercase())
 
         val mob = world.spawnEntity(spawnLocation, entityType) as LivingEntity
-        mob.customName = mobData.getString("display_name") ?: ""
+        mob.customName = mobData.getString("display_name")
         mob.isCustomNameVisible = true
 
         // armor
