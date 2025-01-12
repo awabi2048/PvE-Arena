@@ -5,6 +5,7 @@ easy:
   wave: 3
   reward_ticket: easy
   reward_point: false
+  icon: MOSS_BLOCK
 
 normal:
   name: "§eノーマル"
@@ -13,6 +14,7 @@ normal:
   wave: 5
   reward_ticket: normal
   reward_point: true
+  icon: DEEPSLATE
 
 hard:
   name: "§cハード"
@@ -21,6 +23,7 @@ hard:
   wave: 5
   reward_ticket: hard
   reward_point: true
+  icon: MAGMA_BLOCK
 
 expert:
   name: "§dエキスパート"
@@ -29,6 +32,7 @@ expert:
   wave: 8
   reward_ticket: extreme
   reward_point: true
+  icon: OBSIDIAN
 
 nightmare:
   name: "§4ナイトメア"
@@ -37,3 +41,5 @@ nightmare:
   wave: 8
   reward_ticket: extreme
   reward_point: false
+  icon: CRYING_OBSIDIAN
+

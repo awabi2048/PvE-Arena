@@ -13,6 +13,8 @@ import me.awabi2048.pve_arena.game.Generic
 import me.awabi2048.pve_arena.game.NormalArena
 import me.awabi2048.pve_arena.game.QuickArena
 import me.awabi2048.pve_arena.game.WaveProcessingMode
+import me.awabi2048.pve_arena.menu_manager.EntranceMenu
+import me.awabi2048.pve_arena.menu_manager.MenuManager
 import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.Bukkit
 import org.bukkit.entity.*
@@ -24,6 +26,8 @@ import org.bukkit.event.entity.EntityTargetLivingEntityEvent
 import org.bukkit.event.entity.SlimeSplitEvent
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.player.PlayerChangedWorldEvent
+import org.bukkit.event.player.PlayerInteractEntityEvent
+import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 
@@ -195,6 +199,7 @@ object EventListener : Listener {
         }
     }
 
+    @EventHandler
     fun regulateElderGuardian(event: ElderGuardianAppearanceEvent) {
         if (!event.entity.world.name.startsWith("arena_session.")) return
         event.isCancelled = true
@@ -202,22 +207,23 @@ object EventListener : Listener {
         event.affectedPlayer.damage(8.0)
     }
 
-//    @EventHandler
-//    fun onEntranceMenuClicked(event: InventoryClickEvent) {
-//        if (event.whoClicked !is Player) return
-//        if (playerMenuStatus[event.whoClicked] != "entrance") return
-//
-//        if (event.slot !in listOf(19, 21, 23, 25, 40)) return
-//
-//        entranceMenuClicked(event)
-//        event.isCancelled = true
-//
-//    }
-//
-//    @EventHandler
-//    fun onCloseInventory(event: InventoryCloseEvent) {
-//        playerMenuStatus.remove(event.player)
-//    }
+    @EventHandler
+    fun onEntranceMenuClicked(event: InventoryClickEvent) {
+        if (event.whoClicked !is Player) return
+        if (event.view.title == "§7§lArena Entrance") {
+            val menu = EntranceMenu(event.whoClicked as Player)
+            val inverted = (event.click.isRightClick)
+
+            when(event.slot) {
+                19 -> menu.cycleOption(event.inventory, EntranceMenu.OptionCategory.MobType, inverted)
+                21 -> menu.cycleOption(event.inventory, EntranceMenu.OptionCategory.MobDifficulty, inverted)
+                23 -> menu.changeOptionValue(event.inventory, EntranceMenu.OptionCategory.PlayerCount, inverted)
+                25 -> menu.changeOptionValue(event.inventory, EntranceMenu.OptionCategory.SacrificeAmount, inverted)
+                40 -> menu.changeOptionValue(event.inventory, EntranceMenu.OptionCategory.SacrificeAmount, inverted)
+            }
+        }
+
+    }
 
 //    @EventHandler
 //    fun onPortalEnter(event: PlayerMoveEvent) {
@@ -253,5 +259,12 @@ object EventListener : Listener {
 //                    val portal = EntrancePortal(uuid).transportPlayer(event.player)
 //                }
 //            }
+//    }
+
+    @EventHandler
+//    fun onQuestBoardOpen(event: PlayerInteractEntityEvent) {
+//        if (!event.rightClicked.scoreboardTags.contains("arena.interaction.quest_board")) return
+//
+//        val menu = MenuManager(event.player, MenuManager.MenuType.Quest())
 //    }
 }
