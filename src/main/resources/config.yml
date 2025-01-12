@@ -18,3 +18,4 @@ misc:
 
     player_max: 6
     sacrifice_max: 4
+    cost_increase_per_player_pow: 0.613 # log_6(3)

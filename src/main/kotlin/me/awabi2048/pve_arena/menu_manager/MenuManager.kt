@@ -16,7 +16,6 @@ abstract class MenuManager(val player: Player, val menuType: MenuType) {
         data class Quest(val questType: GenericQuest.QuestType) : MenuType()
     }
 
-    val bar = "§7▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
     val black = Lib.getHiddenItem(Material.BLACK_STAINED_GLASS_PANE)
     val gray = Lib.getHiddenItem(Material.GRAY_STAINED_GLASS_PANE)
 

@@ -26,4 +26,14 @@ object Lib {
     fun lookForSession(uuid: String): Generic {
         return activeSession.filter{it.uuid == uuid}.toList()[0]
     }
+
+    fun getBar(length: Int, base: String): String {
+        var i = 0
+        while (i < length) {
+            base.plus("▬")
+            i++
+        }
+
+        return base
+    }
 }

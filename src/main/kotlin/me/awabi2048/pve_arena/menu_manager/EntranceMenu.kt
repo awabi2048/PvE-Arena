@@ -190,9 +190,9 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
         val goIconMeta = goIcon.itemMeta
         goIconMeta.setItemName("§cゲートを開く")
         goIconMeta.lore = listOf(
-            bar,
+            Lib.getBar(50, "§7"),
             "§7クリックして§cアリーナへのゲート§7を開きます。",
-            bar,
+            Lib.getBar(50, "§7"),
             "§d✵ コスト §7»",
             "",
         )
@@ -212,7 +212,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
         val playerCount = menu.getItem(23)!!.amount
 
         val baseCost = DataFile.mobType.getInt("${mobType.toString().substringAfter("MobType.").lowercase()}.base_cost")
-
+        val difficultyMultiplier = DataFile.difficulty.getInt("${mobType.toString().substringAfter("MobType.").lowercase()}.base_cost")
 
         val rawCost =
     }
@@ -250,7 +250,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
         }
 
         fun getMobTypeLore(mobType: WaveProcessingMode.MobType): List<String> {
-            val lore = mutableListOf(bar, "§f左クリック§7: §a次へ, §f右クリック§7: §c前へ", "", bar)
+            val lore = mutableListOf(Lib.getBar(50, "§7"), "§f左クリック§7: §a次へ, §f右クリック§7: §c前へ", "", Lib.getBar(50, "§7"))
             for (key in DataFile.mobType.getKeys(false)) {
                 val addValue =
                     if (key == mobType.toString().substringAfter("MobType.").lowercase()) {
@@ -262,7 +262,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
                 lore += addValue
             }
 
-            lore += bar
+            lore += Lib.getBar(50, "§7")
 
             return lore
         }
@@ -293,7 +293,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
         }
 
         fun getDifficultyLore(difficulty: WaveProcessingMode.MobDifficulty): List<String> {
-            val lore = mutableListOf(bar, "§f左クリック§7: §a次へ, §f右クリック§7: §c前へ", "", bar)
+            val lore = mutableListOf(Lib.getBar(50, "§7"), "§f左クリック§7: §a次へ, §f右クリック§7: §c前へ", "", Lib.getBar(50, "§7"))
             for (key in DataFile.difficulty.getKeys(false)) {
                 val addValue =
                     if (key == difficulty.toString().substringAfter("MobDifficulty.").lowercase()) {
@@ -305,7 +305,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
                 lore += addValue
             }
 
-            lore += bar
+            lore += Lib.getBar(50, "§7")
 
             return lore
         }
@@ -329,10 +329,10 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
 
         itemMeta.setItemName("§aプレイ人数")
         itemMeta.lore = listOf(
-            bar,
+            Lib.getBar(50, "§7"),
             "§7プレイする人数を設定します。",
             "§7現在の設定§7: §6${playerCount} 人",
-            bar,
+            Lib.getBar(50, "§7"),
         )
 
         item.itemMeta = itemMeta
@@ -345,10 +345,10 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
 
         itemMeta.setItemName("§d捧げ物")
         itemMeta.lore = listOf(
-            bar,
+            Lib.getBar(50, "§7"),
             "§7§o何を捧げる？",
             "§e現在の設定§7: §d${sacrificeAmount} 個",
-            bar,
+            Lib.getBar(50, "§7"),
         )
 
         if (sacrificeAmount >= 1) itemMeta.setEnchantmentGlintOverride(true)

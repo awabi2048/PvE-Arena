@@ -48,7 +48,7 @@ class PlayerData(private val player: Player) {
             player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 2.0f)
         }
 
-        YamlUtil.save("player_data.yml", DataFile.playerData as YamlConfiguration)
+        YamlUtil.save("player_data/main.yml", DataFile.playerData as YamlConfiguration)
         DataFile.reloadPlayerData()
     }
 
@@ -59,7 +59,7 @@ class PlayerData(private val player: Player) {
         DataFile.playerData.set("$uuid.profession_exp_current", 0)
         DataFile.playerData.set("$uuid.profession_exp_all_time", 0)
 
-        YamlUtil.save("player_data.yml", DataFile.playerData as YamlConfiguration)
+        YamlUtil.save("player_data/main.yml", DataFile.playerData as YamlConfiguration)
     }
 
     private fun getData(key: String): Int {
