@@ -1,9 +1,10 @@
 package me.awabi2048.pve_arena.game
 
 import me.awabi2048.pve_arena.Main
-import me.awabi2048.pve_arena.Main.Companion.arenaStatusMap
+import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.Main.Companion.prefix
-import me.awabi2048.pve_arena.Main.Companion.quickArenaStatusMap
+import me.awabi2048.pve_arena.Main.Companion.spawnSessionKillCount
+import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Sound
@@ -12,16 +13,26 @@ import org.bukkit.scoreboard.Criteria
 import org.bukkit.scoreboard.DisplaySlot
 import org.bukkit.scoreboard.Objective
 
-class QuickArena(private val generationData: GenerationData): Generic(generationData.uuid) {
+class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), WaveProcessingMode {
+
+    val lastWave = 10
 
     override fun generate() {
-
+        status = Status.WaitingGeneration
 
         val launcher = Launcher(Launcher.StageType.QUICK)
-        launcher.prepareWorld(generationData.uuid)
-        launcher.prepareStructure(generationData.uuid)
+        launcher.prepareWorld(uuid)
+        launcher.prepareStructure(uuid)
 
-        println("$prefix Started arena session for uuid: ${generationData.uuid}, type: QUICK, STATUS: ${Main.quickArenaStatusMap[generationData.uuid]?.code}")
+        println("$prefix Started arena session for uuid: ${uuid}, type: QUICK, STATUS: $status")
+
+        Bukkit.getScheduler().runTaskLater(
+            instance,
+            Runnable {
+                status = Status.WaitingStart
+            },
+            20L
+        )
     }
 
     override fun joinPlayer(player: Player) {
@@ -33,9 +44,10 @@ class QuickArena(private val generationData: GenerationData): Generic(generation
                 (-15..15).random().toDouble() / 10
             )
         )
+
         player.playSound(player, Sound.ENTITY_PLAYER_TELEPORT, 1.0f, 2.0f)
         player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.2f)
-        player.sendMessage("$prefix §7クイックアリーナに入場しました。")
+        player.sendMessage("$prefix §eクイックアリーナ§7に入場しました。")
 
         val displayScoreboard = setupScoreboard(player)
         player.scoreboard = displayScoreboard.scoreboard!!
@@ -44,19 +56,19 @@ class QuickArena(private val generationData: GenerationData): Generic(generation
 
     override fun start() {
         getSessionWorld()!!.players.forEach {
-            it.sendMessage("$prefix §7Wave 1は§e§n15秒後§7に開始します。")
+            it.sendMessage("$prefix §b最初のウェーブ§7は§e§n15秒後§7に開始します。")
         }
 
         Bukkit.getScheduler().runTaskLater(
-            Main.instance,
+            instance,
             Runnable {
-                countdown(14)
+                startCountdown(14, getSessionWorld()!!)
             },
             20L
         )
 
         Bukkit.getScheduler().runTaskLater(
-            Main.instance,
+            instance,
             Runnable {
                 waveProcession()
             },
@@ -65,8 +77,10 @@ class QuickArena(private val generationData: GenerationData): Generic(generation
     }
 
     override fun waveProcession() {
-        arenaStatusMap[uuid]!!.wave += 1
-        val wave = quickArenaStatusMap[generationData.uuid]!!.wave
+        if (status is Status.WaitingStart) status = Status.InGame(WaveProcessingMode.MobType.entries.random(), WaveProcessingMode.MobDifficulty.HARD, 0, 0)
+
+        (status as Status.InGame).wave += 1
+        val wave = (status as Status.InGame).wave
 
         getSessionWorld()!!.players.forEach {
             it.playSound(it, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 0.5f)
@@ -94,17 +108,19 @@ class QuickArena(private val generationData: GenerationData): Generic(generation
 
         if (wave < 10) {
             Bukkit.getScheduler().runTaskLater(
-                Main.instance,
+                instance,
                 Runnable {
                     waveProcession()
                 },
                 600L
             )
+        } else {
+
         }
 
         if (wave == 1) {
             Bukkit.getScheduler().runTaskLater(
-                Main.instance,
+                instance,
                 Runnable {
                     timeTracking()
                 },
@@ -126,5 +142,49 @@ class QuickArena(private val generationData: GenerationData): Generic(generation
         return scoreboard
     }
 
-    data class GenerationData(val uuid: String, val players: Set<Player>)
+    override fun rewardDistribute() {
+        TODO("Not yet implemented")
+    }
+
+    override fun startSpawnSession() {
+        // roll mobs
+        val mobType = WaveProcessingMode.MobType.entries.random()
+        spawnSessionKillCount[uuid] = 0
+
+        for (i in 1..12) {
+            Bukkit.getScheduler().runTaskLater(
+                instance,
+                Runnable {
+                    randomSpawn(
+                        world = getSessionWorld()!!,
+                        wave = (status as Status.InGame).wave,
+                        mobType = mobType,
+                        difficulty = WaveProcessingMode.MobDifficulty.HARD
+                    )
+                },
+                (10 * i).toLong()
+            )
+        }
+    }
+
+    override fun endProcession() {
+        // announce
+        val players: MutableList<String> = mutableListOf()
+        getSessionWorld()!!.players.forEach {
+            players += it.displayName
+        }
+
+        Bukkit.getServer().onlinePlayers.filter { it.hasPermission("pve_arena.main.receive_announce") }.forEach {
+            it.sendMessage(
+                "$prefix §e${players.joinToString()}§7さんが§eクイックアリーナ§7をクリアしました！§f<§e${
+                    Lib.timeToClock(
+                        (status as Status.InGame).timeElapsed
+                    )
+                }§f>"
+            )
+        }
+
+        // end session
+        stop()
+    }
 }

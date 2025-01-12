@@ -15,10 +15,8 @@ class Main : JavaPlugin() {
     companion object {
         var prefix = "§7«§cArena§7»"
 
-        var arenaSessionMap: MutableMap<String, Generic> = mutableMapOf()
-        var arenaStatusMap: MutableMap<String, Generic.Status> = mutableMapOf()
-
         val activeSession: MutableSet<Generic> = mutableSetOf()
+        val spawnSessionKillCount: MutableMap<String, Int> = mutableMapOf()
 
         // reward multiplier
         val rewardModifiers: MutableSet<Reward.RewardMultiplier.RewardModifier> = mutableSetOf()

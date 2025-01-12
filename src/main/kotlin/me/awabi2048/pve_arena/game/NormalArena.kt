@@ -2,31 +2,30 @@ package me.awabi2048.pve_arena.game
 
 import me.awabi2048.pve_arena.Main.Companion.displayScoreboardMap
 import me.awabi2048.pve_arena.Main.Companion.instance
-import me.awabi2048.pve_arena.Main.Companion.lobbyOriginLocation
 import me.awabi2048.pve_arena.Main.Companion.prefix
+import me.awabi2048.pve_arena.Main.Companion.spawnSessionKillCount
 import me.awabi2048.pve_arena.config.DataFile
-import me.awabi2048.pve_arena.game.NormalArena.MobDifficulty.*
 import me.awabi2048.pve_arena.misc.Lib
 import me.awabi2048.pve_arena.misc.PlayerData
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.Particle
 import org.bukkit.Sound
-import org.bukkit.attribute.Attribute
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Criteria
 import org.bukkit.scoreboard.DisplaySlot
 import org.bukkit.scoreboard.Objective
-import org.codehaus.plexus.util.FileUtils
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
-class NormalArena(uuid: String, players: Set<Player>, val mobType: MobType, val difficulty: MobDifficulty, val sacrifice: Int = 0) : Generic(uuid, players) {
+class NormalArena(
+    uuid: String,
+    players: Set<Player>,
+    val mobType: WaveProcessingMode.MobType,
+    val difficulty: WaveProcessingMode.MobDifficulty,
+    val sacrifice: Int = 0,
+) : Generic(uuid, players), WaveProcessingMode {
 
     val lastWave = DataFile.difficulty.getInt("${mobDifficultyToString(difficulty)}.wave")
-
-    private val mobTypeSection = DataFile.mobType.getConfigurationSection(mobTypeToString(mobType))!!
-    private val difficultySection = DataFile.difficulty.getConfigurationSection(mobDifficultyToString(difficulty))!!
 
     override fun generate() {
         status = Status.WaitingGeneration
@@ -36,13 +35,21 @@ class NormalArena(uuid: String, players: Set<Player>, val mobType: MobType, val 
         launcher.prepareStructure(uuid)
 
         println("$prefix Started arena session for uuid: ${uuid}, type: NORMAL, STATUS: $status")
+
+        Bukkit.getScheduler().runTaskLater(
+            instance,
+            Runnable {
+                status = Status.WaitingStart
+            },
+            20L
+        )
     }
 
     override fun start() {
         getSessionWorld()!!.players.forEach {
-            it.sendMessage("$prefix §7Wave 1は§e§n20秒後§7に開始します。")
+            it.sendMessage("$prefix §b最初のウェーブ§7は§e§n20秒後§7に開始します。")
         }
-        countdown(20)
+        startCountdown(20, getSessionWorld()!!)
 
         Bukkit.getScheduler().runTaskLater(
             instance,
@@ -73,58 +80,8 @@ class NormalArena(uuid: String, players: Set<Player>, val mobType: MobType, val 
         displayScoreboardMap[player] = displayScoreboard
     }
 
-    fun finishWave() {
-        if (status !is Status.InGame) {
-            throw IllegalStateException()
-        }
-
-        val currentStatus = status as Status.InGame
-        getSessionWorld()!!.players.forEach {
-            if (currentStatus.wave != lastWave) {
-                it.sendMessage("$prefix §6Wave ${currentStatus.wave} §7が終了しました！§e10秒後§7に次のウェーブが開始します。")
-                it.playSound(it, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f)
-
-                Bukkit.getScheduler().runTaskLater(
-                    instance,
-                    Runnable {
-                        countdown(9)
-                    },
-                    20L
-                )
-
-                Bukkit.getScheduler().runTaskLater(
-                    instance,
-                    Runnable {
-                        waveProcession()
-                    },
-                    200L
-                )
-
-            } else {
-                it.sendMessage("$prefix §6Last Wave§7 が終了しました！§e10秒後§7にロビーに戻ります。")
-                it.playSound(it, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f)
-                it.playSound(it, Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.1f)
-
-                // scoreboard
-                println("ELAPSED: ${currentStatus.timeElapsed}")
-                status = Status.WaitingFinish
-
-                // reward
-                rewardDistribute()
-
-                Bukkit.getScheduler().runTaskLater(
-                    instance,
-                    Runnable {
-                        endProcession()
-                    },
-                    200L
-                )
-            }
-        }
-    }
-
     override fun waveProcession() {
-        if (status !is Status.InGame) throw IllegalStateException()
+        if (status is Status.WaitingStart) status = Status.InGame(mobType, difficulty, 0, 0)
 
         (status as Status.InGame).wave += 1
         val wave = (status as Status.InGame).wave
@@ -164,7 +121,7 @@ class NormalArena(uuid: String, players: Set<Player>, val mobType: MobType, val 
         }
     }
 
-    private fun rewardDistribute() {
+    override fun rewardDistribute() {
         // calc reward
         val baseTicket = DataFile.mobType.getInt("${mobTypeToString(mobType)}.reward.ticket")
         val basePoint = DataFile.mobType.getInt("${mobTypeToString(mobType)}.reward.point")
@@ -176,8 +133,8 @@ class NormalArena(uuid: String, players: Set<Player>, val mobType: MobType, val 
         val sacrificeMultiplier = (1.0 + sacrifice).pow(0.5)
 
         val ticket = when (difficulty) {
-            EXPERT -> (baseTicket * Reward.RewardMultiplier.ticket).roundToInt()
-            NIGHTMARE -> (baseTicket * difficultyMultiplier * Reward.RewardMultiplier.ticket / 2).roundToInt()
+            WaveProcessingMode.MobDifficulty.EXPERT -> (baseTicket * Reward.RewardMultiplier.ticket).roundToInt()
+            WaveProcessingMode.MobDifficulty.NIGHTMARE -> (baseTicket * difficultyMultiplier * Reward.RewardMultiplier.ticket / 2).roundToInt()
             else -> (baseTicket * Reward.RewardMultiplier.ticket).roundToInt()
         }
 
@@ -209,29 +166,7 @@ class NormalArena(uuid: String, players: Set<Player>, val mobType: MobType, val 
         }
     }
 
-    private fun mobStatsCalc(id: String, data: String): Double {
-
-        val mobData = DataFile.mobDefinition.getConfigurationSection(id)!!
-        val baseValue = mobData.getDouble("base_stats.$data")
-
-        val difficultyModifier =
-            difficultySection.getDouble("mob_multiplier", 1.0)
-        val waveModifier =
-            1.0 + (status as Status.InGame).wave * DataFile.config.getDouble("mob_stats.per_wave", 0.1)
-        val playerCountModifier =
-            1.0 + (players.size - 1) * DataFile.config.getDouble("mob_stats.per_player_count", 0.1)
-
-        val totalModifier = difficultyModifier * waveModifier * playerCountModifier
-
-        val modifiedValue = when (data) {
-            "speed" -> baseValue * totalModifier.pow(DataFile.config.getDouble("mob_stats.speed_modifier_pow", 0.1))
-            else -> baseValue * totalModifier
-        }
-
-        return modifiedValue
-    }
-
-    private fun summonCountCalc(wave: Int): Int {
+    fun summonCountCalc(wave: Int): Int {
         val mobData = DataFile.mobType.getConfigurationSection(mobTypeToString(mobType))!!
         val baseValue = mobData.getInt("base_summon_count")
 
@@ -244,92 +179,35 @@ class NormalArena(uuid: String, players: Set<Player>, val mobType: MobType, val 
         return modifiedValue
     }
 
-    private fun startSpawnSession() {
-        if (status !is Status.InGame) throw IllegalStateException()
-        val summonCount = summonCountCalc((status as Status.InGame).wave)
+    override fun startSpawnSession() {
+        val wave = (status as Status.InGame).wave
+        val summonCount = summonCountCalc(wave)
+        spawnSessionKillCount[uuid] = 0
 
         for (i in 1..summonCount) {
             Bukkit.getScheduler().runTaskLater(
                 instance,
                 Runnable {
-                    randomSpawn()
+                    randomSpawn(getSessionWorld()!!, (status as Status.InGame).wave, mobType, difficulty)
                 },
                 (10 * i).toLong()
             )
         }
     }
 
-    private fun mobSelect(): String {
-        val availableMobSection = mobTypeSection.getConfigurationSection("mobs")!!
-        val availableMobSet = availableMobSection.getKeys(false)
+    override fun endProcession() {
+        val difficultySection = DataFile.difficulty.getConfigurationSection(mobDifficultyToString(difficulty))!!
+        val mobTypeSection = DataFile.mobType.getConfigurationSection(mobTypeToString(mobType))!!
 
-        val wave = (status as Status.InGame).wave
-
-        val spawnCandidate: MutableList<String> = mutableListOf()
-        for (key in availableMobSet) {
-            // wave check
-            val waveRangeString = availableMobSection.getString("$key.wave")!!
-            val waveRangeMin = waveRangeString.substringBefore("..").toInt()
-            val waveRangeMax = waveRangeString.substringAfter("..").toInt()
-            val waveRange = waveRangeMin..waveRangeMax
-
-            // difficulty check
-
-            if (wave in waveRange) spawnCandidate += key
-        }
-
-        var weightSum = 0
-
-        for (key in spawnCandidate) {
-            weightSum += availableMobSection.getInt("$key.weight")
-        }
-
-        val seed = (1..weightSum).random()
-
-        var weightSumPreliminary = 0
-        var spawnMobId = ""
-        for (key in spawnCandidate) {
-            if (seed in weightSumPreliminary..<weightSumPreliminary + availableMobSection.getInt("$key.weight")) {
-                spawnMobId = key
-                break
-            }
-            weightSumPreliminary += availableMobSection.getInt("$key.weight")
-        }
-        return spawnMobId
-    }
-
-    private fun randomSpawn() {
-        val spawnLocation =
-            listOf(
-                Location(getSessionWorld()!!, 18.5, 0.25, 0.5),
-                Location(getSessionWorld()!!, 0.5, 0.25, 18.5),
-                Location(getSessionWorld()!!, -18.5, 0.25, 0.5),
-                Location(getSessionWorld()!!, 0.5, 0.25, -18.5)
-            ).random()
-
-        val id = mobSelect()
-        val mob = summonMob(id, spawnLocation)
-
-        // attribute
-        mob.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.baseValue = mobStatsCalc(id, "health")
-        mob.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.baseValue = mobStatsCalc(id, "strength")
-        mob.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)!!.baseValue = mobStatsCalc(id, "speed")
-
-        mob.health = mobStatsCalc(id, "health")
-
-        getSessionWorld()!!.spawnParticle(Particle.TRIAL_SPAWNER_DETECTION, spawnLocation, 10, 0.1, 0.1, 0.1, 0.1)
-    }
-
-    private fun endProcession() {
         // announce
         val difficultyName = difficultySection.getString("name")!!
         val mobTypeName = mobTypeSection.getString("name")!!
         val arenaName = when (difficulty) {
-            EASY -> "§a$difficultyName・${mobTypeName}アリーナ"
-            NORMAL -> "§e$difficultyName・${mobTypeName}アリーナ"
-            HARD -> "§c§l$difficultyName・${mobTypeName}アリーナ"
-            EXPERT -> "§d§l$difficultyName・${mobTypeName}アリーナ"
-            NIGHTMARE -> "§b§l$difficultyName・${mobTypeName}アリーナ"
+            WaveProcessingMode.MobDifficulty.EASY -> "§a$difficultyName・${mobTypeName}アリーナ"
+            WaveProcessingMode.MobDifficulty.NORMAL -> "§e$difficultyName・${mobTypeName}アリーナ"
+            WaveProcessingMode.MobDifficulty.HARD -> "§c§l$difficultyName・${mobTypeName}アリーナ"
+            WaveProcessingMode.MobDifficulty.EXPERT -> "§d§l$difficultyName・${mobTypeName}アリーナ"
+            WaveProcessingMode.MobDifficulty.NIGHTMARE -> "§b§l$difficultyName・${mobTypeName}アリーナ"
         }
 
         val players: MutableList<String> = mutableListOf()
@@ -351,20 +229,6 @@ class NormalArena(uuid: String, players: Set<Player>, val mobType: MobType, val 
         stop()
     }
 
-    override fun stop() {
-        // teleport back
-        getSessionWorld()!!.players.forEach {
-            it.teleport(lobbyOriginLocation)
-            it.playSound(it, Sound.ENTITY_PLAYER_TELEPORT, 1.0f, 2.0f)
-        }
-
-        // remove session world
-        val sessionWorld = getSessionWorld()!!
-
-        Bukkit.unloadWorld(sessionWorld, true)
-        FileUtils.deleteDirectory(sessionWorld.name)
-    }
-
     override fun setupScoreboard(player: Player): Objective {
         val scoreboard = Bukkit.getScoreboardManager().newScoreboard.registerNewObjective(
             "arena_scoreboard_display.${player.uniqueId}",
@@ -377,11 +241,11 @@ class NormalArena(uuid: String, players: Set<Player>, val mobType: MobType, val 
         val mobTypeName = "§b${mobTypeToString(mobType).capitalize()}"
 
         val difficultyName = when (difficulty) {
-            EASY -> "§a${mobDifficultyToString(difficulty).capitalize()}"
-            NORMAL -> "§e${mobDifficultyToString(difficulty).capitalize()}"
-            HARD -> "§c${mobDifficultyToString(difficulty).capitalize()}"
-            EXPERT -> "§d${mobDifficultyToString(difficulty).capitalize()}"
-            NIGHTMARE -> "§4${mobDifficultyToString(difficulty).capitalize()}"
+            WaveProcessingMode.MobDifficulty.EASY -> "§a${mobDifficultyToString(difficulty).capitalize()}"
+            WaveProcessingMode.MobDifficulty.NORMAL -> "§e${mobDifficultyToString(difficulty).capitalize()}"
+            WaveProcessingMode.MobDifficulty.HARD -> "§c${mobDifficultyToString(difficulty).capitalize()}"
+            WaveProcessingMode.MobDifficulty.EXPERT -> "§d${mobDifficultyToString(difficulty).capitalize()}"
+            WaveProcessingMode.MobDifficulty.NIGHTMARE -> "§4${mobDifficultyToString(difficulty).capitalize()}"
         }
 
         scoreboard.getScore("").score = 6
@@ -392,31 +256,5 @@ class NormalArena(uuid: String, players: Set<Player>, val mobType: MobType, val 
         scoreboard.getScore("§fMobs §7---").score = 1
 
         return scoreboard
-    }
-
-    enum class MobType {
-        ZOMBIE,
-        SKELETON,
-        SPIDER,
-        BLAZE,
-        CREEPER,
-        GUARDIAN,
-        ENDERMAN;
-    }
-
-    private fun mobDifficultyToString(difficulty: MobDifficulty): String {
-        return difficulty.toString().substringAfter("MobDifficulty.").lowercase()
-    }
-
-    private fun mobTypeToString(mobType: MobType): String {
-        return mobType.toString().substringAfter("MobType.").lowercase()
-    }
-
-    enum class MobDifficulty {
-        EASY,
-        NORMAL,
-        HARD,
-        EXPERT,
-        NIGHTMARE;
     }
 }

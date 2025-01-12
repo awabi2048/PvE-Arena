@@ -27,4 +27,8 @@ object DataFile {
         instance.saveResource("stage_data" + File.separator + "difficulty.yml", false)
         instance.saveResource("stage_data" + File.separator + "mob_type.yml", false)
     }
+
+    fun reloadPlayerData() {
+        playerData = YamlUtil.load("player_data.yml")
+    }
 }

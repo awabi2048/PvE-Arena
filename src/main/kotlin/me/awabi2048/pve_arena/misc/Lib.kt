@@ -1,5 +1,7 @@
 package me.awabi2048.pve_arena.misc
 
+import me.awabi2048.pve_arena.Main.Companion.activeSession
+import me.awabi2048.pve_arena.game.Generic
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
@@ -21,5 +23,9 @@ object Lib {
         val minute = ((time / 10 / 60) % 60).toString().padStart(2, '0')
 
         return "$minute:$second.$decimal"
+    }
+
+    fun lookForSession(uuid: String): Generic {
+        return activeSession.filter{it.uuid == uuid}[0]
     }
 }

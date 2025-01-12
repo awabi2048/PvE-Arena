@@ -40,17 +40,64 @@ skeleton:
   base_cost: 2
   base_summon_count: 12
   mobs:
-    normal_zombie:
+    normal_skeleton:
       base_multiplier: 1.0
       wave: 1..3
       weight: 10
-    mutant_zombie:
+    armored_skeleton:
       base_multiplier: 1.0
-      wave: 3..5
-      weight: 10
-    zombie_master:
+      wave: 2..4
+      weight: 5
+    skeleton_soldier:
       base_multiplier: 1.0
-      wave: 4..7
+      wave: 3..8
+      weight: 5
+    stray_soldier:
+      base_multiplier: 1.0
+      wave: 3..8
+      weight: 5
+    bogged_soldier:
+      base_multiplier: 1.0
+      wave: 4..8
+      weight: 5
+    skeleton_knight:
+      base_multiplier: 1.0
+      wave: 5..8
+      weight: 3
+
+skeleton:
+  name: "スケルトン"
+  base_health: 20.0f
+  base_attack: 2.0f
+  base_speed: 0.1f
+  reward:
+    ticket: 3
+    point: 2
+    level_experience: 10
+  base_cost: 2
+  base_summon_count: 12
+  mobs:
+    normal_skeleton:
+      base_multiplier: 1.0
+      wave: 1..3
       weight: 10
-
-
+    armored_skeleton:
+      base_multiplier: 1.0
+      wave: 2..4
+      weight: 5
+    skeleton_soldier:
+      base_multiplier: 1.0
+      wave: 3..8
+      weight: 5
+    stray_soldier:
+      base_multiplier: 1.0
+      wave: 3..8
+      weight: 5
+    bogged_soldier:
+      base_multiplier: 1.0
+      wave: 4..8
+      weight: 5
+    skeleton_knight:
+      base_multiplier: 1.0
+      wave: 5..8
+      weight: 3

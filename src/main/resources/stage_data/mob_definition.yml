@@ -35,7 +35,7 @@ zombie_soldier:
     hand: IRON_SWORD
     offhand: AIR
     helmet: LEATHER_HELMET
-    chestplate: LEATHER_HELMET
+    chestplate: LEATHER_CHESTPLATE
     leggings: LEATHER_LEGGINGS
     boots: LEATHER_BOOTS
   base_stats:
@@ -59,17 +59,33 @@ zombie_knight:
     speed: 0.25
   display_name: ""
 
-mutant_zombie:
+tank_zombie:
   entity_type: ZOMBIE
   equipment:
     hand: AIR
     offhand: AIR
-    helmet: AIR
-    chestplate: AIR
-    leggings: AIR
-    boots: AIR
+    helmet: CHAINMAIL_HELMET
+    chestplate: CHAINMAIL_CHESTPLATE
+    leggings: CHAINMAIL_LEGGINGS
+    boots: CHAINMAIL_BOOTS
   base_stats:
     health: 65.0
     strength: 8.0
     speed: 0.26
   display_name: ""
+
+normal_skeleton:
+  entity_type: SKELETON
+  equipment:
+    hand: AIR
+    offhand: AIR
+    helmet: CHAINMAIL_HELMET
+    chestplate: CHAINMAIL_CHESTPLATE
+    leggings: CHAINMAIL_LEGGINGS
+    boots: CHAINMAIL_BOOTS
+  base_stats:
+    health: 65.0
+    strength: 8.0
+    speed: 0.26
+  display_name: ""
+

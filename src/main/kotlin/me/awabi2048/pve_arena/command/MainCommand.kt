@@ -2,6 +2,7 @@ package me.awabi2048.pve_arena.command
 
 import me.awabi2048.pve_arena.Main.Companion.prefix
 import me.awabi2048.pve_arena.game.NormalArena
+import me.awabi2048.pve_arena.game.WaveProcessingMode
 import me.awabi2048.pve_arena.menu_manager.main.getMainMenu
 import me.awabi2048.pve_arena.misc.sendError
 import org.bukkit.Sound
@@ -77,13 +78,13 @@ object MainCommand : CommandExecutor, TabCompleter {
         } else {
             if (p3.isNullOrEmpty()) return null
 
-            if (p3.size == 1) return listOf("start_session", "stop_session", "join_session")
+            if (p3.size == 1) return listOf("config", "start_session", "stop_session", "join_session")
 
             if (p3[0] == "start_session") {
                 if (p3.size == 2) return listOf("NORMAL", "QUICK", "DUNGEON")
                 if (p3[1] == "NORMAL") {
                     if (p3.size == 3) {
-                        val mobTypeList = NormalArena.MobType.entries.toList()
+                        val mobTypeList = WaveProcessingMode.MobType.entries.toList()
                         val mobTypeStringList: MutableList<String> = mutableListOf()
                         mobTypeList.forEach {
                             mobTypeStringList += it.toString()
@@ -92,7 +93,7 @@ object MainCommand : CommandExecutor, TabCompleter {
                     }
 
                     if (p3.size == 4) {
-                        val difficultyList = NormalArena.MobDifficulty.entries.toList()
+                        val difficultyList = WaveProcessingMode.MobDifficulty.entries.toList()
                         val difficultyStringList: MutableList<String> = mutableListOf()
                         difficultyList.forEach {
                             difficultyStringList += it.toString()
