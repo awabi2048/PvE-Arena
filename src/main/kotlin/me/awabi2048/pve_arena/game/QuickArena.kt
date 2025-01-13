@@ -6,6 +6,7 @@ import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.Main.Companion.prefix
 import me.awabi2048.pve_arena.Main.Companion.spawnSessionKillCount
 import me.awabi2048.pve_arena.config.DataFile
+import me.awabi2048.pve_arena.item.ItemManager
 import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -143,8 +144,8 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
 
     override fun rewardDistribute() {
         val ticketCount = 5
-        val ticketType = Reward.TicketType.HARD
-        val point = 5
+        val ticketType = ItemManager.ArenaItem.TICKET_EXTREME
+        val point = 1
         val exp = 20
 
         Reward.distribute(getSessionWorld()!!.players.toSet(), Pair(ticketType, ticketCount), point, exp)

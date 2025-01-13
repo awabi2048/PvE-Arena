@@ -1,9 +1,7 @@
 package me.awabi2048.pve_arena.command
 
 import me.awabi2048.pve_arena.Main.Companion.prefix
-import me.awabi2048.pve_arena.game.NormalArena
 import me.awabi2048.pve_arena.game.WaveProcessingMode
-import me.awabi2048.pve_arena.menu_manager.main.getMainMenu
 import me.awabi2048.pve_arena.misc.sendError
 import org.bukkit.Sound
 import org.bukkit.command.Command
@@ -22,16 +20,16 @@ object MainCommand : CommandExecutor, TabCompleter {
 
         // 引数なし → メニュー開く
         if (p3.isNullOrEmpty()) {
-            val mainMenu = getMainMenu(p0)
-
-            // 万が一失敗したらエラー
-            if (mainMenu == null) {
-                p0.sendError("メインメニューの生成に失敗しました。")
-                return true
-            }
-
-            // メニュー開く
-            p0.openInventory(mainMenu)
+//            val mainMenu =
+//
+//            // 万が一失敗したらエラー
+//            if (mainMenu == null) {
+//                p0.sendError("メインメニューの生成に失敗しました。")
+//                return true
+//            }
+//
+//            // メニュー開く
+//            p0.openInventory(mainMenu)
 
             // 効果音
             p0.playSound(p0, Sound.UI_BUTTON_CLICK, 1.0f, 2.0f)

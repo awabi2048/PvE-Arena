@@ -6,6 +6,7 @@ import me.awabi2048.pve_arena.Main.Companion.prefix
 import me.awabi2048.pve_arena.Main.Companion.spawnSessionKillCount
 import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.game.WaveProcessingMode.MobDifficulty.*
+import me.awabi2048.pve_arena.item.ItemManager
 import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -146,15 +147,15 @@ class NormalArena(
             (baseProfessionExp * difficultyMultiplier * Reward.RewardMultiplier.professionExp * sacrificeMultiplier).roundToInt()
 
         // distribute
-        val ticketType = when(difficulty) {
-            EASY -> Reward.TicketType.EASY
-            NORMAL -> Reward.TicketType.NORMAL
-            HARD -> Reward.TicketType.HARD
-            EXPERT -> Reward.TicketType.EXTREME
-            NIGHTMARE -> Reward.TicketType.EXTREME
+        val ticketItem = when(difficulty) {
+            EASY -> ItemManager.ArenaItem.TICKET_EASY
+            NORMAL -> ItemManager.ArenaItem.TICKET_NORMAL
+            HARD -> ItemManager.ArenaItem.TICKET_HARD
+            EXPERT -> ItemManager.ArenaItem.TICKET_EXTREME
+            NIGHTMARE -> ItemManager.ArenaItem.TICKET_EXTREME
         }
 
-        Reward.distribute(getSessionWorld()!!.players.toSet(), Pair(ticketType, ticketCount), point, professionExp)
+        Reward.distribute(getSessionWorld()!!.players.toSet(), Pair(ticketItem, ticketCount), point, professionExp)
     }
 
     fun summonCountCalc(wave: Int): Int {

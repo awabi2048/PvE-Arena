@@ -22,10 +22,12 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDeathEvent
+import org.bukkit.event.entity.EntityPotionEffectEvent
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent
 import org.bukkit.event.entity.SlimeSplitEvent
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.player.PlayerChangedWorldEvent
+import org.bukkit.event.player.PlayerInteractAtEntityEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.potion.PotionEffect
@@ -186,43 +188,55 @@ object EventListener : Listener {
         }
     }
 
-    @EventHandler
-    fun regulateMobMovement(event: EntityMoveEvent) {
-        if (event.entity.world.name.startsWith("arena_session.")) {
-            val movedDistance = event.to.distance(event.from)
+//    @EventHandler
+//    fun regulateMobMovement(event: Entity) {
+//        if (event.entity.world.name.startsWith("arena_session.")) {
+//            val movedDistance = event.to.distance(event.from)
+//
+//            if (event.entity is Spider && event.entity.isClimbing) event.isCancelled = true
+//            if (event.entity is Blaze && event.entity.isOnGround) event.isCancelled = true
+//
+//            if ((event.entity is Enderman || event.entity is Shulker) && movedDistance >= 1.0) event.isCancelled = true
+//
+//        }
+//    }
 
-            if (event.entity is Spider && event.entity.isClimbing) event.isCancelled = true
-            if (event.entity is Blaze && event.entity.isOnGround) event.isCancelled = true
-
-            if ((event.entity is Enderman || event.entity is Shulker) && movedDistance >= 1.0) event.isCancelled = true
-
-        }
-    }
-
-    @EventHandler
-    fun regulateElderGuardian(event: ElderGuardianAppearanceEvent) {
-        if (!event.entity.world.name.startsWith("arena_session.")) return
-        event.isCancelled = true
-        event.affectedPlayer.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 5, 1))
-        event.affectedPlayer.damage(8.0)
-    }
+//    @EventHandler
+//    fun regulateElderGuardian(event: EntityPotionEffectEvent) {
+//        event.cause == EntityPotionEffectEvent.Cause.
+//
+//        if (!event.entity.world.name.startsWith("arena_session.")) return
+//        event.isCancelled = true
+//        event.affectedPlayer.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 5, 1))
+//        event.affectedPlayer.damage(8.0)
+//    }
 
     @EventHandler
     fun onEntranceMenuClicked(event: InventoryClickEvent) {
         if (event.whoClicked !is Player) return
         if (event.view.title == "§7§lArena Entrance") {
+            event.isCancelled = true
+
             val menu = EntranceMenu(event.whoClicked as Player)
-            val inverted = (event.click.isRightClick)
+            val inverted = event.isRightClick
 
             when(event.slot) {
                 19 -> menu.cycleOption(event.inventory, EntranceMenu.OptionCategory.MobType, inverted)
                 21 -> menu.cycleOption(event.inventory, EntranceMenu.OptionCategory.MobDifficulty, inverted)
                 23 -> menu.changeOptionValue(event.inventory, EntranceMenu.OptionCategory.PlayerCount, inverted)
                 25 -> menu.changeOptionValue(event.inventory, EntranceMenu.OptionCategory.SacrificeAmount, inverted)
-                40 -> menu.changeOptionValue(event.inventory, EntranceMenu.OptionCategory.SacrificeAmount, inverted)
+                40 -> menu.open()
             }
         }
+    }
 
+    @EventHandler
+    fun onMenuOpen(event: PlayerInteractAtEntityEvent) {
+        if (!event.rightClicked.scoreboardTags.contains("arena.interaction")) return
+        if (event.rightClicked.scoreboardTags.contains("arena.misc.game.entrance_menu")) {
+            val menu = EntranceMenu(event.player)
+            menu.open()
+        }
     }
 
 //    @EventHandler
@@ -261,7 +275,7 @@ object EventListener : Listener {
 //            }
 //    }
 
-    @EventHandler
+//    @EventHandler
 //    fun onQuestBoardOpen(event: PlayerInteractEntityEvent) {
 //        if (!event.rightClicked.scoreboardTags.contains("arena.interaction.quest_board")) return
 //

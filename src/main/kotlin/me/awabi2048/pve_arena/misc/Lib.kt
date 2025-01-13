@@ -28,12 +28,14 @@ object Lib {
     }
 
     fun getBar(length: Int, base: String): String {
+        var bar = base
+
         var i = 0
         while (i < length) {
-            base.plus("▬")
+            bar = "$bar▬"
             i++
         }
 
-        return base
+        return bar
     }
 }

@@ -1,6 +1,9 @@
 package me.awabi2048.pve_arena.item
 
+import me.awabi2048.pve_arena.Main.Companion.instance
+import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataType
 
 abstract class ItemManager {
     abstract fun get(itemKind: ArenaItem): ItemStack
@@ -19,9 +22,12 @@ abstract class ItemManager {
         SACRIFICE_ITEM_CHARGED,
         KEY_30,
         KEY_50,
-        KEY_70,
-        KEY_100,
         ENTER_COST_ITEM,
-        ENTER_COST_ITEM_RARE,
+        ENTER_COST_ITEM_RARE;
+    }
+
+    fun getFromItem(item: ItemStack): ArenaItem? {
+        val itemIdString = item.itemMeta?.persistentDataContainer?.get(NamespacedKey(instance, "id"), PersistentDataType.STRING)?: return null
+        return ItemManager.ArenaItem.valueOf(itemIdString)
     }
 }

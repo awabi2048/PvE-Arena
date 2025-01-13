@@ -24,7 +24,7 @@ object EnterCostItem: ItemManager() {
                 val item = ItemStack(Material.QUARTZ)
                 val itemMeta = item.itemMeta
 
-                itemMeta.setItemName("§3ソウルエッセンス")
+                itemMeta.setItemName("§3§lソウルエッセンス")
                 itemMeta.lore = listOf(
                     "§7アリーナゲートへのゲートを開きます。",
                 )
