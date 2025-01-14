@@ -1,21 +1,24 @@
 package me.awabi2048.pve_arena.menu_manager
 
+import me.awabi2048.pve_arena.Main.Companion.activeSession
 import me.awabi2048.pve_arena.Main.Companion.instance
+import me.awabi2048.pve_arena.Main.Companion.prefix
 import me.awabi2048.pve_arena.config.DataFile
+import me.awabi2048.pve_arena.game.NormalArena
 import me.awabi2048.pve_arena.game.WaveProcessingMode
+import me.awabi2048.pve_arena.item.EnterCostItem
 import me.awabi2048.pve_arena.item.ItemManager
 import me.awabi2048.pve_arena.item.ItemManager.ArenaItem.*
 import me.awabi2048.pve_arena.item.KeyItem
 import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.NamespacedKey
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
-import org.bukkit.persistence.PersistentDataType
+import org.checkerframework.checker.units.qual.C
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
@@ -42,7 +45,6 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
             else -> null
         }
         var currentOptionIndex = 0
-        var index = 0
 
         if (option == OptionCategory.MobType) {
             // get current state
@@ -72,7 +74,14 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
                 false -> currentOptionIndex + 1
                 true -> currentOptionIndex - 1
             }
-            index = max(min(indexCycled, 0), WaveProcessingMode.MobType.entries.size - 1)
+
+            var index = indexCycled
+
+            if (index >= WaveProcessingMode.MobDifficulty.entries.size) {
+                index = WaveProcessingMode.MobDifficulty.entries.size
+            } else if (index < 0) {
+                index = 0
+            }
 
             println("index:$index, cycled: $indexCycled, cur: $currentOption")
 
@@ -116,10 +125,28 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
                 false -> currentOptionIndex + 1
                 true -> currentOptionIndex - 1
             }
-            index = min(min(indexCycled, 0), WaveProcessingMode.MobDifficulty.entries.size - 1)
+//            index = max(min(indexCycled, 0), WaveProcessingMode.MobDifficulty.entries.size - 1)
+
+            var index = indexCycled
+
+            if (index >= WaveProcessingMode.MobDifficulty.entries.size) {
+                index = WaveProcessingMode.MobDifficulty.entries.size
+            } else if (index < 0) {
+                index = 0
+            }
+
+            println("index:$index, cycled: $indexCycled, cur: $currentOption")
 
             // replace
             menu.setItem(21, getDifficultyIcon(WaveProcessingMode.MobDifficulty.entries[index]))
+
+            val goIcon = getGoIcon(
+                getMobTypeFromIcon(menu.getItem(19)!!),
+                WaveProcessingMode.MobDifficulty.entries[index],
+                menu.getItem(23)!!.amount,
+                getSacrificeAmountFromIcon(menu.getItem(25)!!)
+            )
+            menu.setItem(40, goIcon)
         }
     }
 
@@ -137,28 +164,103 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
             }
 
             // change value
-            val changedValue = min(min(uncheckedValue, 1), DataFile.config.getInt("misc.game.player_max"))
+            var changedValue = uncheckedValue
+
+            if (changedValue >= DataFile.config.getInt("misc.game.player_max")) {
+                changedValue = DataFile.config.getInt("misc.game.player_max")
+            } else if (changedValue < 1) {
+                changedValue = 1
+            }
 
             // refresh
             menu.setItem(23, getPlayersIcon(changedValue))
+
+            val goIcon = getGoIcon(
+                getMobTypeFromIcon(menu.getItem(19)!!),
+                getDifficultyFromIcon(menu.getItem(21)!!),
+                changedValue,
+                getSacrificeAmountFromIcon(menu.getItem(25)!!)
+            )
+            menu.setItem(40, goIcon)
         }
         if (option == OptionCategory.SacrificeAmount) {
             // get current state
             uncheckedValue = when (inverted) {
-                true -> menu.getItem(25)!!.amount - 1
-                false -> menu.getItem(25)!!.amount + 1
+                true -> getSacrificeAmountFromIcon(menu.getItem(25)!!) - 1
+                false -> getSacrificeAmountFromIcon(menu.getItem(25)!!) + 1
             }
 
             // change value
-            val changedValue = max(min(uncheckedValue, 0), DataFile.config.getInt("misc.game.sacrifice_max"))
+            var changedValue = uncheckedValue
+
+            if (changedValue >= DataFile.config.getInt("misc.game.sacrifice_max")) {
+                changedValue = DataFile.config.getInt("misc.game.sacrifice_max")
+            } else if (changedValue < 0) {
+                changedValue = 0
+            }
 
             // refresh
             menu.setItem(25, getSacrificeIcon(changedValue))
+
+            val goIcon = getGoIcon(
+                getMobTypeFromIcon(menu.getItem(19)!!),
+                getDifficultyFromIcon(menu.getItem(21)!!),
+                menu.getItem(23)!!.amount,
+                changedValue
+            )
+            menu.setItem(40, goIcon)
         }
     }
 
-    fun openGate() {
+    fun openGate(menu: Inventory) {
+        // check cost
+        val enterCost = getFinalCost(menu)
 
+        var costItemCommon = 0
+        var costItemRare = 0
+
+        for (item in player.inventory) {
+            if (item?.itemMeta?.itemName != null) {
+                when (item.itemMeta.itemName) {
+                    EnterCostItem.get(ItemManager.ArenaItem.ENTER_COST_ITEM).itemMeta.itemName -> costItemCommon += 1
+                    EnterCostItem.get(ItemManager.ArenaItem.ENTER_COST_ITEM_RARE).itemMeta.itemName -> costItemRare += 1
+                }
+            }
+        }
+
+        if (!(enterCost[ItemManager.ArenaItem.ENTER_COST_ITEM]!! >= costItemCommon &&
+                    enterCost[ItemManager.ArenaItem.ENTER_COST_ITEM_RARE]!! >= costItemRare)
+        ) {
+
+            player.sendMessage("$prefix §c入場コストが不足しています。")
+            player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 0.5f)
+            player.playSound(player, Sound.UI_BUTTON_CLICK, 1.0f, 0.5f)
+
+            return
+        }
+
+        // start
+        val mobType = getMobTypeFromIcon(menu.getItem(19)!!)
+        val difficulty = getDifficultyFromIcon(menu.getItem(21)!!)
+        val playerCount = menu.getItem(23)!!.amount
+        val sacrifice = getSacrificeAmountFromIcon(menu.getItem(25)!!)
+
+        val session = NormalArena(player.uniqueId.toString(), setOf(player), mobType, difficulty, sacrifice)
+
+        activeSession += session
+        session.generate()
+
+        Bukkit.getScheduler().runTaskLater(
+            instance,
+            Runnable {
+                session.joinPlayer(player)
+                session.start()
+            },
+            40L
+        )
+
+
+        //
     }
 
     enum class OptionCategory {
@@ -248,12 +350,15 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
     }
 
     private fun getDiscount(): Double {
-        val keyItem = KeyItem.getFromItem(player.inventory.first { KeyItem.getFromItem(it) in KeyItem.set })
-        return when (keyItem) {
-            KEY_30 -> 0.3
-            KEY_50 -> 0.5
-            else -> 1.0
+        if (player.inventory.any { it != null && KeyItem.getFromItem(it) in KeyItem.set }) {
+            val keyItem = KeyItem.getFromItem(player.inventory.first { KeyItem.getFromItem(it) in KeyItem.set })
+            return when (keyItem) {
+                KEY_30 -> 0.3
+                KEY_50 -> 0.5
+                else -> 1.0
+            }
         }
+        return 1.0
     }
 
     private fun calcCostItemMap(rawCost: Int): Map<ItemManager.ArenaItem, Int> {
@@ -269,6 +374,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
         )
     }
 
+    // get state from ItemStack
     private fun getMobTypeFromIcon(icon: ItemStack): WaveProcessingMode.MobType {
         return WaveProcessingMode.MobType.entries.first {
             icon.type == Material.getMaterial(
@@ -296,7 +402,8 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
     private fun getSacrificeAmountFromIcon(icon: ItemStack): Int {
         val rawLore = icon.itemMeta!!.lore!![2]
         val amount =
-            rawLore.substringAfter("§d").removeSuffix(" 個").toIntOrNull() ?: throw IllegalArgumentException("")
+            rawLore.substringAfter("§d").removeSuffix(" 個").toIntOrNull()
+                ?: throw IllegalArgumentException("Invalid Icon item given.")
 
         return amount
     }
@@ -319,7 +426,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
             for (key in DataFile.mobType.getKeys(false)) {
                 val addValue =
                     if (key == mobType.toString().substringAfter("MobType.").lowercase()) {
-                        "§6» §6§l${DataFile.mobType.getString("$key.name").toString()} §6«"
+                        "§6» §b${DataFile.mobType.getString("$key.name").toString()} §6«"
                     } else {
                         "§7${DataFile.mobType.getString("$key.name").toString()}"
                     }
@@ -345,6 +452,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
         return item
     }
 
+    // get ItemStack from state
     private fun getDifficultyIcon(difficulty: WaveProcessingMode.MobDifficulty): ItemStack {
         fun getDifficultyIconMaterial(difficulty: WaveProcessingMode.MobDifficulty): Material {
             val iconString =
@@ -364,12 +472,13 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
                 "",
                 Lib.getBar(50, "§7")
             )
+
             for (key in DataFile.difficulty.getKeys(false)) {
                 val addValue =
                     if (key == difficulty.toString().substringAfter("MobDifficulty.").lowercase()) {
                         "§6» §6${DataFile.difficulty.getString("$key.name").toString()} §6«"
                     } else {
-                        "§7${DataFile.mobType.getString("$key.name").toString()}"
+                        "§7${DataFile.difficulty.getString("$key.name").toString().removeRange(0..1)}"
                     }
 
                 lore += addValue
@@ -440,7 +549,8 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
 
         // cost discount calculation
         if (player.inventory.any { it != null && KeyItem.getFromItem(it) in KeyItem.set }) {
-            val key = KeyItem.getFromItem(player.inventory.first { it != null &&  KeyItem.getFromItem(it) in KeyItem.set })
+            val key =
+                KeyItem.getFromItem(player.inventory.first { it != null && KeyItem.getFromItem(it) in KeyItem.set })
 
             val discount = when (key) {
                 KEY_30 -> 0.3
@@ -451,7 +561,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
             val trueRawCost = (rawCost * discount).roundToInt()
 
             // construct lore part
-            costDisplay.add(
+            if (calcCostItemMap(trueRawCost)[ENTER_COST_ITEM_RARE]!! >= 1) costDisplay.addFirst(
                 "§7- §3ソウルフラグメント §c§m×${calcCostItemMap(rawCost)[ENTER_COST_ITEM]} §7→ §e×${
                     calcCostItemMap(
                         trueRawCost
@@ -489,7 +599,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
             Lib.getBar(50, "§7"),
             "§7クリックして§cアリーナへのゲート§7を開きます。",
             Lib.getBar(50, "§7"),
-            "§d✵ コスト §7»"
+            "§6§l§b✵ コスト §7»"
         ) + costDisplay + listOf(
             Lib.getBar(50, "§7")
         )

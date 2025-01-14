@@ -125,9 +125,9 @@ interface WaveProcessingMode {
         val seed = (1..weightSum).random()
 
         var weightSumPreliminary = 0
-        var spawnMobId = ""
+        var spawnMobId = "none"
         for (key in spawnCandidate) {
-            if (seed in weightSumPreliminary..<(weightSumPreliminary + availableMobSection.getInt("$key.weight"))) {
+            if (seed in weightSumPreliminary + 1..<(weightSumPreliminary + availableMobSection.getInt("$key.weight"))) {
                 spawnMobId = key
                 break
             }
@@ -135,9 +135,8 @@ interface WaveProcessingMode {
         }
 
         // spawn
+        println("CANDIDATES: $spawnCandidate, SEED:$seed ,MOD ID:$spawnMobId")
         val mobData = DataFile.mobDefinition.getConfigurationSection(spawnMobId)!!
-
-        println("ENTITY TYPE: ${mobData.getString("entity_type")}, $mobData")
         val entityType = EntityType.valueOf(mobData.getString("entity_type") ?: "".uppercase())
 
         val mob = world.spawnEntity(spawnLocation, entityType) as LivingEntity

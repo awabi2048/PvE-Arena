@@ -17,6 +17,7 @@ import me.awabi2048.pve_arena.menu_manager.EntranceMenu
 import me.awabi2048.pve_arena.menu_manager.MenuManager
 import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.Bukkit
+import org.bukkit.Sound
 import org.bukkit.entity.*
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -181,7 +182,6 @@ object EventListener : Listener {
 
     @EventHandler
     fun regulateMobTarget(event: EntityTargetLivingEntityEvent) {
-        println("regulateMobTarget")
         if (event.entity.world.name.startsWith("arena_session.") && event.target !is Player) {
             event.isCancelled = true
             event.target = event.entity.world.players.random()
@@ -214,18 +214,55 @@ object EventListener : Listener {
     @EventHandler
     fun onEntranceMenuClicked(event: InventoryClickEvent) {
         if (event.whoClicked !is Player) return
-        if (event.view.title == "§7§lArena Entrance") {
+        if (event.clickedInventory?.any {it != null && it.itemMeta.itemName == "§cゲートを開く"} == true) {
             event.isCancelled = true
+            if (event.whoClicked.scoreboardTags.contains("arena.misc.in_click_interval")) return
 
             val menu = EntranceMenu(event.whoClicked as Player)
             val inverted = event.isRightClick
+            val player = event.whoClicked as Player
 
-            when(event.slot) {
-                19 -> menu.cycleOption(event.inventory, EntranceMenu.OptionCategory.MobType, inverted)
-                21 -> menu.cycleOption(event.inventory, EntranceMenu.OptionCategory.MobDifficulty, inverted)
-                23 -> menu.changeOptionValue(event.inventory, EntranceMenu.OptionCategory.PlayerCount, inverted)
-                25 -> menu.changeOptionValue(event.inventory, EntranceMenu.OptionCategory.SacrificeAmount, inverted)
-                40 -> menu.open()
+            if (event.slot in listOf(19, 21, 23, 25, 40)) {
+                player.playSound(player, Sound.UI_BUTTON_CLICK, 1.0f, 2.0f)
+                player.sendMessage("slot: ${event.slot}, inverted: $inverted")
+            }
+
+            // on start
+            if (event.slot == 40) {
+                player.closeInventory()
+                player.scoreboardTags.add("arena.misc.in_click_interval")
+
+                player.sendMessage("$prefix §7開始処理を実行中です。3秒程度掛かります。")
+
+                Bukkit.getScheduler().runTaskLater(
+                    instance,
+                    Runnable {
+                        player.scoreboardTags.remove("arena.misc.in_click_interval")
+                    },
+                    100L
+                )
+
+                menu.openGate(event.clickedInventory!!)
+
+            } else {
+
+                // precession
+                when (event.slot) {
+                    19 -> menu.cycleOption(event.inventory, EntranceMenu.OptionCategory.MobType, inverted)
+                    21 -> menu.cycleOption(event.inventory, EntranceMenu.OptionCategory.MobDifficulty, inverted)
+                    23 -> menu.changeOptionValue(event.inventory, EntranceMenu.OptionCategory.PlayerCount, inverted)
+                    25 -> menu.changeOptionValue(event.inventory, EntranceMenu.OptionCategory.SacrificeAmount, inverted)
+                }
+
+                //
+                player.scoreboardTags.add("arena.misc.in_click_interval")
+                Bukkit.getScheduler().runTaskLater(
+                    instance,
+                    Runnable {
+                        player.scoreboardTags.remove("arena.misc.in_click_interval")
+                    },
+                    3L
+                )
             }
         }
     }
@@ -233,7 +270,9 @@ object EventListener : Listener {
     @EventHandler
     fun onMenuOpen(event: PlayerInteractAtEntityEvent) {
         if (!event.rightClicked.scoreboardTags.contains("arena.interaction")) return
-        if (event.rightClicked.scoreboardTags.contains("arena.misc.game.entrance_menu")) {
+        event.isCancelled = true
+
+        if (event.rightClicked.scoreboardTags.contains("arena.misc.game.entrance_menu") && !event.player.scoreboardTags.contains("arena.misc.in_click_interval")) {
             val menu = EntranceMenu(event.player)
             menu.open()
         }
@@ -282,3 +321,4 @@ object EventListener : Listener {
 //        val menu = MenuManager(event.player, MenuManager.MenuType.Quest())
 //    }
 }
+3

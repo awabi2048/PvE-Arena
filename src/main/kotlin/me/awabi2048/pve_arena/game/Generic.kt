@@ -26,22 +26,24 @@ abstract class Generic(val uuid: String, val players: Set<Player>, var status: S
         val time = Lib.tickToClock(timeElapsed)
 
         // scoreboard
-        getSessionWorld()!!.players.forEach {
-            val displayScoreboard = Main.displayScoreboardMap[it]!!
+        if (getSessionWorld() != null) {
+            getSessionWorld()!!.players.forEach {
+                val displayScoreboard = Main.displayScoreboardMap[it]!!
 
-            displayScoreboard.scoreboard!!.resetScores("§fTime §7$timeBefore")
-            if (timeElapsed == 1) displayScoreboard.scoreboard!!.resetScores("§fTime §700:00.00")
+                displayScoreboard.scoreboard!!.resetScores("§fTime §7$timeBefore")
+                if (timeElapsed == 1) displayScoreboard.scoreboard!!.resetScores("§fTime §700:00.00")
 
-            displayScoreboard.getScore("§fTime §7$time").score = 3
+                displayScoreboard.getScore("§fTime §7$time").score = 3
+            }
+
+            Bukkit.getScheduler().runTaskLater(
+                instance,
+                Runnable {
+                    timeTracking()
+                },
+                1L
+            )
         }
-
-        Bukkit.getScheduler().runTaskLater(
-            Main.instance,
-            Runnable {
-                timeTracking()
-            },
-            1L
-        )
     }
 
     fun stop() {
@@ -50,12 +52,6 @@ abstract class Generic(val uuid: String, val players: Set<Player>, var status: S
             it.teleport(lobbyOriginLocation)
             it.playSound(it, Sound.ENTITY_PLAYER_TELEPORT, 1.0f, 2.0f)
         }
-
-        // remove session world
-        val sessionWorld = getSessionWorld()!!
-
-        Bukkit.unloadWorld(sessionWorld, true)
-        FileUtils.deleteDirectory(sessionWorld.name)
     }
 
     fun afkCheck() {
