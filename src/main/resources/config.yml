@@ -1,5 +1,11 @@
 profession_exp_multiplier: 1.4
 
+# lobby
+lobby_origin_location_x: -70
+lobby_origin_location_y: 64
+lobby_origin_location_z: -219
+lobby_dimension: "world"
+
 mob_stats:
   modifiers:
     # playerCountModifier = 1.0 + (({PlayerCount} - 1) * {per_player_count})
@@ -13,11 +19,22 @@ mob_stats:
 
 misc:
   game:
+    # クイックアリーナ: 全ウェーブ数
     quick_arena_wave: 10
+
+    # クイックアリーナ: ウェーブ間インターバル（秒）
     quick_arena_time: 45
 
+    # 入場時の最大数
     player_max: 6
     sacrifice_max: 4
+
+    # 入場コストのプレイヤーによる倍率: {player_count} ^ {cost_increase_per_player_pow}
     cost_increase_per_player_pow: 0.613 # = log_6(3)
 
+    # タイムアウトまでの時間（秒）
+    second_until_timeout: 300
+
+    # モブ召喚の間隔
+    mob_summon_interval: 10
 

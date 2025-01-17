@@ -1,6 +1,5 @@
 package me.awabi2048.pve_arena.game
 
-import io.papermc.paper.scoreboard.numbers.NumberFormat
 import me.awabi2048.pve_arena.Main
 import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.Main.Companion.prefix
@@ -23,7 +22,7 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
     override fun generate() {
         status = Status.WaitingGeneration
 
-        val launcher = Launcher(Launcher.StageType.QUICK)
+        val launcher = Launcher(Launcher.Type.QUICK)
         launcher.prepareWorld(uuid)
         launcher.prepareStructure(uuid)
 
@@ -143,6 +142,8 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
     }
 
     override fun rewardDistribute() {
+        // TODO: 1日1回のスロット的なのを足す
+
         val ticketCount = 5
         val ticketType = ItemManager.ArenaItem.TICKET_EXTREME
         val point = 1
@@ -174,7 +175,7 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
         }
     }
 
-    override fun endProcession() {
+    override fun endProcession(clearTime: Int) {
         // announce
         val players: MutableList<String> = mutableListOf()
         getSessionWorld()!!.players.forEach {
@@ -183,7 +184,7 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
 
         Bukkit.getServer().onlinePlayers.filter { it.hasPermission("pve_arena.main.receive_announce") }.forEach {
             it.sendMessage(
-                "$prefix §e${players.joinToString()}§7さんが§eクイックアリーナ§7をクリアしました！ §7[§e${
+                "$prefix §e${players.joinToString()} §7さんが§eクイックアリーナ§7をクリアしました！ §7[§e${
                     Lib.tickToClock(
                         (status as Status.InGame).timeElapsed
                     )

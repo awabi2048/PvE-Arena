@@ -12,6 +12,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Sound
 import org.bukkit.entity.Player
+import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scoreboard.Criteria
 import org.bukkit.scoreboard.DisplaySlot
 import org.bukkit.scoreboard.Objective
@@ -31,8 +32,17 @@ class NormalArena(
     override fun generate() {
         status = Status.WaitingGeneration
 
-        val launcher = Launcher(Launcher.StageType.NORMAL)
-        launcher.prepareWorld(uuid)
+        val launcher = Launcher(Launcher.Type.NORMAL)
+
+        if (Bukkit.getWorlds().any { it.name == "arena_session.$uuid" }) {
+            val sessionWorld = getSessionWorld()!!
+            sessionWorld.entities.forEach { it.remove() }
+            println("exist")
+        } else {
+            launcher.prepareWorld(uuid)
+            println("or not")
+        }
+
         launcher.prepareStructure(uuid)
 
         println("$prefix Started arena session for uuid: ${uuid}, type: NORMAL, STATUS: $status")
@@ -57,7 +67,7 @@ class NormalArena(
         Bukkit.getScheduler().runTaskLater(
             instance,
             Runnable {
-                waveProcession()
+                if (getSessionWorld()!!.players.isNotEmpty()) waveProcession()
             },
             400L
         )
@@ -75,7 +85,7 @@ class NormalArena(
 
         // announce
         player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.2f)
-        player.sendMessage("$prefix §7アリーナに入場しました。")
+        player.sendMessage("$prefix §eアリーナ§7に入場しました。")
 
         // scoreboard
         val displayScoreboard = setupScoreboard(player)
@@ -90,6 +100,7 @@ class NormalArena(
         val wave = (status as Status.InGame).wave
 
         getSessionWorld()!!.players.forEach {
+            // 開始時演出
             it.playSound(it, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 0.5f)
             if (wave == lastWave) {
                 it.sendTitle("", "§7- §6§lLast Wave §7-", 5, 40, 5)
@@ -103,24 +114,22 @@ class NormalArena(
                 displayScoreboard.scoreboard!!.resetScores("§fWave §7---")
                 displayScoreboard.scoreboard!!.resetScores("§fMobs §7---")
             } else {
+                for (count in 0..summonCountCalc(wave - 1)) {
+                    displayScoreboard.scoreboard!!.resetScores("§fMobs §c${count}§7/${summonCountCalc(wave - 1)}")
+                }
                 displayScoreboard.scoreboard!!.resetScores("§fWave §6${wave - 1}§7/$lastWave")
-                displayScoreboard.scoreboard!!.resetScores("§fMobs §c0§7/${summonCountCalc(wave - 1)}")
             }
 
             displayScoreboard.getScore("§fWave §6${wave}§7/$lastWave").score = 2
             displayScoreboard.getScore("§fMobs §c${summonCountCalc(wave)}§7/${summonCountCalc(wave)}").score = 1
         }
 
+        // spawn start
         startSpawnSession()
 
         if (wave == 1) {
-            Bukkit.getScheduler().runTaskLater(
-                instance,
-                Runnable {
-                    timeTracking()
-                },
-                5L
-            )
+            // タイム計測開始
+            timeTracking()
         }
     }
 
@@ -147,7 +156,7 @@ class NormalArena(
             (baseProfessionExp * difficultyMultiplier * Reward.RewardMultiplier.professionExp * sacrificeMultiplier).roundToInt()
 
         // distribute
-        val ticketItem = when(difficulty) {
+        val ticketItem = when (difficulty) {
             EASY -> ItemManager.ArenaItem.TICKET_EASY
             NORMAL -> ItemManager.ArenaItem.TICKET_NORMAL
             HARD -> ItemManager.ArenaItem.TICKET_HARD
@@ -184,12 +193,12 @@ class NormalArena(
                         randomSpawn(getSessionWorld()!!, (status as Status.InGame).wave, mobType, difficulty)
                     }
                 },
-                (10 * i).toLong()
+                (DataFile.config.getInt("misc.game.mob_summon_interval") * i).toLong()
             )
         }
     }
 
-    override fun endProcession() {
+    override fun endProcession(clearTime: Int) {
         val difficultySection = DataFile.difficulty.getConfigurationSection(mobDifficultyToString(difficulty))!!
         val mobTypeSection = DataFile.mobType.getConfigurationSection(mobTypeToString(mobType))!!
 
@@ -211,11 +220,7 @@ class NormalArena(
 
         Bukkit.getServer().onlinePlayers.filter { it.hasPermission("pve_arena.main.receive_announce") }.forEach {
             it.sendMessage(
-                "$prefix §e${players.joinToString()}§7さんが$arenaName§7をクリアしました！ §7[§e${
-                    Lib.tickToClock(
-                        (status as Status.InGame).timeElapsed
-                    )
-                }§7]"
+                "$prefix §e${players.joinToString()} §7さんが$arenaName§7をクリアしました！ §7[§e${Lib.tickToClock(clearTime)}§7]"
             )
         }
 

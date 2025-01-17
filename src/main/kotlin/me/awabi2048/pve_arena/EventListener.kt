@@ -65,7 +65,7 @@ object EventListener : Listener {
             if (event.slot !in 9..35) return
             if (!event.isShiftClick && (event.click.isMouseClick && !event.click.isLeftClick && !event.click.isRightClick)) return
             val uuid = event.currentItem?.itemMeta?.itemName ?: return
-            val session = Lib.lookForSession(uuid)
+            val session = Lib.lookForSession(uuid)!!
             session.stop()
             event.whoClicked.sendMessage("$prefix §eUUID: $uuid のセッションを強制終了しました。")
         }
@@ -99,7 +99,8 @@ object EventListener : Listener {
     fun onPlayerKillInArena(event: EntityDeathEvent) {
         if (event.entity.world.name.startsWith("arena_session") && event.entity.killer is Player) {
             val uuid = event.entity.world.name.substringAfter("arena_session.")
-            val session = Lib.lookForSession(uuid)
+            val session = Lib.lookForSession(uuid)!!
+            if (session.status !is Generic.Status.InGame) return
 
             if (event.entity.world.entities.none { it.scoreboardTags.contains("arena.mob") } && session is WaveProcessingMode) {
                 val lastWave = when (session) {
@@ -115,10 +116,13 @@ object EventListener : Listener {
                     instance,
                     Runnable {
                         session.finishWave(
-                            world = event.entity.world,
-                            wave = (session.status as Generic.Status.InGame).wave,
-                            lastWave = lastWave
+                            event.entity.world,
+                            (session.status as Generic.Status.InGame).wave,
+                            lastWave,
+                            (session.status as Generic.Status.InGame).timeElapsed
                         )
+
+                        if ((session.status as Generic.Status.InGame).wave == lastWave) Lib.lookForSession(uuid)!!.status = Generic.Status.WaitingFinish
                     },
                     40L
                 )
@@ -162,10 +166,10 @@ object EventListener : Listener {
 
         if (event.player.world.name.startsWith("arena_session.")) {
             val uuid = event.player.world.name.substringAfter("arena_session.")
-            val session = Lib.lookForSession(uuid)
+            val session = Lib.lookForSession(uuid)!!
             if (!session.players.contains(event.player)) {
                 event.player.teleport(lobbyOriginLocation)
-                event.player.sendMessage("$prefix §c§lWARNING: §cあなたは入場を許可されていません。")
+                event.player.sendMessage("$prefix §c§lWARNING §cあなたは入場を許可されていません。")
             }
         }
 
@@ -174,7 +178,7 @@ object EventListener : Listener {
                 println("SESSION SIZE: ${activeSession.size}")
 
                 val uuid = world.name.substringAfter("arena_session.")
-                val session = Lib.lookForSession(uuid)
+                val session = Lib.lookForSession(uuid)!!
                 session.stop()
             }
         }
@@ -224,7 +228,6 @@ object EventListener : Listener {
 
             if (event.slot in listOf(19, 21, 23, 25, 40)) {
                 player.playSound(player, Sound.UI_BUTTON_CLICK, 1.0f, 2.0f)
-                player.sendMessage("slot: ${event.slot}, inverted: $inverted")
             }
 
             // on start
@@ -232,7 +235,7 @@ object EventListener : Listener {
                 player.closeInventory()
                 player.scoreboardTags.add("arena.misc.in_click_interval")
 
-                player.sendMessage("$prefix §7開始処理を実行中です。3秒程度掛かります。")
+                player.sendMessage("$prefix §7ゲートを開いています....")
 
                 Bukkit.getScheduler().runTaskLater(
                     instance,
@@ -321,4 +324,3 @@ object EventListener : Listener {
 //        val menu = MenuManager(event.player, MenuManager.MenuType.Quest())
 //    }
 }
-3

@@ -11,7 +11,6 @@ import me.awabi2048.pve_arena.game.QuickArena
 import me.awabi2048.pve_arena.game.WaveProcessingMode
 import me.awabi2048.pve_arena.misc.Lib
 import me.awabi2048.pve_arena.misc.sendError
-import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -33,14 +32,14 @@ class SubCommand(private val sender: Player, private val args: Array<out String>
 
         fun startSession() {
             try {
-                sender.sendMessage("$prefix §7セッションの開始処理を行っています...")
+                sender.sendMessage("$prefix §開始処理を実行中です。通常§n2秒程度§7掛かります。")
 
-                val stageType = Launcher.StageType.valueOf(args[1])
+                val type = Launcher.Type.valueOf(args[1])
 
                 val uuid = sender.uniqueId.toString()
                 val players = setOf(sender)
 
-                if (stageType == Launcher.StageType.NORMAL) {
+                if (type == Launcher.Type.NORMAL) {
                     val mobType = WaveProcessingMode.MobType.valueOf(args[2])
                     val difficulty = WaveProcessingMode.MobDifficulty.valueOf(args[3])
                     val sacrifice = args[4].toInt()
@@ -61,7 +60,7 @@ class SubCommand(private val sender: Player, private val args: Array<out String>
                     )
                 }
 
-                if (stageType == Launcher.StageType.QUICK) {
+                if (type == Launcher.Type.QUICK) {
 
                     val session = QuickArena(uuid, players)
 

@@ -5,18 +5,22 @@ import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.Main.Companion.prefix
 import me.awabi2048.pve_arena.Main.Companion.spawnSessionKillCount
 import me.awabi2048.pve_arena.config.DataFile
+import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.*
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Monster
+import org.bukkit.entity.Skeleton
+import org.bukkit.entity.Zombie
 import org.bukkit.inventory.ItemStack
+import org.bukkit.scheduler.BukkitRunnable
 import kotlin.math.pow
 
 interface WaveProcessingMode {
     fun waveProcession()
 
-    fun finishWave(world: World, wave: Int, lastWave: Int) {
+    fun finishWave(world: World, wave: Int, lastWave: Int, clearTime: Int) {
         world.players.forEach {
             if (wave != lastWave) {
                 it.sendMessage("$prefix §6Wave $wave §7が終了しました！§e10秒後§7に次のウェーブが開始します。")
@@ -49,7 +53,7 @@ interface WaveProcessingMode {
                 Bukkit.getScheduler().runTaskLater(
                     instance,
                     Runnable {
-                        endProcession()
+                        endProcession(clearTime)
                     },
                     200L
                 )
@@ -59,7 +63,7 @@ interface WaveProcessingMode {
 
     fun rewardDistribute()
 
-    fun endProcession()
+    fun endProcession(clearTime: Int)
 
     fun startSpawnSession()
 
@@ -126,8 +130,9 @@ interface WaveProcessingMode {
 
         var weightSumPreliminary = 0
         var spawnMobId = "none"
+
         for (key in spawnCandidate) {
-            if (seed in weightSumPreliminary + 1..<(weightSumPreliminary + availableMobSection.getInt("$key.weight"))) {
+            if (seed in weightSumPreliminary + 1..(weightSumPreliminary + availableMobSection.getInt("$key.weight"))) {
                 spawnMobId = key
                 break
             }
@@ -135,7 +140,8 @@ interface WaveProcessingMode {
         }
 
         // spawn
-        println("CANDIDATES: $spawnCandidate, SEED:$seed ,MOD ID:$spawnMobId")
+        println("CANDIDATES: $spawnCandidate, SEED:$seed ,MOB ID:$spawnMobId")
+
         val mobData = DataFile.mobDefinition.getConfigurationSection(spawnMobId)!!
         val entityType = EntityType.valueOf(mobData.getString("entity_type") ?: "".uppercase())
 
@@ -190,6 +196,8 @@ interface WaveProcessingMode {
         // 識別タグ
         mob.scoreboardTags.add("arena.mob")
 
+        if (mob is Zombie) mob.isBaby = false
+
         mob.getAttribute(Attribute.GENERIC_FOLLOW_RANGE)!!.baseValue = 64.0
         (mob as Monster).target = world.players.random()
 
@@ -205,30 +213,28 @@ interface WaveProcessingMode {
         return mobType.toString().substringAfter("MobType.").lowercase()
     }
 
-    fun startCountdown(timeRemaining: Int, world: World) {
-        if (timeRemaining == 0) return
+    fun startCountdown(time: Int, world: World) {
+        var timeRemaining = time
 
-        world.players.forEach {
-            if (timeRemaining in 1..5) {
-                it.playSound(it, Sound.UI_BUTTON_CLICK, 1.0f, 2.0f)
-//                it.sendTitlePart(TitlePart.SUBTITLE, Component.text("§7- §e$timeRemaining §7-")) // NoClassDefFoundException
-                it.sendTitle("", "§7- §e$timeRemaining §7-", 5, 20, 5)
+        object: BukkitRunnable() {
+            override fun run() {
+                world.players.forEach {
+                    if (timeRemaining in 1..5) {
+                        it.playSound(it, Sound.UI_BUTTON_CLICK, 1.0f, 2.0f)
+                        it.sendTitle("", "§7- §e$timeRemaining §7-", 5, 20, 5)
+                    }
+
+                    if (timeRemaining in listOf(5, 10, 15) || timeRemaining % 15 == 0) {
+                        it.sendMessage("$prefix §7開始まで残り§e§n${timeRemaining}秒§7です。")
+                        it.sendTitle("", "§7- §e$timeRemaining §7-", 5, 20, 5)
+                        it.playSound(it, Sound.UI_BUTTON_CLICK, 1.0f, 2.0f)
+                    }
+                }
+
+                timeRemaining -= 1
+                if (timeRemaining == 0) cancel()
             }
-
-            if (timeRemaining in listOf(5, 10, 15)) {
-                it.sendMessage("$prefix §7開始まで残り§e§n${timeRemaining}秒§7です。")
-                it.sendTitle("", "§7- §e$timeRemaining §7-", 5, 20, 5)
-                it.playSound(it, Sound.UI_BUTTON_CLICK, 1.0f, 2.0f)
-            }
-        }
-
-        Bukkit.getScheduler().runTaskLater(
-            Main.instance,
-            Runnable {
-                startCountdown(timeRemaining - 1, world)
-            },
-            20
-        )
+        }.runTaskTimer(instance, 0, 20)
     }
 
     enum class MobType {

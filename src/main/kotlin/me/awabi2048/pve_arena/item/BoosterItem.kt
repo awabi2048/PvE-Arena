@@ -46,11 +46,11 @@ object BoosterItem: ItemManager() {
                 itemMeta.lore = listOf(
                     "§b30分間§7、獲得するアリーナ報酬を§a30%§7ブーストします！",
                     "§eサーバー全体§7に効果があります。§6右クリックで使用§7します。",
-                    Lib.getBar(50, "§8"),
+                    Lib.getBar(40, "§8"),
                     "§7効果を受ける報酬 »",
                     "§7- アリーナチケット",
                     "§7- アリーナポイント",
-                    Lib.getBar(50, "§8"),
+                    Lib.getBar(40, "§8"),
                 )
                 itemMeta.setMaxStackSize(1)
                 itemMeta.setEnchantmentGlintOverride(false)
@@ -66,11 +66,11 @@ object BoosterItem: ItemManager() {
                 itemMeta.lore = listOf(
                     "§b30分間§7、獲得するアリーナ報酬を§a§l50%§7ブーストします！",
                     "§eサーバー全体§7に効果があります。§6右クリックで使用§7します。",
-                    Lib.getBar(50, "§8"),
+                    Lib.getBar(40, "§8"),
                     "§7効果を受ける報酬 »",
                     "§7- アリーナチケット",
                     "§7- アリーナポイント",
-                    Lib.getBar(50, "§8"),
+                    Lib.getBar(40, "§8"),
                 )
                 itemMeta.setMaxStackSize(1)
                 itemMeta.setEnchantmentGlintOverride(true)

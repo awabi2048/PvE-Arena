@@ -1,7 +1,7 @@
 package me.awabi2048.pve_arena.game
 
 import me.awabi2048.pve_arena.Main
-import me.awabi2048.pve_arena.game.Launcher.StageType.*
+import me.awabi2048.pve_arena.game.Launcher.Type.*
 import org.bukkit.*
 import org.bukkit.block.structure.Mirror
 import org.bukkit.block.structure.StructureRotation
@@ -10,7 +10,7 @@ import java.io.File
 import java.util.*
 import javax.annotation.Nonnull
 
-class Launcher(private val stageType: StageType) {
+class Launcher(private val type: Type) {
     fun prepareWorld(uuid: String) {
 
         val sessionWorldCreator = WorldCreator("arena_session.$uuid")
@@ -36,7 +36,6 @@ class Launcher(private val stageType: StageType) {
 
 //        when (stageType) {
 //            NORMAL -> TODO()
-//            BOSS -> TODO()
 //            QUICK -> TODO()
 //        }
     }
@@ -55,9 +54,10 @@ class Launcher(private val stageType: StageType) {
     }
 
     fun prepareStructure(uuid: String) {
-        val fileName = when(stageType) {
+        val fileName = when(type) {
             NORMAL -> "normal"
             QUICK -> "normal"
+            BOSS_LOBBY -> "boss_lobby"
         }
 
         val structureManager = Bukkit.getStructureManager()
@@ -79,8 +79,9 @@ class Launcher(private val stageType: StageType) {
         )
     }
 
-    enum class StageType {
+    enum class Type {
         NORMAL,
-        QUICK;
+        QUICK,
+        BOSS_LOBBY;
     }
 }

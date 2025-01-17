@@ -24,7 +24,7 @@ class Main : JavaPlugin() {
         val displayScoreboardMap: MutableMap<Player, Objective> = mutableMapOf()
 
         // location
-        val lobbyOriginLocation: Location = Location(Bukkit.getWorld("world"), -110.0, 64.0, -223.0)
+        lateinit var lobbyOriginLocation: Location
 //        val lobbyOriginLocation: Location = Location(Bukkit.getWorld("arena"), 0.5, 0.25, 0.5)
 
         lateinit var instance: JavaPlugin
@@ -33,9 +33,15 @@ class Main : JavaPlugin() {
     override fun onEnable() {
         instance = this
 
-        // Plugin startup logic
         DataFile.copy()
         DataFile.loadAll()
+
+        lobbyOriginLocation = Location(
+            Bukkit.getWorld(DataFile.config.getString("lobby_dimension") ?: "arena"),
+            DataFile.config.getInt("lobby_location_x").toDouble() + 0.5,
+            DataFile.config.getInt("lobby_location_y").toDouble(),
+            DataFile.config.getInt("lobby_location_z").toDouble() + 0.5,
+        )
 
         getCommand("arena")?.setExecutor(MainCommand)
 
@@ -47,11 +53,14 @@ class Main : JavaPlugin() {
     override fun onDisable() {
         // Plugin shutdown logic
         // remove all session data
-        for (sessionWorld in Bukkit.getWorlds().filter{it.name.startsWith("arena_session.")}) {
+        for (sessionWorld in Bukkit.getWorlds().filter { it.name.startsWith("arena_session.") }) {
             sessionWorld.players.forEach {
                 it.teleport(lobbyOriginLocation)
+                val scoreboard = displayScoreboardMap[it]!!
+                scoreboard.unregister()
             }
-            Bukkit.unloadWorld(sessionWorld, false)
+
+            Bukkit.unloadWorld(sessionWorld, true)
             FileUtils.deleteDirectory(sessionWorld.name)
         }
     }

@@ -418,10 +418,10 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
 
         fun getMobTypeLore(mobType: WaveProcessingMode.MobType): List<String> {
             val lore = mutableListOf(
-                Lib.getBar(50, "§7"),
+                Lib.getBar(40, "§7"),
                 "§f左クリック§7: §a次へ, §f右クリック§7: §c前へ",
                 "",
-                Lib.getBar(50, "§7")
+                Lib.getBar(40, "§7")
             )
             for (key in DataFile.mobType.getKeys(false)) {
                 val addValue =
@@ -434,7 +434,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
                 lore += addValue
             }
 
-            lore += Lib.getBar(50, "§7")
+            lore += Lib.getBar(40, "§7")
 
             return lore
         }
@@ -467,10 +467,10 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
 
         fun getDifficultyLore(difficulty: WaveProcessingMode.MobDifficulty): List<String> {
             val lore = mutableListOf(
-                Lib.getBar(50, "§7"),
+                Lib.getBar(40, "§7"),
                 "§f左クリック§7: §a次へ, §f右クリック§7: §c前へ",
                 "",
-                Lib.getBar(50, "§7")
+                Lib.getBar(40, "§7")
             )
 
             for (key in DataFile.difficulty.getKeys(false)) {
@@ -484,7 +484,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
                 lore += addValue
             }
 
-            lore += Lib.getBar(50, "§7")
+            lore += Lib.getBar(40, "§7")
 
             return lore
         }
@@ -508,10 +508,10 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
 
         itemMeta.setItemName("§aプレイ人数")
         itemMeta.lore = listOf(
-            Lib.getBar(50, "§7"),
+            Lib.getBar(40, "§7"),
             "§7プレイする人数を設定します。",
             "§7現在の設定§7: §6${playerCount} 人",
-            Lib.getBar(50, "§7"),
+            Lib.getBar(40, "§7"),
         )
 
         item.itemMeta = itemMeta
@@ -524,10 +524,10 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
 
         itemMeta.setItemName("§d捧げ物")
         itemMeta.lore = listOf(
-            Lib.getBar(50, "§7"),
+            Lib.getBar(40, "§7"),
             "§7§o何を捧げる？",
             "§e現在の設定§7: §d${sacrificeAmount} 個",
-            Lib.getBar(50, "§7"),
+            Lib.getBar(40, "§7"),
         )
 
         if (sacrificeAmount >= 1) itemMeta.setEnchantmentGlintOverride(true)
@@ -596,12 +596,12 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
         val goIconMeta = goIcon.itemMeta
         goIconMeta.setItemName("§cゲートを開く")
         goIconMeta.lore = listOf(
-            Lib.getBar(50, "§7"),
+            Lib.getBar(40, "§7"),
             "§7クリックして§cアリーナへのゲート§7を開きます。",
-            Lib.getBar(50, "§7"),
-            "§6§l§b✵ コスト §7»"
+            Lib.getBar(40, "§7"),
+            "§6§l§b✵ §lコスト §7»"
         ) + costDisplay + listOf(
-            Lib.getBar(50, "§7")
+            Lib.getBar(40, "§7")
         )
         goIconMeta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
         goIcon.itemMeta = goIconMeta

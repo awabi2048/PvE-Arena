@@ -34,7 +34,7 @@ object DataFile {
 
     fun copy() {
         for (resource in resourceSet) {
-            println("checking: ${File(instance.dataFolder,File.separator + resource.replace("/", File.separator)).path}, exists: ${File(instance.dataFolder,File.separator + resource.replace("/", File.separator)).exists()}")
+//            println("checking: ${File(instance.dataFolder,File.separator + resource.replace("/", File.separator)).path}, exists: ${File(instance.dataFolder,File.separator + resource.replace("/", File.separator)).exists()}")
 
             if (!File(instance.dataFolder,File.separator + resource.replace("/", File.separator)).exists()) {
                 instance.saveResource(resource.replace("/", File.separator), false)

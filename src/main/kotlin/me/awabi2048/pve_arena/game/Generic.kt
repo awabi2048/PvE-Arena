@@ -1,12 +1,15 @@
 package me.awabi2048.pve_arena.game
 
 import me.awabi2048.pve_arena.Main
+import me.awabi2048.pve_arena.Main.Companion.activeSession
 import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.Main.Companion.lobbyOriginLocation
 import me.awabi2048.pve_arena.Main.Companion.prefix
+import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.*
 import org.bukkit.entity.Player
+import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scoreboard.Objective
 import org.codehaus.plexus.util.FileUtils
 
@@ -19,31 +22,30 @@ abstract class Generic(val uuid: String, val players: Set<Player>, var status: S
     }
 
     fun timeTracking() {
-        (status as Status.InGame).timeElapsed += 1
-        val timeElapsed = (status as Status.InGame).timeElapsed
+        object : BukkitRunnable() {
+            override fun run() {
+                if (Lib.lookForSession(uuid)?.status is Status.WaitingFinish) {
+                    cancel()
+                } else {
+                    // タイム加算
+                    (status as Status.InGame).timeElapsed += 1
+                    val timeElapsed = (status as Status.InGame).timeElapsed
 
-        val timeBefore = Lib.tickToClock(timeElapsed - 1)
-        val time = Lib.tickToClock(timeElapsed)
+                    val timeBefore = Lib.tickToClock(timeElapsed - 1)
+                    val time = Lib.tickToClock(timeElapsed)
 
-        // scoreboard
-        if (getSessionWorld() != null) {
-            getSessionWorld()!!.players.forEach {
-                val displayScoreboard = Main.displayScoreboardMap[it]!!
+                    // スコアボード表示再設定
+                    getSessionWorld()!!.players.forEach {
+                        val displayScoreboard = Main.displayScoreboardMap[it]!!
 
-                displayScoreboard.scoreboard!!.resetScores("§fTime §7$timeBefore")
-                if (timeElapsed == 1) displayScoreboard.scoreboard!!.resetScores("§fTime §700:00.00")
+                        displayScoreboard.scoreboard!!.resetScores("§fTime §7$timeBefore")
+                        if (timeElapsed == 1) displayScoreboard.scoreboard!!.resetScores("§fTime §700:00.00")
 
-                displayScoreboard.getScore("§fTime §7$time").score = 3
+                        displayScoreboard.getScore("§fTime §7$time").score = 3
+                    }
+                }
             }
-
-            Bukkit.getScheduler().runTaskLater(
-                instance,
-                Runnable {
-                    timeTracking()
-                },
-                1L
-            )
-        }
+        }.runTaskTimer(instance, 0, 1)
     }
 
     fun stop() {
@@ -52,31 +54,37 @@ abstract class Generic(val uuid: String, val players: Set<Player>, var status: S
             it.teleport(lobbyOriginLocation)
             it.playSound(it, Sound.ENTITY_PLAYER_TELEPORT, 1.0f, 2.0f)
         }
+
+//        val worldFile = getSessionWorld()!!.worldFolder
+//        Bukkit.unloadWorld(getSessionWorld()!!, false) // ← セーブすると大遅延が発生
+        getSessionWorld()!!.entities.forEach {it.remove()}
+        activeSession.remove(this)
     }
 
     fun afkCheck() {
-        if (players.filter { it.noActionTicks >= 5 * 60 * 20 }.size == players.size) {
-            players.forEach{
-                it.sendMessage("$prefix §cセッションがタイムアウトしました。")
-                it.playSound(it, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 0.5f)
+        val secondToTimeout = DataFile.config.getInt("misc.game.second_until_timeout").toLong()
+
+        object : BukkitRunnable() {
+            override fun run() {
+                if (players.filter { it.noActionTicks >= secondToTimeout }.size == players.size) {
+                    players.forEach {
+                        it.sendMessage("$prefix §cセッションがタイムアウトしました。")
+                        it.playSound(it, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 0.5f)
+                    }
+                    stop()
+                    cancel()
+                } else if (Lib.lookForSession(uuid) == null) {
+                    cancel()
+                }
             }
-            stop()
-        } else {
-            Bukkit.getScheduler().runTaskLater(
-                instance,
-                Runnable {
-                    afkCheck()
-                },
-                5 * 60 * 20L
-            )
-        }
+        }.runTaskTimer(instance, 0, secondToTimeout)
     }
 
     abstract fun joinPlayer(player: Player)
     abstract fun generate()
     abstract fun start()
     abstract fun setupScoreboard(player: Player): Objective
-    abstract fun endProcession()
+    abstract fun endProcession(clearTime: Int)
 
     sealed class Status {
         data object Standby : Status()

@@ -61,12 +61,12 @@ object Reward {
             playerStats.addExp(exp)
             playerStats.addArenaPoint(point)
 
-            it.sendMessage(Lib.getBar(50, "§7"))
+            it.sendMessage(Lib.getBar(40, "§7"))
             it.sendMessage("$prefix §e報酬を受け取りました！")
-            it.sendMessage("§7▶ ${ticketItem.itemMeta.itemName} §fx${ticketReward.second}")
-            it.sendMessage("§7▶ アリーナポイント §e$point §7Point")
-            it.sendMessage("§7▶ アリーナ経験値 §a$exp §7Exp")
-            it.sendMessage(Lib.getBar(50, "§7"))
+            it.sendMessage("§7→ ${ticketItem.itemMeta.itemName} §fx${ticketReward.second}")
+            it.sendMessage("§7→ §eアリーナポイント §e$point §7Point")
+            it.sendMessage("§7→ §aアリーナ経験値 §a$exp §7Exp")
+            it.sendMessage(Lib.getBar(40, "§7"))
         }
     }
 }
