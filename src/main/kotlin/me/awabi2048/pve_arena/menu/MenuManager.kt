@@ -1,7 +1,6 @@
-package me.awabi2048.pve_arena.menu_manager
+package me.awabi2048.pve_arena.menu
 
 import me.awabi2048.pve_arena.misc.Lib
-import me.awabi2048.pve_arena.quest.DailyQuest
 import me.awabi2048.pve_arena.quest.GenericQuest
 import org.bukkit.Bukkit
 import org.bukkit.Material

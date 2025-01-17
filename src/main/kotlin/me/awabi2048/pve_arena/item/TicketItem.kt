@@ -1,9 +1,12 @@
 package me.awabi2048.pve_arena.item
 
+import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.item.ItemManager.ArenaItem.*
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataType
 
 object TicketItem : ItemManager() {
     override fun get(itemKind: ArenaItem): ItemStack {
@@ -46,7 +49,17 @@ object TicketItem : ItemManager() {
 
         if (itemKind in listOf(TICKET_EXTREME, TICKET_BOSS)) itemMeta.setEnchantmentGlintOverride(true)
 
+        itemMeta.persistentDataContainer.set(NamespacedKey(instance, "id"), PersistentDataType.STRING, itemKind.name.substringAfter("ArenaItem."))
+
         item.itemMeta = itemMeta
         return item
     }
+
+    override val list = listOf(
+        TICKET_EASY,
+        TICKET_NORMAL,
+        TICKET_HARD,
+        TICKET_EXTREME,
+        TICKET_BOSS,
+    )
 }

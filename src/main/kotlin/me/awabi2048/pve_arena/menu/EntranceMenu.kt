@@ -1,4 +1,4 @@
-package me.awabi2048.pve_arena.menu_manager
+package me.awabi2048.pve_arena.menu
 
 import me.awabi2048.pve_arena.Main.Companion.activeSession
 import me.awabi2048.pve_arena.Main.Companion.instance
@@ -18,9 +18,6 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
-import org.checkerframework.checker.units.qual.C
-import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -77,8 +74,8 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
 
             var index = indexCycled
 
-            if (index >= WaveProcessingMode.MobDifficulty.entries.size) {
-                index = WaveProcessingMode.MobDifficulty.entries.size - 1
+            if (index >= WaveProcessingMode.MobType.entries.size) {
+                index = WaveProcessingMode.MobType.entries.size - 1
             } else if (index < 0) {
                 index = 0
             }
@@ -216,21 +213,13 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
         // check cost
         val enterCost = getFinalCost(menu)
 
-        var costItemCommon = 0
-        var costItemRare = 0
+        val itemCommon = EnterCostItem.get(ItemManager.ArenaItem.ENTER_COST_ITEM)
+        val itemRare = EnterCostItem.get(ItemManager.ArenaItem.ENTER_COST_ITEM_RARE)
 
-        for (item in player.inventory) {
-            if (item?.itemMeta?.itemName != null) {
-                when (item.itemMeta.itemName) {
-                    EnterCostItem.get(ItemManager.ArenaItem.ENTER_COST_ITEM).itemMeta.itemName -> costItemCommon += 1
-                    EnterCostItem.get(ItemManager.ArenaItem.ENTER_COST_ITEM_RARE).itemMeta.itemName -> costItemRare += 1
-                }
-            }
-        }
+        val playerCostItemCommon = player.inventory.containsAtLeast(itemCommon, enterCost[ItemManager.ArenaItem.ENTER_COST_ITEM]!!)
+        val playerCostItemRare = player.inventory.containsAtLeast(itemRare, enterCost[ItemManager.ArenaItem.ENTER_COST_ITEM_RARE]!!)
 
-        if (!(enterCost[ItemManager.ArenaItem.ENTER_COST_ITEM]!! >= costItemCommon &&
-                    enterCost[ItemManager.ArenaItem.ENTER_COST_ITEM_RARE]!! >= costItemRare)
-        ) {
+        if (!(playerCostItemCommon && playerCostItemRare)){
 
             player.sendMessage("$prefix §c入場コストが不足しています。")
             player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 0.5f)
@@ -239,6 +228,15 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
             return
         }
 
+        // コスト
+        itemCommon.amount = enterCost[ItemManager.ArenaItem.ENTER_COST_ITEM]!!
+        itemRare.amount = enterCost[ItemManager.ArenaItem.ENTER_COST_ITEM_RARE]!!
+
+//        player.inventory.remove(itemCommon)
+//        player.inventory.remove(itemRare)
+        player.inventory.removeItem(itemCommon)
+        player.inventory.removeItem(itemRare)
+
         // start
         val mobType = getMobTypeFromIcon(menu.getItem(19)!!)
         val difficulty = getDifficultyFromIcon(menu.getItem(21)!!)
@@ -246,6 +244,11 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
         val sacrifice = getSacrificeAmountFromIcon(menu.getItem(25)!!)
 
         val session = NormalArena(player.uniqueId.toString(), setOf(player), mobType, difficulty, sacrifice)
+
+        player.sendMessage("$prefix §7ゲートを開いています....")
+        player.location.getNearbyPlayers(10.0).forEach {
+            it.playSound(it, Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 0.6f)
+        }
 
         activeSession += session
         session.generate()

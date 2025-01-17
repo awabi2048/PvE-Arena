@@ -2,6 +2,7 @@ package me.awabi2048.pve_arena.command
 
 import me.awabi2048.pve_arena.Main.Companion.prefix
 import me.awabi2048.pve_arena.game.WaveProcessingMode
+import me.awabi2048.pve_arena.item.ItemManager
 import me.awabi2048.pve_arena.misc.sendError
 import org.bukkit.Sound
 import org.bukkit.command.Command
@@ -50,6 +51,7 @@ object MainCommand : CommandExecutor, TabCompleter {
                 "start_session" -> SubCommand.Option.START_SESSION
                 "join_session" -> SubCommand.Option.JOIN_SESSION
                 "stop_session" -> SubCommand.Option.STOP_SESSION
+                "get_item" -> SubCommand.Option.GET_ITEM
                 else -> null
             }
 
@@ -76,7 +78,7 @@ object MainCommand : CommandExecutor, TabCompleter {
         } else {
             if (p3.isNullOrEmpty()) return null
 
-            if (p3.size == 1) return listOf("config", "start_session", "stop_session", "join_session")
+            if (p3.size == 1) return listOf("config", "start_session", "stop_session", "join_session", "get_item")
 
             if (p3[0] == "start_session") {
                 if (p3.size == 2) return listOf("NORMAL", "QUICK", "DUNGEON")
@@ -106,6 +108,14 @@ object MainCommand : CommandExecutor, TabCompleter {
 
                 if (p3[1] == "DUNGEON") {
                     return listOf("現在未実装です")
+                }
+            }
+
+            if (p3[0] == "get_item") {
+                if (p3.size == 2) {
+                    val list: MutableList<String> = mutableListOf()
+                     ItemManager.ArenaItem.entries.forEach { list += it.toString() }
+                    return list
                 }
             }
         }

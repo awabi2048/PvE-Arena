@@ -1,9 +1,5 @@
 package me.awabi2048.pve_arena
 
-import com.destroystokyo.paper.event.entity.EndermanEscapeEvent
-import io.papermc.paper.event.entity.ElderGuardianAppearanceEvent
-import io.papermc.paper.event.entity.EntityMoveEvent
-import me.awabi2048.pve_arena.Main.Companion.activeSession
 import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.Main.Companion.lobbyOriginLocation
 import me.awabi2048.pve_arena.Main.Companion.prefix
@@ -13,28 +9,29 @@ import me.awabi2048.pve_arena.game.Generic
 import me.awabi2048.pve_arena.game.NormalArena
 import me.awabi2048.pve_arena.game.QuickArena
 import me.awabi2048.pve_arena.game.WaveProcessingMode
-import me.awabi2048.pve_arena.menu_manager.EntranceMenu
-import me.awabi2048.pve_arena.menu_manager.MenuManager
+import me.awabi2048.pve_arena.item.AccessoryItem
+import me.awabi2048.pve_arena.item.ItemManager
+import me.awabi2048.pve_arena.item.SacrificeItem
+import me.awabi2048.pve_arena.menu.EntranceMenu
 import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.Bukkit
 import org.bukkit.Sound
 import org.bukkit.attribute.Attribute
-import org.bukkit.damage.DamageSource
 import org.bukkit.entity.*
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDeathEvent
-import org.bukkit.event.entity.EntityPotionEffectEvent
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent
+import org.bukkit.event.entity.ProjectileLaunchEvent
 import org.bukkit.event.entity.SlimeSplitEvent
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerInteractAtEntityEvent
-import org.bukkit.event.player.PlayerInteractEntityEvent
-import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.potion.PotionEffect
-import org.bukkit.potion.PotionEffectType
+import org.bukkit.event.player.PlayerLoginEvent
+import org.bukkit.event.player.PlayerToggleSneakEvent
+import org.bukkit.projectiles.ProjectileSource
+import org.bukkit.scheduler.BukkitRunnable
 
 object EventListener : Listener {
     @EventHandler
@@ -49,7 +46,7 @@ object EventListener : Listener {
 
         val uuid = event.entity.location.world.toString().substringAfter("arena_session.")
         if (Lib.lookForSession(uuid) is WaveProcessingMode) {
-            val difficulty = (Lib.lookForSession(uuid) as Generic.Status.InGame).difficulty
+            val difficulty = (Lib.lookForSession(uuid)?.status as Generic.Status.InGame).difficulty
             event.droppedExp *= when (difficulty) {
                 WaveProcessingMode.MobDifficulty.EASY -> 1.2.toInt()
                 WaveProcessingMode.MobDifficulty.NORMAL -> 1.5.toInt()
@@ -64,26 +61,46 @@ object EventListener : Listener {
     fun playerDamageModify(event: EntityDamageByEntityEvent) {
         if (event.damager !is Player) return
 
-
+        val player = event.damager as Player
+        if (AccessoryItem.searchPlayerInventory(player, ItemManager.ArenaItem.HUNTER_ACCESSORY) > 0) {
+            event.damage *= 1.3
+            player.heal(event.damage * 0.1)
+        }
     }
 
     @EventHandler
     fun playerTakenDamageModify(event: EntityDamageByEntityEvent) {
-        println("Damager is ${event.damager}")
-
         if (event.entity.world.name.startsWith("arena_session.")) {
             if (event.entity !is Player) return
 
-            if (event.damager is Skeleton || event.damager is Stray || event.damager is Bogged) {
-                event.damage = (event.damager as LivingEntity).getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value
+            if (event.damager is AbstractArrow) {
+                event.damage = (event.damager as AbstractArrow).damage
             }
 
-            if (event.damager is Drowned) {
-                event.damage = (event.damager as Drowned).getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value
+            if (event.damager is Trident) {
+                event.damage = (event.damager as Trident).damage
             }
 
             if (event.damager is Guardian) {
                 event.damage = (event.damager as Guardian).getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value
+            }
+        }
+    }
+
+    @EventHandler
+    fun setProjectileDamage(event: ProjectileLaunchEvent) {
+        if (event.entity.world.name.startsWith("arena_session.")) {
+            if (event.entity is Trident) {
+                val shooter = (event.entity as Trident).shooter
+                if (shooter is Drowned) (event.entity as Trident).damage = shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value
+            }
+
+            if (event.entity is AbstractArrow) {
+                val shooter = (event.entity as AbstractArrow).shooter
+                val entity = event.entity as AbstractArrow
+                if (shooter is Skeleton) entity.damage = shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value
+                if (shooter is Stray) entity.damage = shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value
+                if (shooter is Bogged) entity.damage = shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value
             }
         }
     }
@@ -100,30 +117,6 @@ object EventListener : Listener {
             event.whoClicked.sendMessage("$prefix §eUUID: $uuid のセッションを強制終了しました。")
         }
     }
-
-//    @EventHandler
-//    fun onEntranceMenuOpened(event: PlayerInteractEntityEvent) {
-//        if (!event.rightClicked.scoreboardTags.contains("arena.normal.entrance_interaction")) return
-//        if (event.rightClicked.scoreboardTags.contains("arena.normal.portal_open")) return
-//
-//        val player = event.player
-//
-//        // メニュー開く
-//        val entranceMenu = getEntranceMenu(event.player, event.rightClicked.uniqueId.toString()) ?: return
-//        player.openInventory(entranceMenu)
-//
-//        // 効果音
-//        player.playSound(player, Sound.BLOCK_ENDER_CHEST_OPEN, 1.0f, 1.0f)
-//
-//        // パーティクル
-//        player.world.spawnParticle(Particle.WITCH, event.rightClicked.location.toCenterLocation(), 50, 0.5, 0.5, 0.5)
-//
-//        // フラグ設定
-//        playerMenuStatus[player] = "entrance"
-//
-//        event.isCancelled = true
-//
-//    }
 
     @EventHandler
     fun onPlayerKillInArena(event: EntityDeathEvent) {
@@ -188,7 +181,6 @@ object EventListener : Listener {
 
     @EventHandler
     fun onPlayerMoveDimension(event: PlayerChangedWorldEvent) {
-
         if (Main.displayScoreboardMap[event.player] != null && !event.player.world.name.startsWith("arena_session.")) {
             // reset scoreboard
             val scoreboard = Main.displayScoreboardMap[event.player]!!
@@ -216,35 +208,19 @@ object EventListener : Listener {
     }
 
     @EventHandler
+    fun onPlayerLogin(event: PlayerLoginEvent) {
+        if (event.player.world.name.startsWith("arena_session.")) {
+            event.player.teleport(lobbyOriginLocation)
+        }
+    }
+
+    @EventHandler
     fun regulateMobTarget(event: EntityTargetLivingEntityEvent) {
         if (event.entity.world.name.startsWith("arena_session.") && event.target !is Player) {
             event.isCancelled = true
             event.target = event.entity.world.players.random()
         }
     }
-
-//    @EventHandler
-//    fun regulateMobMovement(event: Entity) {
-//        if (event.entity.world.name.startsWith("arena_session.")) {
-//            val movedDistance = event.to.distance(event.from)
-//
-//            if (event.entity is Spider && event.entity.isClimbing) event.isCancelled = true
-//            if (event.entity is Blaze && event.entity.isOnGround) event.isCancelled = true
-//
-//            if ((event.entity is Enderman || event.entity is Shulker) && movedDistance >= 1.0) event.isCancelled = true
-//
-//        }
-//    }
-
-//    @EventHandler
-//    fun regulateElderGuardian(event: EntityPotionEffectEvent) {
-//        event.cause == EntityPotionEffectEvent.Cause.
-//
-//        if (!event.entity.world.name.startsWith("arena_session.")) return
-//        event.isCancelled = true
-//        event.affectedPlayer.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 5, 1))
-//        event.affectedPlayer.damage(8.0)
-//    }
 
     @EventHandler
     fun onEntranceMenuClicked(event: InventoryClickEvent) {
@@ -265,8 +241,6 @@ object EventListener : Listener {
             if (event.slot == 40) {
                 player.closeInventory()
                 player.scoreboardTags.add("arena.misc.in_click_interval")
-
-                player.sendMessage("$prefix §7ゲートを開いています....")
 
                 Bukkit.getScheduler().runTaskLater(
                     instance,
@@ -315,46 +289,28 @@ object EventListener : Listener {
         }
     }
 
-//    @EventHandler
-//    fun onPortalEnter(event: PlayerMoveEvent) {
-//        val player = event.player
-//
-//        val playerX = player.location.toCenterLocation().x
-//        val playerY = player.location.toCenterLocation().y
-//        val playerZ = player.location.toCenterLocation().z
-//
-//        for (entranceCollider in player.location.getNearbyPlayers(3.0)) {
-//            val colliderX = entranceCollider.location.toCenterLocation().x
-//            val colliderY = entranceCollider.location.toCenterLocation().y
-//            val colliderZ = entranceCollider.location.toCenterLocation().z
-//
-//            if (
-//                (playerX in colliderX - 1..colliderX + 1)
-//                && (playerY in colliderY - 1..colliderY + 1)
-//                && (playerZ in colliderZ - 1..colliderZ + 1)
-//            ) {
-//                val a = EntrancePortal()
-//            }
-//        }
-//    }
+    @EventHandler
+    fun onSneak(event: PlayerToggleSneakEvent) {
+        val player = event.player
+        if (SacrificeItem.getFromItem(player.equipment.itemInMainHand) == ItemManager.ArenaItem.SACRIFICE_ITEM) {
+            // チャージ開始
+            if (event.isSneaking) {
+                object : BukkitRunnable() {
+                    override fun run() {
+                        if (!player.isSneaking) cancel()
+                        if (player.level < 3) cancel()
+                        if (SacrificeItem.getFromItem(player.equipment.itemInMainHand) != ItemManager.ArenaItem.SACRIFICE_ITEM) {
+                            cancel()
+                            return
+                        }
 
-//    @EventHandler
-//    fun onPortalEnter(event: PlayerInteractEntityEvent) {
-//        if (!event.rightClicked.scoreboardTags.contains("arena.normal.portal_open")) return
-//            for (session in sessionDataMap.values) {
-//                if (event.rightClicked == session.portalEntity) {
-//
-//                    val uuid = sessionDataMap.filterKeys { sessionDataMap[it] == session }.keys.toList()[0]
-//
-//                    val portal = EntrancePortal(uuid).transportPlayer(event.player)
-//                }
-//            }
-//    }
-
-//    @EventHandler
-//    fun onQuestBoardOpen(event: PlayerInteractEntityEvent) {
-//        if (!event.rightClicked.scoreboardTags.contains("arena.interaction.quest_board")) return
-//
-//        val menu = MenuManager(event.player, MenuManager.MenuType.Quest())
-//    }
+                        player.level -= 3
+                        player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.3f, 0.6f)
+                        val chargedItem = SacrificeItem.charge(player.equipment.itemInMainHand)
+                        player.equipment.setItemInMainHand(chargedItem)
+                    }
+                }.runTaskTimer(instance, 5, 5)
+            }
+        }
+    }
 }

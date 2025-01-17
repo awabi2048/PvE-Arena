@@ -1,5 +1,6 @@
 package me.awabi2048.pve_arena.command
 
+import com.sun.tools.javac.comp.Enter
 import me.awabi2048.pve_arena.Main.Companion.activeSession
 import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.Main.Companion.prefix
@@ -9,12 +10,14 @@ import me.awabi2048.pve_arena.game.Launcher
 import me.awabi2048.pve_arena.game.NormalArena
 import me.awabi2048.pve_arena.game.QuickArena
 import me.awabi2048.pve_arena.game.WaveProcessingMode
+import me.awabi2048.pve_arena.item.*
 import me.awabi2048.pve_arena.misc.Lib
 import me.awabi2048.pve_arena.misc.sendError
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import java.security.Key
 
 class SubCommand(private val sender: Player, private val args: Array<out String>, private val option: Option) {
     //
@@ -105,7 +108,7 @@ class SubCommand(private val sender: Player, private val args: Array<out String>
                 }
 
                 val players: MutableList<String> = mutableListOf()
-                Bukkit.getWorld("arena_session.${session.uuid}")!!.players.forEach{
+                Bukkit.getWorld("arena_session.${session.uuid}")!!.players.forEach {
                     players.add(it.displayName().toString())
                 }
 
@@ -125,11 +128,35 @@ class SubCommand(private val sender: Player, private val args: Array<out String>
             sender.openInventory(menu)
         }
 
+        fun getItem() {
+            try {
+                val itemId = args[1].uppercase()
+                val itemKind = ItemManager.ArenaItem.valueOf(itemId)
+
+                val item = when (itemKind) {
+                    in AccessoryItem.list -> AccessoryItem.get(itemKind)
+                    in BoosterItem.list -> BoosterItem.get(itemKind)
+                    in EnchantmentItem.list -> EnchantmentItem.get(itemKind)
+                    in EnterCostItem.list -> EnterCostItem.get(itemKind)
+                    in KeyItem.list -> KeyItem.get(itemKind)
+                    in SacrificeItem.list -> SacrificeItem.get(itemKind)
+                    in TicketItem.list -> TicketItem.get(itemKind)
+                    else -> throw IllegalArgumentException()
+                }
+
+                sender.inventory.addItem(item)
+
+            } catch (e: Exception) {
+                sender.sendError("無効なアイテムIdです。")
+            }
+        }
+
         when (option) {
             CONFIG -> config()
             START_SESSION -> startSession()
             JOIN_SESSION -> TODO()
             STOP_SESSION -> stopSession()
+            GET_ITEM -> getItem()
         }
     }
 
@@ -138,5 +165,6 @@ class SubCommand(private val sender: Player, private val args: Array<out String>
         START_SESSION,
         JOIN_SESSION,
         STOP_SESSION,
+        GET_ITEM
     }
 }

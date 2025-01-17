@@ -1,9 +1,9 @@
 profession_exp_multiplier: 1.4
 
 # lobby
-lobby_origin_location_x: -70
-lobby_origin_location_y: 64
-lobby_origin_location_z: -219
+lobby_location_x: -70
+lobby_location_y: 64
+lobby_location_z: -219
 lobby_dimension: "world"
 
 mob_stats:
@@ -37,4 +37,9 @@ misc:
 
     # モブ召喚の間隔
     mob_summon_interval: 10
+
+  item:
+    #
+    sacrifice_item_charge_amount: 2500
+
 

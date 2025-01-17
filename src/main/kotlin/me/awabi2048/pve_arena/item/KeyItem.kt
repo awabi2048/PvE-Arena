@@ -26,9 +26,9 @@ object KeyItem : ItemManager() {
                 itemMeta.lore = listOf(
                     "§7アリーナ入場時に耐久値を消費し、コストを§630%§7削減します。",
                     "",
-                    Lib.getBar(40, "§8"),
+                    Lib.getBar(30, "§8"),
                     "§7残り耐久値: §a10§7/10",
-                    Lib.getBar(40, "§8"),
+                    Lib.getBar(30, "§8"),
                 )
                 itemMeta.setMaxStackSize(1)
                 itemMeta.setEnchantmentGlintOverride(false)
@@ -48,9 +48,9 @@ object KeyItem : ItemManager() {
                 itemMeta.lore = listOf(
                     "§7アリーナ入場時に耐久値を消費し、コストを§650%§7削減します。",
                     "",
-                    Lib.getBar(40, "§8"),
+                    Lib.getBar(30, "§8"),
                     "§7残り耐久値: §a20§7/20",
-                    Lib.getBar(40, "§8"),
+                    Lib.getBar(30, "§8"),
                 )
                 itemMeta.setMaxStackSize(1)
                 itemMeta.setEnchantmentGlintOverride(false)
@@ -65,6 +65,11 @@ object KeyItem : ItemManager() {
             else -> throw IllegalArgumentException("@item/KeyItem.kt: invalid itemKind specified.")
         }
     }
+
+    override val list = listOf(
+        ArenaItem.KEY_30,
+        ArenaItem.KEY_50
+    )
 
     fun onUse() {
 

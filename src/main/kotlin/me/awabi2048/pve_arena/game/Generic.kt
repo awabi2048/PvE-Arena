@@ -8,7 +8,9 @@ import me.awabi2048.pve_arena.Main.Companion.prefix
 import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.*
+import org.bukkit.entity.Blaze
 import org.bukkit.entity.Player
+import org.bukkit.entity.Spider
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scoreboard.Objective
 import org.codehaus.plexus.util.FileUtils
@@ -78,6 +80,20 @@ abstract class Generic(val uuid: String, val players: Set<Player>, var status: S
                 }
             }
         }.runTaskTimer(instance, 0, secondToTimeout)
+    }
+    fun startWatchMobMovement() {
+        object: BukkitRunnable() {
+            override fun run() {
+                val sessionWorld = getSessionWorld()!!
+                sessionWorld.entities.forEach {
+                    if (it is Blaze) {
+                        if (it.velocity.y > 0.0) it.velocity.y = 0.0
+                    }
+                }
+
+                if (status !is Status.InGame) cancel()
+            }
+        }.runTaskTimer(instance, 0, 1)
     }
 
     abstract fun joinPlayer(player: Player)
