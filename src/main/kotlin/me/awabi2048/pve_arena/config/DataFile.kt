@@ -10,6 +10,9 @@ object DataFile {
     lateinit var mobDefinition: ConfigurationSection
     lateinit var config: ConfigurationSection
     lateinit var playerData: ConfigurationSection
+    lateinit var stats: ConfigurationSection
+    lateinit var record: ConfigurationSection
+    lateinit var quest: ConfigurationSection
     lateinit var customModelData: ConfigurationSection
 
     private val resourceSet = setOf(
@@ -20,6 +23,7 @@ object DataFile {
         "player_data/main.yml",
         "player_data/quest.yml",
         "player_data/stats.yml",
+        "player_data/record.yml",
         "misc/custom_model_data.yml",
     )
 
@@ -29,6 +33,9 @@ object DataFile {
         mobDefinition = YamlUtil.load("stage_data/mob_definition.yml")
         config = YamlUtil.load("config.yml")
         playerData = YamlUtil.load("player_data/main.yml")
+        stats = YamlUtil.load("player_data/stats.yml")
+        quest = YamlUtil.load("player_data/quest.yml")
+        record = YamlUtil.load("player_data/record.yml")
         customModelData = YamlUtil.load("misc/custom_model_data.yml")
     }
 

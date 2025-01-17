@@ -1,5 +1,14 @@
 uuid:
-  timestamp: ""
-  record_millis: 1000
-  mob_type: ZOMBIE
-  difficulty:
+  clear_count:
+    ZOMBIE:
+      EASY: 0
+      NORMAL: 0
+      HARD: 0
+      EXPERT: 0
+      NIGHTMARE: 0
+    SKELETON:
+      EASY: 0
+      NORMAL: 0
+      HARD: 0
+      EXPERT: 0
+      NIGHTMARE: 0

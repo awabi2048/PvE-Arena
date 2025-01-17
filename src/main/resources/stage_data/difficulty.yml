@@ -9,7 +9,7 @@ easy:
 
 normal:
   name: "§eノーマル"
-  mob_multiplier: 1.1
+  mob_multiplier: 1.0
   reward_multiplier: 1.0
   wave: 5
   reward_ticket: normal
@@ -18,7 +18,7 @@ normal:
 
 hard:
   name: "§cハード"
-  mob_multiplier: 1.5
+  mob_multiplier: 1.2
   reward_multiplier: 1.5
   wave: 5
   reward_ticket: hard
@@ -27,7 +27,7 @@ hard:
 
 expert:
   name: "§dエキスパート"
-  mob_multiplier: 2.0
+  mob_multiplier: 1.4
   reward_multiplier: 1.8
   wave: 8
   reward_ticket: extreme
@@ -36,7 +36,7 @@ expert:
 
 nightmare:
   name: "§4ナイトメア"
-  mob_multiplier: 3.0
+  mob_multiplier: 1.8
   reward_multiplier: 3.0
   wave: 8
   reward_ticket: extreme

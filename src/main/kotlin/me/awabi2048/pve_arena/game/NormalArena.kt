@@ -223,6 +223,12 @@ class NormalArena(
             )
         }
 
+        // stats
+        getSessionWorld()!!.players.forEach{
+            val path = "${it.uniqueId}.${mobTypeToString(mobType).uppercase()}.${mobDifficultyToString(difficulty).uppercase()}"
+            DataFile.stats.set(path, DataFile.playerData.getInt(path) + 1)
+        }
+
         // end session
         stop()
     }

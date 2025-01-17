@@ -10,6 +10,7 @@ import me.awabi2048.pve_arena.item.EnterCostItem
 import me.awabi2048.pve_arena.item.ItemManager
 import me.awabi2048.pve_arena.item.ItemManager.ArenaItem.*
 import me.awabi2048.pve_arena.item.KeyItem
+import me.awabi2048.pve_arena.item.SacrificeItem
 import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -215,27 +216,41 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
 
         val itemCommon = EnterCostItem.get(ItemManager.ArenaItem.ENTER_COST_ITEM)
         val itemRare = EnterCostItem.get(ItemManager.ArenaItem.ENTER_COST_ITEM_RARE)
+        val sacrificeItem = SacrificeItem.get(ItemManager.ArenaItem.SACRIFICE_ITEM_CHARGED)
+        val sacrificeAmount = getSacrificeAmountFromIcon(menu.getItem(25)!!)
 
-        val playerCostItemCommon = player.inventory.containsAtLeast(itemCommon, enterCost[ItemManager.ArenaItem.ENTER_COST_ITEM]!!)
-        val playerCostItemRare = player.inventory.containsAtLeast(itemRare, enterCost[ItemManager.ArenaItem.ENTER_COST_ITEM_RARE]!!)
+        val playerCostItemCommon =
+            player.inventory.containsAtLeast(itemCommon, enterCost[ItemManager.ArenaItem.ENTER_COST_ITEM]!!)
+        val playerCostItemRare =
+            player.inventory.containsAtLeast(itemRare, enterCost[ItemManager.ArenaItem.ENTER_COST_ITEM_RARE]!!)
+        val playerSacrificeItem =
+            player.inventory.containsAtLeast(sacrificeItem, sacrificeAmount)
 
-        if (!(playerCostItemCommon && playerCostItemRare)){
+        if (!(playerCostItemCommon && playerCostItemRare)) {
 
             player.sendMessage("$prefix §c入場コストが不足しています。")
             player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 0.5f)
             player.playSound(player, Sound.UI_BUTTON_CLICK, 1.0f, 0.5f)
 
             return
+        } else if (!playerSacrificeItem) {
+            player.sendMessage("$prefix §8供え物が足りない...")
+            player.playSound(player, Sound.ENTITY_ZOMBIE_CONVERTED_TO_DROWNED, 1.0f, 0.75f)
+            player.playSound(player, Sound.UI_BUTTON_CLICK, 1.0f, 0.5f)
+
+            return
         }
 
-        // コスト
+        // コスト消費
         itemCommon.amount = enterCost[ItemManager.ArenaItem.ENTER_COST_ITEM]!!
         itemRare.amount = enterCost[ItemManager.ArenaItem.ENTER_COST_ITEM_RARE]!!
+        sacrificeItem.amount = sacrificeAmount
 
 //        player.inventory.remove(itemCommon)
 //        player.inventory.remove(itemRare)
         player.inventory.removeItem(itemCommon)
         player.inventory.removeItem(itemRare)
+        player.inventory.removeItem(sacrificeItem)
 
         // start
         val mobType = getMobTypeFromIcon(menu.getItem(19)!!)
@@ -254,12 +269,10 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
         session.generate()
 
         Bukkit.getScheduler().runTaskLater(
-            instance,
-            Runnable {
+            instance, Runnable {
                 session.joinPlayer(player)
                 session.start()
-            },
-            40L
+            }, 40L
         )
 
 
@@ -267,15 +280,11 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
     }
 
     enum class OptionCategory {
-        MobType,
-        MobDifficulty,
-        PlayerCount,
-        SacrificeAmount
+        MobType, MobDifficulty, PlayerCount, SacrificeAmount
     }
 
     enum class EnterCost {
-        FRAGMENT,
-        ESSENCE;
+        FRAGMENT, ESSENCE;
     }
 
     private fun structMenu(
@@ -372,8 +381,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
         val rare = rawCost / 6
 
         return mapOf(
-            ItemManager.ArenaItem.ENTER_COST_ITEM to normal,
-            ItemManager.ArenaItem.ENTER_COST_ITEM_RARE to rare
+            ItemManager.ArenaItem.ENTER_COST_ITEM to normal, ItemManager.ArenaItem.ENTER_COST_ITEM_RARE to rare
         )
     }
 
@@ -404,9 +412,8 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
 
     private fun getSacrificeAmountFromIcon(icon: ItemStack): Int {
         val rawLore = icon.itemMeta!!.lore!![2]
-        val amount =
-            rawLore.substringAfter("§d").removeSuffix(" 個").toIntOrNull()
-                ?: throw IllegalArgumentException("Invalid Icon item given.")
+        val amount = rawLore.substringAfter("§d").removeSuffix(" 個").toIntOrNull()
+            ?: throw IllegalArgumentException("Invalid Icon item given.")
 
         return amount
     }
@@ -421,18 +428,14 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
 
         fun getMobTypeLore(mobType: WaveProcessingMode.MobType): List<String> {
             val lore = mutableListOf(
-                Lib.getBar(40, "§7"),
-                "§f左クリック§7: §a次へ, §f右クリック§7: §c前へ",
-                "",
-                Lib.getBar(40, "§7")
+                Lib.getBar(40, "§7"), "§f左クリック§7: §a次へ, §f右クリック§7: §c前へ", "", Lib.getBar(40, "§7")
             )
             for (key in DataFile.mobType.getKeys(false)) {
-                val addValue =
-                    if (key == mobType.toString().substringAfter("MobType.").lowercase()) {
-                        "§6» §b${DataFile.mobType.getString("$key.name").toString()} §6«"
-                    } else {
-                        "§7${DataFile.mobType.getString("$key.name").toString()}"
-                    }
+                val addValue = if (key == mobType.toString().substringAfter("MobType.").lowercase()) {
+                    "§6» §b${DataFile.mobType.getString("$key.name").toString()} §6«"
+                } else {
+                    "§7${DataFile.mobType.getString("$key.name").toString()}"
+                }
 
                 lore += addValue
             }
@@ -458,31 +461,26 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
     // get ItemStack from state
     private fun getDifficultyIcon(difficulty: WaveProcessingMode.MobDifficulty): ItemStack {
         fun getDifficultyIconMaterial(difficulty: WaveProcessingMode.MobDifficulty): Material {
-            val iconString =
-                DataFile.difficulty.getString(
-                    "${
-                        difficulty.toString().substringAfter("MobDifficulty.").lowercase()
-                    }.icon"
-                )!!
+            val iconString = DataFile.difficulty.getString(
+                "${
+                    difficulty.toString().substringAfter("MobDifficulty.").lowercase()
+                }.icon"
+            )!!
             val iconMaterial = Material.getMaterial(iconString) ?: throw (IllegalStateException("MATERIAL NOT EXIST"))
             return iconMaterial
         }
 
         fun getDifficultyLore(difficulty: WaveProcessingMode.MobDifficulty): List<String> {
             val lore = mutableListOf(
-                Lib.getBar(40, "§7"),
-                "§f左クリック§7: §a次へ, §f右クリック§7: §c前へ",
-                "",
-                Lib.getBar(40, "§7")
+                Lib.getBar(40, "§7"), "§f左クリック§7: §a次へ, §f右クリック§7: §c前へ", "", Lib.getBar(40, "§7")
             )
 
             for (key in DataFile.difficulty.getKeys(false)) {
-                val addValue =
-                    if (key == difficulty.toString().substringAfter("MobDifficulty.").lowercase()) {
-                        "§6» §6${DataFile.difficulty.getString("$key.name").toString()} §6«"
-                    } else {
-                        "§7${DataFile.difficulty.getString("$key.name").toString().removeRange(0..1)}"
-                    }
+                val addValue = if (key == difficulty.toString().substringAfter("MobDifficulty.").lowercase()) {
+                    "§6» §6${DataFile.difficulty.getString("$key.name").toString()} §6«"
+                } else {
+                    "§7${DataFile.difficulty.getString("$key.name").toString().removeRange(0..1)}"
+                }
 
                 lore += addValue
             }
@@ -564,7 +562,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
             val trueRawCost = (rawCost * discount).roundToInt()
 
             // construct lore part
-            if (calcCostItemMap(trueRawCost)[ENTER_COST_ITEM_RARE]!! >= 1) costDisplay.addFirst(
+            if (calcCostItemMap(trueRawCost)[ENTER_COST_ITEM]!! >= 1) costDisplay.addFirst(
                 "§7- §3ソウルフラグメント §c§m×${calcCostItemMap(rawCost)[ENTER_COST_ITEM]} §7→ §e×${
                     calcCostItemMap(
                         trueRawCost
@@ -579,19 +577,19 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
                     )[ENTER_COST_ITEM_RARE]
                 } §7→ §e×${calcCostItemMap(trueRawCost)[ENTER_COST_ITEM_RARE]}"
             )
+
             if (sacrificeAmount >= 1) costDisplay.add("§7- §d魂入りの瓶 §e×$sacrificeAmount")
             costDisplay.add("§7- §c§nインベントリ内のアリーナの鍵を消耗します！")
 
         } else {
-            costDisplay.add("§7- §3ソウルフラグメント §e×${calcCostItemMap(rawCost)[ENTER_COST_ITEM]}")
+            if (calcCostItemMap(rawCost)[ENTER_COST_ITEM]!! >= 1) costDisplay.addFirst(
+                "§7- §3ソウルフラグメント §e×${calcCostItemMap(rawCost)[ENTER_COST_ITEM]}"
+            )
 
             if (calcCostItemMap(rawCost)[ENTER_COST_ITEM_RARE]!! >= 1) costDisplay.addFirst(
-                "§7- §3§lソウルエッセンス §e×${
-                    calcCostItemMap(
-                        rawCost
-                    )[ENTER_COST_ITEM_RARE]
-                }"
+                "§7- §3§lソウルエッセンス §e×${calcCostItemMap(rawCost)[ENTER_COST_ITEM_RARE]}"
             )
+
             if (sacrificeAmount >= 1) costDisplay.add("§7- §d魂入りの瓶 §e×$sacrificeAmount")
         }
 

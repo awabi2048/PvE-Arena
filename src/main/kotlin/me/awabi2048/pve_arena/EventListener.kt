@@ -92,15 +92,15 @@ object EventListener : Listener {
         if (event.entity.world.name.startsWith("arena_session.")) {
             if (event.entity is Trident) {
                 val shooter = (event.entity as Trident).shooter
-                if (shooter is Drowned) (event.entity as Trident).damage = shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value
+                if (shooter is Drowned) (event.entity as Trident).damage = shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value * 0.6
             }
 
             if (event.entity is AbstractArrow) {
                 val shooter = (event.entity as AbstractArrow).shooter
                 val entity = event.entity as AbstractArrow
-                if (shooter is Skeleton) entity.damage = shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value
-                if (shooter is Stray) entity.damage = shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value
-                if (shooter is Bogged) entity.damage = shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value
+                if (shooter is Skeleton) entity.damage = shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value * 0.6
+                if (shooter is Stray) entity.damage = shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value * 0.6
+                if (shooter is Bogged) entity.damage = shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value * 0.6
             }
         }
     }
