@@ -140,7 +140,7 @@ interface WaveProcessingMode {
         }
 
         // spawn
-        println("CANDIDATES: $spawnCandidate, SEED:$seed ,MOB ID:$spawnMobId")
+//        println("CANDIDATES: $spawnCandidate, SEED:$seed ,MOB ID:$spawnMobId")
 
         val mobData = DataFile.mobDefinition.getConfigurationSection(spawnMobId)!!
         val entityType = EntityType.valueOf(mobData.getString("entity_type") ?: "".uppercase())

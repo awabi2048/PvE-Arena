@@ -18,6 +18,8 @@ import me.awabi2048.pve_arena.menu_manager.MenuManager
 import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.Bukkit
 import org.bukkit.Sound
+import org.bukkit.attribute.Attribute
+import org.bukkit.damage.DamageSource
 import org.bukkit.entity.*
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -54,6 +56,34 @@ object EventListener : Listener {
                 WaveProcessingMode.MobDifficulty.HARD -> 1.75.toInt()
                 WaveProcessingMode.MobDifficulty.EXPERT -> 2.0.toInt()
                 WaveProcessingMode.MobDifficulty.NIGHTMARE -> 3.0.toInt()
+            }
+        }
+    }
+
+    @EventHandler
+    fun playerDamageModify(event: EntityDamageByEntityEvent) {
+        if (event.damager !is Player) return
+
+
+    }
+
+    @EventHandler
+    fun playerTakenDamageModify(event: EntityDamageByEntityEvent) {
+        println("Damager is ${event.damager}")
+
+        if (event.entity.world.name.startsWith("arena_session.")) {
+            if (event.entity !is Player) return
+
+            if (event.damager is Skeleton || event.damager is Stray || event.damager is Bogged) {
+                event.damage = (event.damager as LivingEntity).getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value
+            }
+
+            if (event.damager is Drowned) {
+                event.damage = (event.damager as Drowned).getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value
+            }
+
+            if (event.damager is Guardian) {
+                event.damage = (event.damager as Guardian).getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value
             }
         }
     }
@@ -122,7 +152,8 @@ object EventListener : Listener {
                             (session.status as Generic.Status.InGame).timeElapsed
                         )
 
-                        if ((session.status as Generic.Status.InGame).wave == lastWave) Lib.lookForSession(uuid)!!.status = Generic.Status.WaitingFinish
+                        if ((session.status as Generic.Status.InGame).wave == lastWave) Lib.lookForSession(uuid)!!.status =
+                            Generic.Status.WaitingFinish
                     },
                     40L
                 )
@@ -175,7 +206,7 @@ object EventListener : Listener {
 
         for (world in Bukkit.getWorlds().filter { it.name.startsWith("arena_session.") }) {
             if (world.players.isEmpty()) {
-                println("SESSION SIZE: ${activeSession.size}")
+//                println("SESSION SIZE: ${activeSession.size}")
 
                 val uuid = world.name.substringAfter("arena_session.")
                 val session = Lib.lookForSession(uuid)!!
@@ -218,7 +249,7 @@ object EventListener : Listener {
     @EventHandler
     fun onEntranceMenuClicked(event: InventoryClickEvent) {
         if (event.whoClicked !is Player) return
-        if (event.clickedInventory?.any {it != null && it.itemMeta.itemName == "§cゲートを開く"} == true) {
+        if (event.clickedInventory?.any { it != null && it.itemMeta.itemName == "§cゲートを開く" } == true) {
             event.isCancelled = true
             if (event.whoClicked.scoreboardTags.contains("arena.misc.in_click_interval")) return
 
@@ -275,7 +306,10 @@ object EventListener : Listener {
         if (!event.rightClicked.scoreboardTags.contains("arena.interaction")) return
         event.isCancelled = true
 
-        if (event.rightClicked.scoreboardTags.contains("arena.misc.game.entrance_menu") && !event.player.scoreboardTags.contains("arena.misc.in_click_interval")) {
+        if (event.rightClicked.scoreboardTags.contains("arena.misc.game.entrance_menu") && !event.player.scoreboardTags.contains(
+                "arena.misc.in_click_interval"
+            )
+        ) {
             val menu = EntranceMenu(event.player)
             menu.open()
         }

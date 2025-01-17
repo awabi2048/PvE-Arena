@@ -78,7 +78,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
             var index = indexCycled
 
             if (index >= WaveProcessingMode.MobDifficulty.entries.size) {
-                index = WaveProcessingMode.MobDifficulty.entries.size
+                index = WaveProcessingMode.MobDifficulty.entries.size - 1
             } else if (index < 0) {
                 index = 0
             }
@@ -130,7 +130,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
             var index = indexCycled
 
             if (index >= WaveProcessingMode.MobDifficulty.entries.size) {
-                index = WaveProcessingMode.MobDifficulty.entries.size
+                index = WaveProcessingMode.MobDifficulty.entries.size - 1
             } else if (index < 0) {
                 index = 0
             }

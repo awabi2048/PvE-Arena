@@ -37,10 +37,8 @@ class NormalArena(
         if (Bukkit.getWorlds().any { it.name == "arena_session.$uuid" }) {
             val sessionWorld = getSessionWorld()!!
             sessionWorld.entities.forEach { it.remove() }
-            println("exist")
         } else {
             launcher.prepareWorld(uuid)
-            println("or not")
         }
 
         launcher.prepareStructure(uuid)
