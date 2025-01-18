@@ -1,5 +1,6 @@
 package me.awabi2048.pve_arena.quest
 
+import me.awabi2048.pve_arena.config.DataFile
 import org.bukkit.entity.Player
 
 object WeeklyQuest: GenericQuest {
@@ -15,8 +16,8 @@ object WeeklyQuest: GenericQuest {
         TODO("Not yet implemented")
     }
 
-    override fun randomDetermine(path: String) {
-        TODO("Not yet implemented")
+    override fun getPlayerStatus(player: Player, id: String): GenericQuest.QuestStatus {
+        val status = GenericQuest.QuestStatus(DataFile.playerQuestData.getInt("${player.uniqueId}.weekly.$id.current"), DataFile.ongoingQuestData.getInt("weekly.$id.value"), DataFile.playerQuestData.getBoolean("${player.uniqueId}.weekly.$id.hasCompleted"))
+        return status
     }
-
 }

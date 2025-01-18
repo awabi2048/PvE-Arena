@@ -13,6 +13,7 @@ import me.awabi2048.pve_arena.item.AccessoryItem
 import me.awabi2048.pve_arena.item.ItemManager
 import me.awabi2048.pve_arena.item.SacrificeItem
 import me.awabi2048.pve_arena.menu.EntranceMenu
+import me.awabi2048.pve_arena.menu.QuestMenu
 import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.Bukkit
 import org.bukkit.Sound
@@ -30,7 +31,6 @@ import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerInteractAtEntityEvent
 import org.bukkit.event.player.PlayerLoginEvent
 import org.bukkit.event.player.PlayerToggleSneakEvent
-import org.bukkit.projectiles.ProjectileSource
 import org.bukkit.scheduler.BukkitRunnable
 
 object EventListener : Listener {
@@ -219,64 +219,6 @@ object EventListener : Listener {
         if (event.entity.world.name.startsWith("arena_session.") && event.target !is Player) {
             event.isCancelled = true
             event.target = event.entity.world.players.random()
-        }
-    }
-
-    @EventHandler
-    fun onEntranceMenuClicked(event: InventoryClickEvent) {
-        if (event.whoClicked !is Player) return
-        if (event.clickedInventory?.any { it != null && it.itemMeta.itemName == "§cゲートを開く" } == true) {
-            event.isCancelled = true
-            if (event.whoClicked.scoreboardTags.contains("arena.misc.in_click_interval")) return
-
-            val menu = EntranceMenu(event.whoClicked as Player)
-            val inverted = event.isRightClick
-            val player = event.whoClicked as Player
-
-            if (event.slot in listOf(19, 21, 23, 25, 40)) {
-                player.playSound(player, Sound.UI_BUTTON_CLICK, 1.0f, 2.0f)
-            }
-
-            // on start
-            if (event.slot == 40) {
-                player.closeInventory()
-
-                menu.openGate(event.clickedInventory!!)
-
-            } else {
-
-                // precession
-                when (event.slot) {
-                    19 -> menu.cycleOption(event.inventory, EntranceMenu.OptionCategory.MobType, inverted)
-                    21 -> menu.cycleOption(event.inventory, EntranceMenu.OptionCategory.MobDifficulty, inverted)
-                    23 -> menu.changeOptionValue(event.inventory, EntranceMenu.OptionCategory.PlayerCount, inverted)
-                    25 -> menu.changeOptionValue(event.inventory, EntranceMenu.OptionCategory.SacrificeAmount, inverted)
-                }
-
-                //
-                player.scoreboardTags.add("arena.misc.in_click_interval")
-                Bukkit.getScheduler().runTaskLater(
-                    instance,
-                    Runnable {
-                        player.scoreboardTags.remove("arena.misc.in_click_interval")
-                    },
-                    3L
-                )
-            }
-        }
-    }
-
-    @EventHandler
-    fun onMenuOpen(event: PlayerInteractAtEntityEvent) {
-        if (!event.rightClicked.scoreboardTags.contains("arena.interaction")) return
-        event.isCancelled = true
-
-        if (event.rightClicked.scoreboardTags.contains("arena.misc.game.entrance_menu") && !event.player.scoreboardTags.contains(
-                "arena.misc.in_click_interval"
-            )
-        ) {
-            val menu = EntranceMenu(event.player)
-            menu.open()
         }
     }
 

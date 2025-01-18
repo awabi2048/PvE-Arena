@@ -1,8 +1,21 @@
 uuid:
-  daily_normal_1: 0
-  daily_normal_2: 0
-  daily_challenge: 0
+  daily_normal_1:
+    current: 0
+    hasCompleted: false
+  daily_normal_2:
+    current: 0
+    hasCompleted: false
+  daily_challenge:
+    current: 0
+    hasCompleted: false
 
-  weekly_normal_1: 0
-  weekly_normal_2: 0
-  weekly_challenge: 0
+  weekly_normal_1:
+    current: 0
+    hasCompleted: false
+  weekly_normal_2:
+    current: 0
+    hasCompleted: false
+  weekly_challenge:
+    current: 0
+    hasCompleted: false
+

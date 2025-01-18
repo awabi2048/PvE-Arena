@@ -4,6 +4,7 @@ import me.awabi2048.pve_arena.command.MainCommand
 import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.game.Generic
 import me.awabi2048.pve_arena.game.Reward
+import me.awabi2048.pve_arena.menu.MenuEventListener
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -46,6 +47,7 @@ class Main : JavaPlugin() {
         getCommand("arena")?.setExecutor(MainCommand)
 
         server.pluginManager.registerEvents(EventListener, instance)
+        server.pluginManager.registerEvents(MenuEventListener, instance)
 
 
     }

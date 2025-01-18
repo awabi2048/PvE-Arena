@@ -20,6 +20,15 @@ abstract class MenuManager(val player: Player, val menuType: MenuType) {
 
     abstract fun open()
 
+    fun getBackIcon(): ItemStack {
+        val item = ItemStack(Material.RED_STAINED_GLASS_PANE)
+        val itemMeta = item.itemMeta
+
+        itemMeta.setItemName("§e戻る")
+        item.itemMeta = itemMeta
+        return item
+    }
+
     fun a() {
 //        val menu = Bukkit.createInventory(null, 45, "§2Arena Menu")
 //        val black = Lib.getHiddenItem(Material.BLACK_STAINED_GLASS_PANE)

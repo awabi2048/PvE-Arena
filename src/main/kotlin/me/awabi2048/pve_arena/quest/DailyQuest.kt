@@ -29,6 +29,7 @@ object DailyQuest: GenericQuest {
             val modifier = (dataSection.getInt("index_min")..dataSection.getInt("index_max")).random()
             val value = dataSection.getInt("base_value") * modifier
 
+            DataFile.ongoingQuestData.set("daily.normal_${index + 1}.icon", dataSection.getString("icon"))
             DataFile.ongoingQuestData.set("daily.normal_${index + 1}.criteria", listOf(normalObjective1, normalObjective2)[index].name)
             DataFile.ongoingQuestData.set("daily.normal_${index + 1}.value", value)
             DataFile.ongoingQuestData.set("daily.normal_${index + 1}.reward.point", dataSection.getInt("reward.point") * modifier)
@@ -63,6 +64,7 @@ object DailyQuest: GenericQuest {
         val modifier = (dataSection.getInt("index_min")..dataSection.getInt("index_max")).random()
         val value = dataSection.getInt("base_value") * modifier
 
+        DataFile.ongoingQuestData.set("daily.challenge.icon", dataSection.getString("icon"))
         DataFile.ongoingQuestData.set("daily.challenge.criteria", challengeObjective.name)
         DataFile.ongoingQuestData.set("daily.challenge.value", value)
         DataFile.ongoingQuestData.set("daily.challenge.reward.point", dataSection.getInt("reward.point") * modifier)
@@ -96,8 +98,9 @@ object DailyQuest: GenericQuest {
         TODO("Not yet implemented")
     }
 
-    override fun randomDetermine(path: String) {
-        TODO("Not yet implemented")
+    override fun getPlayerStatus(player: Player, id: String): GenericQuest.QuestStatus {
+        val status = GenericQuest.QuestStatus(DataFile.playerQuestData.getInt("${player.uniqueId}.daily.$id.current"), DataFile.ongoingQuestData.getInt("daily.$id.value"), DataFile.playerQuestData.getBoolean("${player.uniqueId}.daily.$id.hasCompleted"))
+        return status
     }
 }
 

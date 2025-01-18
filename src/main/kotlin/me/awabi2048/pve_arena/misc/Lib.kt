@@ -8,6 +8,7 @@ import org.bukkit.Material
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.SkullMeta
 
 object Lib {
     fun getHiddenItem(material: Material): ItemStack {
@@ -55,6 +56,27 @@ object Lib {
         return DataFile.mobDifficulty.getConfigurationSection(path)
     }
 
+    fun getPlayerHead(player: Player): ItemStack {
+        val item = ItemStack(Material.PLAYER_HEAD)
+        val itemMeta = item.itemMeta
+        if (itemMeta is SkullMeta) {
+            itemMeta.owningPlayer = player
+        }
+        item.itemMeta = itemMeta
+        return item
+    }
+
+    fun getProgressionBar(current: Int, max: Int, length: Int): String {
+        val filled = (current.toDouble() / max).toInt() * length
+        val unfilled = length - filled
+
+        val bar = "§a"
+
+        bar + "|".repeat(filled)
+        bar.plus("§7")
+        bar + "|".repeat(unfilled)
+        return bar
+    }
 
     class SidebarManager(player: Player) {
         fun unregister(scoreboard: String) {

@@ -45,12 +45,12 @@ interface GenericQuest {
     fun update()
     fun rewardDistribute(player: Player)
     fun criteriaCheck()
-    fun randomDetermine(path: String)
+    fun getPlayerStatus(player: Player, id: String): QuestStatus
 
     fun getDataSection(type: QuestType, criteria: Criteria): ConfigurationSection {
         val section = DataFile.questCriteria.getConfigurationSection("${type.name.substringBefore("QuestType.").lowercase()}.preset.${criteria.name.substringBefore("Criteria.").lowercase()}")!!
         return section
     }
 
-    data class QuestData(val type: QuestType, val criteria: Criteria, val value: Int)
+    data class QuestStatus(val current: Int, val objective: Int, val hasCompleted: Boolean)
 }

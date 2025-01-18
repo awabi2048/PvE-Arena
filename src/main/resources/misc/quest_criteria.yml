@@ -5,10 +5,11 @@ daily:
       index_min: 1
       index_max: 3
       title: "§eアリーナハンター"
-      description: "{criteria}アリーナを{count}回クリアしよう。"
+      description: "{criteria}アリーナを{value}回クリアしよう。"
       reward:
         point: 2
         quest_note: 1
+      icon: DIAMOND_SWORD
 
     clear_count_mob_difficulty:
       base_value: 2
@@ -19,6 +20,7 @@ daily:
       reward:
         point: 3
         quest_note: 1
+      icon: GOLDEN_SWORD
 
     clear_count_quick:
       base_value: 2
@@ -29,6 +31,7 @@ daily:
       reward:
         point: 3
         quest_note: 1
+      icon: GOLDEN_SWORD
 
     clear_count_boss:
       base_value: 1
@@ -39,6 +42,7 @@ daily:
       reward:
         point: 6
         quest_note: 2
+      icon: TRIDENT
 
     clear_count_all:
       base_value: 10
@@ -49,6 +53,7 @@ daily:
       reward:
         point: 4
         quest_note: 1
+      icon: DIAMOND_HELMET
 
     clear_time_quick:
       base_value: 1
@@ -59,6 +64,7 @@ daily:
       reward:
         point: 3
         quest_note: 1
+      icon: CLOCK
 
     gain_exp:
       base_value: 50
@@ -69,6 +75,7 @@ daily:
       reward:
         point: 2
         quest_note: 1
+      icon: EXPERIENCE_BOTTLE
 
     slay_mob:
       base_value: 30
@@ -79,3 +86,5 @@ daily:
       reward:
         point: 1
         quest_note: 1
+      icon: IRON_SWORD
+
