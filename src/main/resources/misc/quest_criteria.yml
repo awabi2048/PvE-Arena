@@ -1,0 +1,81 @@
+daily:
+  preset:
+    clear_count_mob_type:
+      base_value: 3
+      index_min: 1
+      index_max: 3
+      title: "§eアリーナハンター"
+      description: "{criteria}アリーナを{count}回クリアしよう。"
+      reward:
+        point: 2
+        quest_note: 1
+
+    clear_count_mob_difficulty:
+      base_value: 2
+      index_min: 1
+      index_max: 3
+      title: "§eアリーナハンター"
+      description: "難易度{criteria}以上のアリーナを{value}回クリアしよう。"
+      reward:
+        point: 3
+        quest_note: 1
+
+    clear_count_quick:
+      base_value: 2
+      index_min: 1
+      index_max: 3
+      title: "§e今日の運試し"
+      description: "クイックアリーナを{value}回クリアしよう。"
+      reward:
+        point: 3
+        quest_note: 1
+
+    clear_count_boss:
+      base_value: 1
+      index_min: 1
+      index_max: 3
+      title: "あああ"
+      description: "アリーナボスを{value}回撃破しよう。"
+      reward:
+        point: 6
+        quest_note: 2
+
+    clear_count_all:
+      base_value: 10
+      index_min: 1
+      index_max: 2
+      title: "§e腕試し"
+      description: "アリーナを{value}回クリアしよう。"
+      reward:
+        point: 4
+        quest_note: 1
+
+    clear_time_quick:
+      base_value: 1
+      index_min: 1
+      index_max: 1
+      title: "§bもっとクイック"
+      description: "クイックアリーナを{value}以内にクリアしよう。"
+      reward:
+        point: 3
+        quest_note: 1
+
+    gain_exp:
+      base_value: 50
+      index_min: 1
+      index_max: 3
+      title: "§aレベルアップ！"
+      description: "アリーナ経験値を{value}獲得しよう。"
+      reward:
+        point: 2
+        quest_note: 1
+
+    slay_mob:
+      base_value: 30
+      index_min: 1
+      index_max: 3
+      title: "§6アリーナハンター"
+      description: "アリーナ内でモブを{value}体討伐しよう。"
+      reward:
+        point: 1
+        quest_note: 1

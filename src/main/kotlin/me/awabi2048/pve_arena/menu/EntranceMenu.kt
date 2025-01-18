@@ -103,7 +103,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
 
                 // get material
                 val iconMaterial = Material.getMaterial(
-                    DataFile.difficulty.getString(
+                    DataFile.mobDifficulty.getString(
                         "${
                             mobDifficulty.toString().substringAfter("MobDifficulty.").lowercase()
                         }.icon"
@@ -234,7 +234,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
 
             return
         } else if (!playerSacrificeItem) {
-            player.sendMessage("$prefix §8供え物が足りない...")
+            player.sendMessage("$prefix §2供え物が足りない...")
             player.playSound(player, Sound.ENTITY_ZOMBIE_CONVERTED_TO_DROWNED, 1.0f, 0.75f)
             player.playSound(player, Sound.UI_BUTTON_CLICK, 1.0f, 0.5f)
 
@@ -261,12 +261,23 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
         val session = NormalArena(player.uniqueId.toString(), setOf(player), mobType, difficulty, sacrifice)
 
         player.sendMessage("$prefix §7ゲートを開いています....")
-        player.location.getNearbyPlayers(10.0).forEach {
-            it.playSound(it, Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 0.6f)
+        player.world.players.forEach {
+            if (it.location.distance(player.location) <= 10) it.playSound(it, Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 0.6f)
         }
 
         activeSession += session
         session.generate()
+
+        // 多重クリック防止
+        player.scoreboardTags.add("arena.misc.in_click_interval")
+
+        Bukkit.getScheduler().runTaskLater(
+            instance,
+            Runnable {
+                player.scoreboardTags.remove("arena.misc.in_click_interval")
+            },
+            100L
+        )
 
         Bukkit.getScheduler().runTaskLater(
             instance, Runnable {
@@ -350,7 +361,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
     ): Int {
         // raw cost calculation
         val baseCost = DataFile.mobType.getInt("${mobType.toString().substringAfter("MobType.").lowercase()}.base_cost")
-        val difficultyMultiplier = DataFile.difficulty.getDouble(
+        val difficultyMultiplier = DataFile.mobDifficulty.getDouble(
             "${
                 difficulty.toString().substringAfter("MobDifficulty.").lowercase()
             }.mob_multiplier"
@@ -401,7 +412,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
     private fun getDifficultyFromIcon(icon: ItemStack): WaveProcessingMode.MobDifficulty {
         return WaveProcessingMode.MobDifficulty.entries.first {
             icon.type == Material.getMaterial(
-                DataFile.difficulty.getString(
+                DataFile.mobDifficulty.getString(
                     "${
                         it.toString().substringAfter("MobDifficulty.").lowercase()
                     }.icon"
@@ -461,7 +472,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
     // get ItemStack from state
     private fun getDifficultyIcon(difficulty: WaveProcessingMode.MobDifficulty): ItemStack {
         fun getDifficultyIconMaterial(difficulty: WaveProcessingMode.MobDifficulty): Material {
-            val iconString = DataFile.difficulty.getString(
+            val iconString = DataFile.mobDifficulty.getString(
                 "${
                     difficulty.toString().substringAfter("MobDifficulty.").lowercase()
                 }.icon"
@@ -475,11 +486,11 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
                 Lib.getBar(40, "§7"), "§f左クリック§7: §a次へ, §f右クリック§7: §c前へ", "", Lib.getBar(40, "§7")
             )
 
-            for (key in DataFile.difficulty.getKeys(false)) {
+            for (key in DataFile.mobDifficulty.getKeys(false)) {
                 val addValue = if (key == difficulty.toString().substringAfter("MobDifficulty.").lowercase()) {
-                    "§6» §6${DataFile.difficulty.getString("$key.name").toString()} §6«"
+                    "§6» §6${DataFile.mobDifficulty.getString("$key.name").toString()} §6«"
                 } else {
-                    "§7${DataFile.difficulty.getString("$key.name").toString().removeRange(0..1)}"
+                    "§7${DataFile.mobDifficulty.getString("$key.name").toString().removeRange(0..1)}"
                 }
 
                 lore += addValue

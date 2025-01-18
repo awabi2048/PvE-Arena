@@ -52,6 +52,7 @@ object MainCommand : CommandExecutor, TabCompleter {
                 "join_session" -> SubCommand.Option.JOIN_SESSION
                 "stop_session" -> SubCommand.Option.STOP_SESSION
                 "get_item" -> SubCommand.Option.GET_ITEM
+                "quest_update" -> SubCommand.Option.QUEST_UPDATE
                 else -> null
             }
 
@@ -78,7 +79,7 @@ object MainCommand : CommandExecutor, TabCompleter {
         } else {
             if (p3.isNullOrEmpty()) return null
 
-            if (p3.size == 1) return listOf("config", "start_session", "stop_session", "join_session", "get_item")
+            if (p3.size == 1) return listOf("config", "start_session", "stop_session", "join_session", "get_item", "quest_update")
 
             if (p3[0] == "start_session") {
                 if (p3.size == 2) return listOf("NORMAL", "QUICK", "DUNGEON")

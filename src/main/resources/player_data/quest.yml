@@ -1,1 +1,8 @@
-daily:
+uuid:
+  daily_normal_1: 0
+  daily_normal_2: 0
+  daily_challenge: 0
+
+  weekly_normal_1: 0
+  weekly_normal_2: 0
+  weekly_challenge: 0

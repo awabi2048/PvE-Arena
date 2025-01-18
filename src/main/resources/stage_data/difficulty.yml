@@ -28,7 +28,7 @@ hard:
 expert:
   name: "§dエキスパート"
   mob_multiplier: 1.4
-  reward_multiplier: 1.8
+  reward_multiplier: 3.0
   wave: 8
   reward_ticket: extreme
   reward_point: true
@@ -37,7 +37,7 @@ expert:
 nightmare:
   name: "§4ナイトメア"
   mob_multiplier: 1.8
-  reward_multiplier: 3.0
+  reward_multiplier: 5.0
   wave: 8
   reward_ticket: extreme
   reward_point: false

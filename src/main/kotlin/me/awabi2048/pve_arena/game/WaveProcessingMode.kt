@@ -1,17 +1,13 @@
 package me.awabi2048.pve_arena.game
 
-import me.awabi2048.pve_arena.Main
 import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.Main.Companion.prefix
-import me.awabi2048.pve_arena.Main.Companion.spawnSessionKillCount
 import me.awabi2048.pve_arena.config.DataFile
-import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.*
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Monster
-import org.bukkit.entity.Skeleton
 import org.bukkit.entity.Zombie
 import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitRunnable
@@ -70,7 +66,7 @@ interface WaveProcessingMode {
     fun randomSpawn(world: World, wave: Int, mobType: MobType, difficulty: MobDifficulty) {
         fun mobStatsCalc(id: String, data: String): Double {
 
-            val difficultySection = DataFile.difficulty.getConfigurationSection(mobDifficultyToString(difficulty))!!
+            val difficultySection = DataFile.mobDifficulty.getConfigurationSection(mobDifficultyToString(difficulty))!!
 
             val mobData = DataFile.mobDefinition.getConfigurationSection(id)!!
             val baseValue = mobData.getDouble("base_stats.$data")

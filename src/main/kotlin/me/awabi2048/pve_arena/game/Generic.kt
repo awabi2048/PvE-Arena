@@ -26,7 +26,7 @@ abstract class Generic(val uuid: String, val players: Set<Player>, var status: S
     fun timeTracking() {
         object : BukkitRunnable() {
             override fun run() {
-                if (Lib.lookForSession(uuid)?.status is Status.WaitingFinish) {
+                if (Lib.lookForSession(uuid)?.status is Status.WaitingFinish || Lib.lookForSession(uuid)?.getSessionWorld()!!.players.isEmpty()) {
                     cancel()
                 } else {
                     // タイム加算

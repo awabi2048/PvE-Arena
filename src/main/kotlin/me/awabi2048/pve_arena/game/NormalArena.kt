@@ -12,7 +12,6 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Sound
 import org.bukkit.entity.Player
-import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scoreboard.Criteria
 import org.bukkit.scoreboard.DisplaySlot
 import org.bukkit.scoreboard.Objective
@@ -27,7 +26,7 @@ class NormalArena(
     val sacrifice: Int = 0,
 ) : Generic(uuid, players), WaveProcessingMode {
 
-    val lastWave = DataFile.difficulty.getInt("${mobDifficultyToString(difficulty)}.wave")
+    val lastWave = DataFile.mobDifficulty.getInt("${mobDifficultyToString(difficulty)}.wave")
 
     override fun generate() {
         status = Status.WaitingGeneration
@@ -140,7 +139,7 @@ class NormalArena(
             DataFile.mobType.getInt("${mobTypeToString(mobType)}.reward.level_experience")
 
         val difficultyMultiplier =
-            DataFile.difficulty.getDouble("${mobDifficultyToString(difficulty)}.reward_multiplier")
+            DataFile.mobDifficulty.getDouble("${mobDifficultyToString(difficulty)}.reward_multiplier")
         val sacrificeMultiplier = (1.0 + sacrifice).pow(0.5)
 
         val ticketCount = when (difficulty) {
@@ -171,7 +170,7 @@ class NormalArena(
         val baseValue = mobData.getInt("base_summon_count")
 
         val difficultyModifier =
-            DataFile.difficulty.getDouble("${mobDifficultyToString(difficulty)}.mob_multiplier")
+            DataFile.mobDifficulty.getDouble("${mobDifficultyToString(difficulty)}.mob_multiplier")
         val waveModifier = 1.0 + wave * DataFile.config.getDouble("mob_stats.per_wave", 0.1)
 
         val modifiedValue = (baseValue * difficultyModifier * waveModifier).roundToInt()
@@ -198,7 +197,7 @@ class NormalArena(
     }
 
     override fun endProcession(clearTime: Int) {
-        val difficultySection = DataFile.difficulty.getConfigurationSection(mobDifficultyToString(difficulty))!!
+        val difficultySection = DataFile.mobDifficulty.getConfigurationSection(mobDifficultyToString(difficulty))!!
         val mobTypeSection = DataFile.mobType.getConfigurationSection(mobTypeToString(mobType))!!
 
         // announce

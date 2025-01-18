@@ -1,12 +1,13 @@
 package me.awabi2048.pve_arena.misc
 
 import me.awabi2048.pve_arena.Main.Companion.activeSession
+import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.game.Generic
-import org.bukkit.Bukkit
+import me.awabi2048.pve_arena.game.WaveProcessingMode
 import org.bukkit.Material
+import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import org.bukkit.scoreboard.Criteria
 
 object Lib {
     fun getHiddenItem(material: Material): ItemStack {
@@ -43,6 +44,17 @@ object Lib {
 
         return bar
     }
+
+    fun getMobTypeSection(mobType: WaveProcessingMode.MobType): ConfigurationSection? {
+        val path = mobType.toString().substringAfter("MobType.").lowercase()
+        return DataFile.mobType.getConfigurationSection(path)
+    }
+
+    fun getMobDifficultySection(mobDifficulty: WaveProcessingMode.MobDifficulty): ConfigurationSection? {
+        val path = mobDifficulty.toString().substringAfter("MobDifficulty.").lowercase()
+        return DataFile.mobDifficulty.getConfigurationSection(path)
+    }
+
 
     class SidebarManager(player: Player) {
         fun unregister(scoreboard: String) {

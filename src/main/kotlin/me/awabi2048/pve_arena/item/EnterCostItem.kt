@@ -17,7 +17,7 @@ object EnterCostItem: ItemManager() {
                 itemMeta.lore = listOf(
                     "§7アリーナゲートへのゲートを開きます。",
                 )
-                itemMeta.setMaxStackSize(16)
+                itemMeta.setMaxStackSize(32)
                 itemMeta.setEnchantmentGlintOverride(true)
 
                 itemMeta.persistentDataContainer.set(NamespacedKey(instance, "id"), PersistentDataType.STRING, itemKind.name.substringAfter("ArenaItem."))
@@ -34,6 +34,7 @@ object EnterCostItem: ItemManager() {
                     "§7アリーナゲートへのゲートを開きます。",
                 )
 
+                itemMeta.setMaxStackSize(16)
                 itemMeta.setEnchantmentGlintOverride(true)
 
                 itemMeta.persistentDataContainer.set(NamespacedKey(instance, "id"), PersistentDataType.STRING, itemKind.name.substringAfter("ArenaItem."))

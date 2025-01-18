@@ -240,15 +240,6 @@ object EventListener : Listener {
             // on start
             if (event.slot == 40) {
                 player.closeInventory()
-                player.scoreboardTags.add("arena.misc.in_click_interval")
-
-                Bukkit.getScheduler().runTaskLater(
-                    instance,
-                    Runnable {
-                        player.scoreboardTags.remove("arena.misc.in_click_interval")
-                    },
-                    100L
-                )
 
                 menu.openGate(event.clickedInventory!!)
 

@@ -13,6 +13,7 @@ import me.awabi2048.pve_arena.game.WaveProcessingMode
 import me.awabi2048.pve_arena.item.*
 import me.awabi2048.pve_arena.misc.Lib
 import me.awabi2048.pve_arena.misc.sendError
+import me.awabi2048.pve_arena.quest.DailyQuest
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -151,12 +152,17 @@ class SubCommand(private val sender: Player, private val args: Array<out String>
             }
         }
 
+        fun questUpdate() {
+            DailyQuest.update()
+        }
+
         when (option) {
             CONFIG -> config()
             START_SESSION -> startSession()
             JOIN_SESSION -> TODO()
             STOP_SESSION -> stopSession()
             GET_ITEM -> getItem()
+            QUEST_UPDATE -> questUpdate()
         }
     }
 
@@ -165,6 +171,7 @@ class SubCommand(private val sender: Player, private val args: Array<out String>
         START_SESSION,
         JOIN_SESSION,
         STOP_SESSION,
-        GET_ITEM
+        GET_ITEM,
+        QUEST_UPDATE
     }
 }

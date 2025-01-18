@@ -35,7 +35,7 @@ skeleton:
     ticket: 3
     point: 2
     level_experience: 10
-  base_cost: 2
+  base_cost: 3
   base_summon_count: 12
   mobs:
     normal_skeleton:
@@ -70,7 +70,7 @@ spider:
     ticket: 3
     point: 2
     level_experience: 10
-  base_cost: 2
+  base_cost: 3
   base_summon_count: 12
   mobs:
     normal_spider:
@@ -101,7 +101,7 @@ blaze:
     ticket: 3
     point: 2
     level_experience: 10
-  base_cost: 2
+  base_cost: 3
   base_summon_count: 12
   mobs:
     normal_blaze:
@@ -132,7 +132,7 @@ guardian:
     ticket: 3
     point: 2
     level_experience: 10
-  base_cost: 2
+  base_cost: 4
   base_summon_count: 12
   mobs:
     guardian:
@@ -159,7 +159,7 @@ enderman:
     ticket: 3
     point: 2
     level_experience: 10
-  base_cost: 2
+  base_cost: 5
   base_summon_count: 12
   mobs:
     enderman:
