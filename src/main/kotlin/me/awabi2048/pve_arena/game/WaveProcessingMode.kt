@@ -193,6 +193,7 @@ interface WaveProcessingMode {
         mob.scoreboardTags.add("arena.mob")
 
         if (mob is Zombie) mob.isBaby = false
+        mob.maximumNoDamageTicks = 2
 
         mob.getAttribute(Attribute.GENERIC_FOLLOW_RANGE)!!.baseValue = 64.0
         (mob as Monster).target = world.players.random()

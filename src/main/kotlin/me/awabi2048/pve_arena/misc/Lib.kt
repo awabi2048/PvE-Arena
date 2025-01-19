@@ -5,6 +5,7 @@ import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.game.Generic
 import me.awabi2048.pve_arena.game.WaveProcessingMode
 import org.bukkit.Material
+import org.bukkit.attribute.Attribute
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -76,6 +77,12 @@ object Lib {
         bar.plus("§7")
         bar + "|".repeat(unfilled)
         return bar
+    }
+
+    fun healPlayer(player: Player, amount: Double) {
+        val healedHealth = player.health + amount
+        val playerMaxHealth = player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
+        player.health = if (healedHealth > playerMaxHealth) playerMaxHealth else healedHealth
     }
 
     class SidebarManager(player: Player) {

@@ -27,6 +27,7 @@ abstract class ItemManager {
         ENTER_COST_ITEM_RARE,
         HUNTER_ACCESSORY,
         ENCHANTED_BOOK_INFINIMENDING,
+        WOODEN_WAND,
     }
 
     abstract val list: List<ArenaItem>

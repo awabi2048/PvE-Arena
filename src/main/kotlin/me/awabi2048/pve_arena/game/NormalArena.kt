@@ -27,7 +27,6 @@ class NormalArena(
 ) : Generic(uuid, players), WaveProcessingMode {
 
     val lastWave = DataFile.mobDifficulty.getInt("${mobDifficultyToString(difficulty)}.wave")
-
     override fun generate() {
         status = Status.WaitingGeneration
 

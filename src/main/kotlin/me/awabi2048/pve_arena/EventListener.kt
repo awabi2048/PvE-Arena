@@ -16,8 +16,10 @@ import me.awabi2048.pve_arena.menu.EntranceMenu
 import me.awabi2048.pve_arena.menu.QuestMenu
 import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.attribute.Attribute
+import org.bukkit.block.data.type.Fire
 import org.bukkit.entity.*
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -31,6 +33,9 @@ import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerInteractAtEntityEvent
 import org.bukkit.event.player.PlayerLoginEvent
 import org.bukkit.event.player.PlayerToggleSneakEvent
+import org.bukkit.inventory.ItemStack
+import org.bukkit.metadata.FixedMetadataValue
+import org.bukkit.metadata.MetadataValue
 import org.bukkit.scheduler.BukkitRunnable
 
 object EventListener : Listener {
@@ -66,61 +71,8 @@ object EventListener : Listener {
             event.damage *= 1.3
             player.heal(event.damage * 0.1)
         }
-    }
 
-    @EventHandler
-    fun playerTakenDamageModify(event: EntityDamageByEntityEvent) {
-        if (event.entity.world.name.startsWith("arena_session.")) {
-            if (event.entity !is Player) return
-
-            if (event.damager is AbstractArrow) {
-                event.damage = (event.damager as AbstractArrow).damage
-            }
-
-            if (event.damager is Trident) {
-                event.damage = (event.damager as Trident).damage
-            }
-
-            if (event.damager is Guardian) {
-                event.damage = (event.damager as Guardian).getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value
-            }
-        }
-    }
-
-    @EventHandler
-    fun setProjectileDamage(event: ProjectileLaunchEvent) {
-        if (event.entity.world.name.startsWith("arena_session.")) {
-            if (event.entity is Trident) {
-                val shooter = (event.entity as Trident).shooter
-                if (shooter is Drowned) (event.entity as Trident).damage = shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value * 0.6
-            }
-
-            if (event.entity is AbstractArrow) {
-                val shooter = (event.entity as AbstractArrow).shooter
-                val entity = event.entity as AbstractArrow
-                if (shooter is Skeleton) entity.damage = shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value * 0.6
-                if (shooter is Stray) entity.damage = shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value * 0.6
-                if (shooter is Bogged) entity.damage = shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value * 0.6
-            }
-        }
-    }
-
-    @EventHandler
-    fun stopSessionMenu(event: InventoryClickEvent) {
-        if (event.view.title == "アリーナセッション管理") {
-            event.isCancelled = true
-            if (event.slot !in 9..35) return
-            if (!event.isShiftClick && (event.click.isMouseClick && !event.click.isLeftClick && !event.click.isRightClick)) return
-            val uuid = event.currentItem?.itemMeta?.itemName ?: return
-            val session = Lib.lookForSession(uuid)!!
-            session.stop()
-            event.whoClicked.sendMessage("$prefix §eUUID: $uuid のセッションを強制終了しました。")
-        }
-    }
-
-    @EventHandler
-    fun onPlayerKillInArena(event: EntityDeathEvent) {
-        if (event.entity.world.name.startsWith("arena_session") && event.entity.killer is Player) {
+        if (event.entity.isDead) {
             val uuid = event.entity.world.name.substringAfter("arena_session.")
             val session = Lib.lookForSession(uuid)!!
             if (session.status !is Generic.Status.InGame) return
@@ -178,6 +130,136 @@ object EventListener : Listener {
             }
         }
     }
+
+    @EventHandler
+    fun playerTakenDamageModify(event: EntityDamageByEntityEvent) {
+        if (event.entity.world.name.startsWith("arena_session.")) {
+            if (event.entity !is Player) return
+
+            if (event.damager is AbstractArrow) {
+                event.damage = (event.damager as AbstractArrow).damage
+            }
+
+            if (event.damager is Trident) {
+                event.damage = (event.damager as Trident).damage
+            }
+
+            if (event.damager is Guardian) {
+                event.damage = (event.damager as Guardian).getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value
+            }
+        }
+    }
+
+    @EventHandler
+    fun setProjectileDamage(event: ProjectileLaunchEvent) {
+        if (event.entity.world.name.startsWith("arena_session.")) {
+            if (event.entity is Trident) {
+                val shooter = (event.entity as Trident).shooter
+                if (shooter is Drowned) (event.entity as Trident).damage =
+                    shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value * 0.6
+            }
+
+            if (event.entity is AbstractArrow) {
+                val shooter = (event.entity as AbstractArrow).shooter
+                val entity = event.entity as AbstractArrow
+                if (shooter is Skeleton) entity.damage =
+                    shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value * 0.6
+                if (shooter is Stray) entity.damage =
+                    shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value * 0.6
+                if (shooter is Bogged) entity.damage =
+                    shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value * 0.6
+            }
+
+            if (event.entity is SmallFireball) {
+                val shooter = (event.entity as SmallFireball).shooter
+                val entity = event.entity as SmallFireball
+                if (shooter is Blaze) {
+                    entity.displayItem = ItemStack(Material.STONE)
+                    entity.setMetadata(
+                        "damage",
+                        FixedMetadataValue(
+                            instance,
+                            shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value * 0.5
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    fun stopSessionMenu(event: InventoryClickEvent) {
+        if (event.view.title == "アリーナセッション管理") {
+            event.isCancelled = true
+            if (event.slot !in 9..35) return
+            if (!event.isShiftClick && (event.click.isMouseClick && !event.click.isLeftClick && !event.click.isRightClick)) return
+            val uuid = event.currentItem?.itemMeta?.itemName ?: return
+            val session = Lib.lookForSession(uuid)!!
+            session.stop()
+            event.whoClicked.sendMessage("$prefix §eUUID: $uuid のセッションを強制終了しました。")
+        }
+    }
+
+//    @EventHandler
+//    fun onPlayerKillInArena(event: EntityDeathEvent) {
+//        if (event.entity.world.name.startsWith("arena_session") && event.entity.killer is Player) {
+//            val uuid = event.entity.world.name.substringAfter("arena_session.")
+//            val session = Lib.lookForSession(uuid)!!
+//            if (session.status !is Generic.Status.InGame) return
+//
+//            if (event.entity.world.entities.none { it.scoreboardTags.contains("arena.mob") } && session is WaveProcessingMode) {
+//                val lastWave = when (session) {
+//                    is NormalArena -> session.lastWave
+//                    is QuickArena -> DataFile.config.getInt("misc.game.quick_arena", 10)
+//                    else -> 1
+//                }
+//
+//                if (session is QuickArena && (session.status as Generic.Status.InGame).wave != lastWave) return
+//
+//                // ウェーブ終了処理
+//                Bukkit.getScheduler().runTaskLater(
+//                    instance,
+//                    Runnable {
+//                        session.finishWave(
+//                            event.entity.world,
+//                            (session.status as Generic.Status.InGame).wave,
+//                            lastWave,
+//                            (session.status as Generic.Status.InGame).timeElapsed
+//                        )
+//
+//                        if ((session.status as Generic.Status.InGame).wave == lastWave) Lib.lookForSession(uuid)!!.status =
+//                            Generic.Status.WaitingFinish
+//                    },
+//                    40L
+//                )
+//            }
+//
+//            // scoreboard
+//            if (session is QuickArena) return
+//
+//            val totalMobCount = when (session) {
+//                is NormalArena -> session.summonCountCalc((session.status as Generic.Status.InGame).wave)
+//                else -> 0
+//            }
+//
+//            event.entity.world.players.forEach { it ->
+//                val displayScoreboard = Main.displayScoreboardMap[it]!!
+//                val currentMobCount =
+//                    event.entity.world.entities.filter { it.scoreboardTags.contains("arena.mob") }.size
+//
+//                if (currentMobCount == totalMobCount - 1) displayScoreboard.scoreboard!!.resetScores("§fMobs §c$totalMobCount§7/$totalMobCount")
+//                spawnSessionKillCount[uuid] = spawnSessionKillCount[uuid]!! + 1
+//
+//                for (count in 0..totalMobCount) {
+//                    displayScoreboard.scoreboard!!.resetScores("§fMobs §c${count}§7/$totalMobCount")
+//                }
+//
+//                displayScoreboard.getScore("§fMobs §c${totalMobCount - spawnSessionKillCount[uuid]!!}§7/$totalMobCount").score =
+//                    1
+//                if (spawnSessionKillCount[uuid]!! == totalMobCount) spawnSessionKillCount.remove(uuid)
+//            }
+//        }
+//    }
 
     @EventHandler
     fun onPlayerMoveDimension(event: PlayerChangedWorldEvent) {

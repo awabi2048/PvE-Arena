@@ -132,9 +132,7 @@ class SubCommand(private val sender: Player, private val args: Array<out String>
         fun getItem() {
             try {
                 val itemId = args[1].uppercase()
-                val itemKind = ItemManager.ArenaItem.valueOf(itemId)
-
-                val item = when (itemKind) {
+                val item = when (val itemKind = ItemManager.ArenaItem.valueOf(itemId)) {
                     in AccessoryItem.list -> AccessoryItem.get(itemKind)
                     in BoosterItem.list -> BoosterItem.get(itemKind)
                     in EnchantmentItem.list -> EnchantmentItem.get(itemKind)
@@ -142,6 +140,7 @@ class SubCommand(private val sender: Player, private val args: Array<out String>
                     in KeyItem.list -> KeyItem.get(itemKind)
                     in SacrificeItem.list -> SacrificeItem.get(itemKind)
                     in TicketItem.list -> TicketItem.get(itemKind)
+                    in WandItem.list -> WandItem.get(itemKind)
                     else -> throw IllegalArgumentException()
                 }
 
