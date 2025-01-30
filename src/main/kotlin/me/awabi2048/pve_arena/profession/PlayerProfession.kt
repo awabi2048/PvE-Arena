@@ -1,5 +1,6 @@
 package me.awabi2048.pve_arena.profession
 
+import me.awabi2048.pve_arena.config.DataFile
 import org.bukkit.entity.Player
 
 enum class PlayerProfession {
@@ -9,12 +10,12 @@ enum class PlayerProfession {
 
     companion object {
         fun getProfession(player: Player): PlayerProfession? {
-            try {
-                val profession = player.getMetadata("arena_profession")
-                if (profession.isEmpty()) return null
-                return profession[0] as PlayerProfession
-            } catch (e: Exception) {
-                return null
+            val profession = DataFile.playerData.getString("${player.uniqueId}.profession")
+            return when(profession) {
+                "SWORDSMAN" -> SWORDSMAN
+                "ARCHER" -> ARCHER
+                "MAGE" -> MAGE
+                else -> null
             }
         }
     }

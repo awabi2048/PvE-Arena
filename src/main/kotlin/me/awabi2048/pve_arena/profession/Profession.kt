@@ -1,64 +1,77 @@
 package me.awabi2048.pve_arena.profession
 
+import me.awabi2048.pve_arena.Main
 import me.awabi2048.pve_arena.Main.Companion.instance
+import me.awabi2048.pve_arena.Main.Companion.playerSkillState
 import me.awabi2048.pve_arena.profession.PlayerProfession.*
+import org.bukkit.Bukkit
 import org.bukkit.Sound
 import org.bukkit.entity.Player
-import org.bukkit.event.inventory.ClickType
-import org.bukkit.metadata.FixedMetadataValue
 import org.bukkit.scheduler.BukkitRunnable
 
-abstract class Profession(private val owner: Player) {
-    fun spell(click: ClickType) {
-        if (!owner.hasMetadata("arena_ability_spell")) {
-            owner.setMetadata("arena_ability_spell", FixedMetadataValue(instance, listOf((click))))
-        } else {
-            val currentSpell = owner.getMetadata("arena_ability_spell")[0].value() as List<ClickType>
-            owner.setMetadata("arena_ability_spell", FixedMetadataValue(instance, currentSpell + click))
-        }
+abstract class Profession(private val player: Player) {
+    fun spell(click: ProfessionSkillState.SpellClick) {
+        if (playerSkillState[player] == null) {
+            if (click == ProfessionSkillState.SpellClick.LEFT) return
+            playerSkillState[player] = ProfessionSkillState(15, mutableListOf())
 
-        owner.setMetadata("arena_ability_spell_called", FixedMetadataValue(instance, System.currentTimeMillis()))
-
-        // spell completed
-        if ((owner.getMetadata("arena_ability_spell")[0].value() as List<*>).size == 3) {
-            val spell = owner.getMetadata("arena_ability_spell")[0].value() as List<ClickType>
-            owner.removeMetadata("arena_ability_spell", instance)
-
-            val profession = PlayerProfession.getProfession(owner)
-
-            when(profession) {
-                MAGE -> Mage(owner).callSkill(spell)
-                ARCHER -> Archer(owner).callSkill(spell)
-                SWORDSMAN -> Swordsman(owner).callSkill(spell)
-                null -> return
-            }
-        }
-
-        val ifChecking = owner.getMetadata("arena_ability_spell_checking")
-
-        // expire
-        if (ifChecking.isEmpty()){
-            owner.setMetadata(
-                "arena_ability_spell_checking",
-                FixedMetadataValue(instance, true)
-            )
-
-            object : BukkitRunnable() {
+            object: BukkitRunnable() {
                 override fun run() {
-                    if (System.currentTimeMillis() - owner.getMetadata("arena_ability_spell_called")[0].value() as Long >= 750) {
-                        owner.removeMetadata(
-                            "arena_ability_spell",
-                            instance
-                        )
-                        owner.removeMetadata("arena_ability_spell_checking", instance)
-                        owner.playSound(owner, Sound.UI_BUTTON_CLICK, 1.0f, 0.5f)
+                    if (!playerSkillState.contains(player)) {
                         cancel()
-                        return
+                    } else {
+//                    println("${playerSkillState[player]!!.expireTimer}")
+                        playerSkillState[player]!!.expireTimer -= 1
+
+                        val spell = playerSkillState[player]!!.spell
+
+                        val a: MutableList<String> = mutableListOf()
+                        for (s in spell) {
+                            if (s == ProfessionSkillState.SpellClick.RIGHT) a += "§6R"
+                            if (s == ProfessionSkillState.SpellClick.LEFT) a += "§bL"
+                        }
+
+                        player.sendTitle("", a.joinToString(" §7- "), 0, 10, 0)
+
+                        if (playerSkillState[player]!!.expireTimer == 0) {
+                            playerSkillState.remove(player)
+                            player.sendMessage("spell expired.")
+                            cancel()
+                        }
                     }
                 }
-            }.runTaskTimer(instance, 1, 1)
+            }.runTaskTimer(instance, 0L, 1L)
+        }
+
+        playerSkillState[player]!!.spell += click
+        playerSkillState[player]!!.expireTimer = 15
+
+        when(click) {
+            ProfessionSkillState.SpellClick.RIGHT -> player.playSound(player, Sound.UI_BUTTON_CLICK, 1.0f, 2.0f)
+            ProfessionSkillState.SpellClick.LEFT -> player.playSound(player, Sound.BLOCK_LAVA_POP, 1.0f, 2.0f)
+        }
+
+        // cast
+        if (playerSkillState[player]!!.spell.size == 3) {
+            val spell = playerSkillState[player]!!.spell.drop(1)
+            val profession = PlayerProfession.getProfession(player)
+
+            when(profession) {
+                SWORDSMAN -> Swordsman(player).callSkill(spell)
+                ARCHER -> Archer(player).callSkill(spell)
+                MAGE -> Mage(player).callSkill(spell)
+                null -> return
+            }
+
+            Bukkit.getScheduler().runTaskLater(
+                instance,
+                Runnable {
+                    playerSkillState.remove(player)
+                },
+                1L
+            )
         }
     }
 
-
+    abstract fun callSkill(spell: List<ProfessionSkillState.SpellClick>)
 }

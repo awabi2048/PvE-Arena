@@ -25,7 +25,7 @@ object WandEventListener: Listener {
         val wand = WandAbility(event.player, event.item!!)
         val player = event.player
 
-        if (event.action in listOf(Action.RIGHT_CLICK_AIR, Action.RIGHT_CLICK_BLOCK) && PlayerProfession.getProfession(player) == PlayerProfession.MAGE) Mage(player).spell(ClickType.RIGHT)
+//        if (event.action in listOf(Action.RIGHT_CLICK_AIR, Action.RIGHT_CLICK_BLOCK) && PlayerProfession.getProfession(player) == PlayerProfession.MAGE) Mage(player).spell(ClickType.RIGHT)
         if (event.action in listOf(Action.LEFT_CLICK_AIR, Action.LEFT_CLICK_BLOCK)) wand.shoot(player.attackCooldown)
     }
 

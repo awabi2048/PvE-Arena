@@ -81,7 +81,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
                 index = 0
             }
 
-            println("index:$index, cycled: $indexCycled, cur: $currentOption")
+//            println("index:$index, cycled: $indexCycled, cur: $currentOption")
 
             // refresh
             val goIcon = getGoIcon(
@@ -133,7 +133,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
                 index = 0
             }
 
-            println("index:$index, cycled: $indexCycled, cur: $currentOption")
+//            println("index:$index, cycled: $indexCycled, cur: $currentOption")
 
             // replace
             menu.setItem(21, getDifficultyIcon(WaveProcessingMode.MobDifficulty.entries[index]))

@@ -1,45 +1,31 @@
 package me.awabi2048.pve_arena.profession
 
-import org.bukkit.Bukkit
+import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.Sound
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
-import org.bukkit.event.inventory.ClickType
+import org.bukkit.util.Vector
 
 class Archer(val player: Player): Profession(player) {
-
-    enum class Skill {
-        HEAL,
-        SHOOT;
-
-        companion object {
-            fun heal(player: Player) {
-                player.heal(4.0)
-                player.getNearbyEntities(5.0, 5.0, 5.0).filterIsInstance<Player>().forEach {
-                    player.playSound(it, Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 2.0f)
-                }
-            }
-
-            fun shoot(player: Player) {
-                for (angle in listOf(-5.0, 0.0, 5.0)){
-                    val projectile = player.world.spawnEntity(player.eyeLocation, EntityType.ARROW)
-                    projectile.setGravity(false)
-                    projectile.velocity = player.eyeLocation.direction.rotateAroundY(angle)
-                }
-            }
-        }
+    private fun skillHeal(player: Player) {
+        Lib.healPlayer(player, 4.0)
+        Lib.playGlobalSound(player, Sound.ENTITY_PLAYER_LEVELUP, 4.0, 2.0f)
     }
 
-    fun callSkill(spell: List<ClickType>) {
-        val skill = when(spell) {
-            listOf(ClickType.RIGHT, ClickType.RIGHT, ClickType.RIGHT) -> Skill.HEAL
-            listOf(ClickType.LEFT, ClickType.LEFT, ClickType.LEFT) ->  Skill.SHOOT
-            else -> null
-        }!!
+    private fun skillShoot(player: Player) {
+        for (angle in listOf(-5.0, 0.0, 5.0)){ // degrees
+            val projectile = player.world.spawnEntity(player.eyeLocation, EntityType.ARROW)
+            projectile.velocity = player.eyeLocation.direction.rotateAroundY(Math.toRadians(angle)).multiply(3.0)
+            projectile.scoreboardTags.add("explosive_arrow")
+        }
 
-        when(skill) {
-            Skill.HEAL -> Skill.heal(player)
-            Skill.SHOOT -> Skill.shoot(player)
+        player.velocity = player.eyeLocation.direction.multiply(-1).setY(0.5)
+    }
+
+    override fun callSkill(spell: List<ProfessionSkillState.SpellClick>) {
+        when (spell) {
+            listOf(ProfessionSkillState.SpellClick.RIGHT, ProfessionSkillState.SpellClick.RIGHT) -> skillHeal(player)
+            listOf(ProfessionSkillState.SpellClick.RIGHT, ProfessionSkillState.SpellClick.LEFT) -> skillShoot(player)
         }
     }
 }

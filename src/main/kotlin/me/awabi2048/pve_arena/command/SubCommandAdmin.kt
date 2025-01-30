@@ -5,6 +5,7 @@ import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.Main.Companion.prefix
 import me.awabi2048.pve_arena.command.SubCommandAdmin.Option.*
 import me.awabi2048.pve_arena.config.DataFile
+import me.awabi2048.pve_arena.config.YamlUtil
 import me.awabi2048.pve_arena.game.Launcher
 import me.awabi2048.pve_arena.game.NormalArena
 import me.awabi2048.pve_arena.game.QuickArena
@@ -15,6 +16,7 @@ import me.awabi2048.pve_arena.misc.sendError
 import me.awabi2048.pve_arena.quest.DailyQuest
 import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
@@ -153,6 +155,17 @@ class SubCommandAdmin(private val sender: Player, private val args: Array<out St
             DailyQuest.update()
         }
 
+        fun changeJob() {
+            if (args[1] !in listOf("SWORDSMAN", "ARCHER", "MAGE")) {
+                sender.sendError("無効なコマンドですw。")
+                return
+            }
+
+            DataFile.playerData.set("${sender.uniqueId}.profession", args[1])
+            YamlUtil.save("player_data/main.yml", DataFile.playerData)
+            DataFile.reloadPlayerData()
+        }
+
         when (option) {
             CONFIG -> config()
             START_SESSION -> startSession()
@@ -160,6 +173,7 @@ class SubCommandAdmin(private val sender: Player, private val args: Array<out St
             STOP_SESSION -> stopSession()
             GET_ITEM -> getItem()
             QUEST_UPDATE -> questUpdate()
+            CHANGE_JOB -> changeJob()
         }
     }
 
@@ -169,6 +183,7 @@ class SubCommandAdmin(private val sender: Player, private val args: Array<out St
         JOIN_SESSION,
         STOP_SESSION,
         GET_ITEM,
-        QUEST_UPDATE
+        QUEST_UPDATE,
+        CHANGE_JOB
     }
 }

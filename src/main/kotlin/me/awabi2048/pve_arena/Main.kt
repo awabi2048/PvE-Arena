@@ -8,6 +8,8 @@ import me.awabi2048.pve_arena.item.wand.WandEventListener
 import me.awabi2048.pve_arena.menu.MenuEventListener
 import me.awabi2048.pve_arena.party.ChatChannel
 import me.awabi2048.pve_arena.party.Party
+import me.awabi2048.pve_arena.profession.ProfessionSkillState
+import me.awabi2048.pve_arena.profession.SkillEventListener
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -22,6 +24,7 @@ class Main : JavaPlugin() {
         val playerChatState: MutableMap<Player, ChatChannel> = mutableMapOf()
         val activeParty: MutableSet<Party> = mutableSetOf()
         val activeSession: MutableSet<Generic> = mutableSetOf()
+
         val spawnSessionKillCount: MutableMap<String, Int> = mutableMapOf()
 
         // reward multiplier
@@ -32,6 +35,8 @@ class Main : JavaPlugin() {
         // location
         lateinit var lobbyOriginLocation: Location
 //        val lobbyOriginLocation: Location = Location(Bukkit.getWorld("arena"), 0.5, 0.25, 0.5)
+
+        val playerSkillState: MutableMap<Player, ProfessionSkillState> = mutableMapOf()
 
         lateinit var instance: JavaPlugin
     }
@@ -54,6 +59,7 @@ class Main : JavaPlugin() {
         server.pluginManager.registerEvents(EventListener, instance)
         server.pluginManager.registerEvents(MenuEventListener, instance)
         server.pluginManager.registerEvents(WandEventListener, instance)
+        server.pluginManager.registerEvents(SkillEventListener, instance)
 
 
     }

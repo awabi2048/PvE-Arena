@@ -50,7 +50,7 @@ object MainCommand : CommandExecutor, TabCompleter {
             }
 
             // 権限あり
-            if (p0.hasPermission("pve_arena.command.main")){
+            if (p0.hasPermission("pve_arena.command.main")) {
                 val adminOption = when (p3[0]) {
                     "config" -> SubCommandAdmin.Option.CONFIG
                     "start_session" -> SubCommandAdmin.Option.START_SESSION
@@ -58,6 +58,7 @@ object MainCommand : CommandExecutor, TabCompleter {
                     "stop_session" -> SubCommandAdmin.Option.STOP_SESSION
                     "get_item" -> SubCommandAdmin.Option.GET_ITEM
                     "quest_update" -> SubCommandAdmin.Option.QUEST_UPDATE
+                    "change_job" -> SubCommandAdmin.Option.CHANGE_JOB
                     else -> null
                 }
 
@@ -80,14 +81,23 @@ object MainCommand : CommandExecutor, TabCompleter {
         p0: CommandSender,
         p1: Command,
         p2: String,
-        p3: Array<out String>?
+        p3: Array<out String>?,
     ): List<String>? {
         if (!p0.hasPermission("pve_arena.command.main")) {
             return listOf("party")
         } else {
             if (p3.isNullOrEmpty()) return null
 
-            if (p3.size == 1) return listOf("config", "start_session", "stop_session", "join_session", "get_item", "quest_update", "party")
+            if (p3.size == 1) return listOf(
+                "config",
+                "start_session",
+                "stop_session",
+                "join_session",
+                "get_item",
+                "quest_update",
+                "party",
+                "change_job"
+            )
 
             if (p3[0] == "start_session") {
                 if (p3.size == 2) return listOf("NORMAL", "QUICK", "DUNGEON")
@@ -123,7 +133,7 @@ object MainCommand : CommandExecutor, TabCompleter {
             if (p3[0] == "get_item") {
                 if (p3.size == 2) {
                     val list: MutableList<String> = mutableListOf()
-                     ItemManager.ArenaItem.entries.forEach { list += it.toString() }
+                    ItemManager.ArenaItem.entries.forEach { list += it.toString() }
                     return list
                 }
             }

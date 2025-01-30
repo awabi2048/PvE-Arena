@@ -86,8 +86,8 @@ object Lib {
         player.health = if (healedHealth > playerMaxHealth) playerMaxHealth else healedHealth
     }
 
-    fun playGlobalSound(player: Player, sound: org.bukkit.Sound, pitch: Float) {
-        player.getNearbyEntities(3.0, 3.0, 3.0).forEach {
+    fun playGlobalSound(player: Player, sound: org.bukkit.Sound, radius: Double, pitch: Float) {
+        player.getNearbyEntities(radius, radius, radius).forEach {
             player.playSound(it, sound, 1.0f, pitch)
             player.playSound(it, sound, 1.0f, pitch)
         }

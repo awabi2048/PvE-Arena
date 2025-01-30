@@ -26,7 +26,7 @@ abstract class Generic(val uuid: String, val players: Set<Player>, var status: S
     fun timeTracking() {
         object : BukkitRunnable() {
             override fun run() {
-                try {// タイム加算
+                try { // タイム加算
                     (status as Status.InGame).timeElapsed += 1
                     val timeElapsed = (status as Status.InGame).timeElapsed
 
@@ -46,6 +46,8 @@ abstract class Generic(val uuid: String, val players: Set<Player>, var status: S
                     cancel()
                     return
                 }
+
+                if (getSessionWorld()!!.players.isEmpty()) cancel()
             }
         }.runTaskTimer(instance, 0, 1)
     }

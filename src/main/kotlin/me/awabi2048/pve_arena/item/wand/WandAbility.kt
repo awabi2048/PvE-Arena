@@ -83,6 +83,6 @@ class WandAbility(val player: Player, val item: ItemStack) {
         }
 
         // spell
-        if (PlayerProfession.getProfession(player) == PlayerProfession.MAGE) Mage(player).spell(ClickType.LEFT)
+//        if (PlayerProfession.getProfession(player) == PlayerProfession.MAGE) Mage(player).spell(ClickType.LEFT)
     }
 }

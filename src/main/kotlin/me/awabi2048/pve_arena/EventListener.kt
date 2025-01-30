@@ -23,6 +23,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent
+import org.bukkit.event.entity.ProjectileHitEvent
 import org.bukkit.event.entity.ProjectileLaunchEvent
 import org.bukkit.event.entity.SlimeSplitEvent
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -76,6 +77,7 @@ object EventListener : Listener {
     @EventHandler
     fun playerDamageModify(event: EntityDamageByEntityEvent) {
         if (event.damager !is Player) return
+        if (!event.entity.location.world.name.startsWith("arena_session")) return
 
         val player = event.damager as Player
         if (AccessoryItem.searchPlayerInventory(player, ItemManager.ArenaItem.HUNTER_ACCESSORY) > 0) {
@@ -304,8 +306,6 @@ object EventListener : Listener {
 
         for (world in Bukkit.getWorlds().filter { it.name.startsWith("arena_session.") }) {
             if (world.players.isEmpty()) {
-//                println("SESSION SIZE: ${activeSession.size}")
-
                 val uuid = world.name.substringAfter("arena_session.")
                 val session = Lib.lookForSession(uuid)!!
                 session.stop()
@@ -350,6 +350,15 @@ object EventListener : Listener {
                     }
                 }.runTaskTimer(instance, 5, 5)
             }
+        }
+    }
+
+    @EventHandler
+    fun onArrowHit(event: ProjectileHitEvent) {
+        if (event.entity.scoreboardTags.contains("explosive_arrow")) {
+            val entity = event.entity
+            entity.location.world.createExplosion(entity.location, 2.0f, false, false)
+            entity.remove()
         }
     }
 }

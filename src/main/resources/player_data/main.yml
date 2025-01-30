@@ -4,6 +4,7 @@ uuid:
   quest_point: 0
 
   # レベリング関連
+  profession: ARCHER
   profession_level: 0
   profession_exp_required: 10
   profession_exp_current: 0
@@ -14,4 +15,4 @@ uuid:
 #  ticket_pouch_normal: 0
 #  ticket_pouch_hard: 0
 
-  #
+

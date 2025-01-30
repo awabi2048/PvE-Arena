@@ -1,5 +1,5 @@
 name: PvE-Arena
-version: '1.0-BETA'
+version: '0.1-ALPHA'
 main: me.awabi2048.pve_arena.Main
 api-version: '1.21'
 authors: [ awabi2048 ]
