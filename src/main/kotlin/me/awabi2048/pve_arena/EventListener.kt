@@ -12,14 +12,11 @@ import me.awabi2048.pve_arena.game.WaveProcessingMode
 import me.awabi2048.pve_arena.item.AccessoryItem
 import me.awabi2048.pve_arena.item.ItemManager
 import me.awabi2048.pve_arena.item.SacrificeItem
-import me.awabi2048.pve_arena.menu.EntranceMenu
-import me.awabi2048.pve_arena.menu.QuestMenu
 import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.attribute.Attribute
-import org.bukkit.block.data.type.Fire
 import org.bukkit.entity.*
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -30,34 +27,48 @@ import org.bukkit.event.entity.ProjectileLaunchEvent
 import org.bukkit.event.entity.SlimeSplitEvent
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.player.PlayerChangedWorldEvent
-import org.bukkit.event.player.PlayerInteractAtEntityEvent
 import org.bukkit.event.player.PlayerLoginEvent
 import org.bukkit.event.player.PlayerToggleSneakEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.metadata.FixedMetadataValue
-import org.bukkit.metadata.MetadataValue
 import org.bukkit.scheduler.BukkitRunnable
+import kotlin.math.roundToInt
 
 object EventListener : Listener {
     @EventHandler
     fun slimeSplit(event: SlimeSplitEvent) {
-        if (!event.entity.location.world.toString().startsWith("arena_session")) return
+        if (!event.entity.location.world.name.startsWith("arena_session")) return
         event.isCancelled = true
     }
 
     @EventHandler
-    fun expModify(event: EntityDeathEvent) {
-        if (!event.entity.location.world.toString().startsWith("arena_session")) return
+    fun dropModify(event: EntityDeathEvent) {
+        if (!event.entity.location.world.name.startsWith("arena_session") || event.entity !is Monster) return
+        val uuid = event.entity.location.world.name.substringAfter("arena_session.")
 
-        val uuid = event.entity.location.world.toString().substringAfter("arena_session.")
         if (Lib.lookForSession(uuid) is WaveProcessingMode) {
             val difficulty = (Lib.lookForSession(uuid)?.status as Generic.Status.InGame).difficulty
-            event.droppedExp *= when (difficulty) {
-                WaveProcessingMode.MobDifficulty.EASY -> 1.2.toInt()
-                WaveProcessingMode.MobDifficulty.NORMAL -> 1.5.toInt()
-                WaveProcessingMode.MobDifficulty.HARD -> 1.75.toInt()
-                WaveProcessingMode.MobDifficulty.EXPERT -> 2.0.toInt()
-                WaveProcessingMode.MobDifficulty.NIGHTMARE -> 3.0.toInt()
+            val difficultyBonus = DataFile.mobDifficulty.getDouble("${difficulty.toString().substringAfter("MobDifficulty.").lowercase()}.reward_multiplier") * (50..100).random() / 100
+
+            // exp
+            event.droppedExp = (event.droppedExp * difficultyBonus * 0.5).roundToInt()
+            println("${event.droppedExp}")
+
+            // drop
+            val majorMaterial = listOf(
+                Material.ROTTEN_FLESH,
+                Material.BONE,
+                Material.BLAZE_ROD,
+                Material.STRING,
+                Material.SPIDER_EYE,
+                Material.PRISMARINE_SHARD,
+                Material.PRISMARINE_CRYSTALS,
+                Material.ENDER_PEARL,
+            )
+
+            event.drops.filter {it.type in majorMaterial}.forEach {
+                it.amount = (it.amount * difficultyBonus).roundToInt()
+                println("dropped ${it.type} for ${it.amount}")
             }
         }
     }
@@ -65,7 +76,6 @@ object EventListener : Listener {
     @EventHandler
     fun playerDamageModify(event: EntityDamageByEntityEvent) {
         if (event.damager !is Player) return
-        println("called")
 
         val player = event.damager as Player
         if (AccessoryItem.searchPlayerInventory(player, ItemManager.ArenaItem.HUNTER_ACCESSORY) > 0) {
@@ -201,6 +211,19 @@ object EventListener : Listener {
         }
     }
 
+    @EventHandler
+    fun preventEntityFriendlyFire(event: EntityDamageByEntityEvent) {
+        if (!event.entity.location.world.name.startsWith("arena_session")) return
+        if (event.entity !is Player && event.damager !is Player) {
+            // 飛び道具 → プレイヤーからの発射でなければキャンセル
+            if (event.entity is Projectile) {
+                if ((event.entity as Projectile).shooter !is Player) event.isCancelled = true
+            } else { // それ以外
+                event.isCancelled = true
+            }
+        }
+    }
+
 //    @EventHandler
 //    fun onPlayerKillInArena(event: EntityDeathEvent) {
 //        if (event.entity.world.name.startsWith("arena_session") && event.entity.killer is Player) {
@@ -299,7 +322,7 @@ object EventListener : Listener {
 
     @EventHandler
     fun regulateMobTarget(event: EntityTargetLivingEntityEvent) {
-        if (event.entity.world.name.startsWith("arena_session.") && event.target !is Player) {
+        if (event.entity.world.name.startsWith("arena_session.") && event.target !is Player && event.entity.world.players.isNotEmpty()) {
             event.isCancelled = true
             event.target = event.entity.world.players.random()
         }

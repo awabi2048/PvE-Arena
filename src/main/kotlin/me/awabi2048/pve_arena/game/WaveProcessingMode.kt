@@ -5,10 +5,7 @@ import me.awabi2048.pve_arena.Main.Companion.prefix
 import me.awabi2048.pve_arena.config.DataFile
 import org.bukkit.*
 import org.bukkit.attribute.Attribute
-import org.bukkit.entity.EntityType
-import org.bukkit.entity.LivingEntity
-import org.bukkit.entity.Monster
-import org.bukkit.entity.Zombie
+import org.bukkit.entity.*
 import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitRunnable
 import kotlin.math.pow
@@ -54,6 +51,11 @@ interface WaveProcessingMode {
                     200L
                 )
             }
+        }
+
+        // remove projectiles
+        world.entities.filter {it is Arrow || it is Trident}.forEach {
+            it.remove()
         }
     }
 
