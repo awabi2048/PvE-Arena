@@ -57,6 +57,7 @@ class Launcher(private val type: Type) {
         val fileName = when(type) {
             NORMAL -> "normal"
             QUICK -> "normal"
+            DUNGEON -> "dungeon_start"
             BOSS_LOBBY -> "boss_lobby"
         }
 
@@ -82,6 +83,7 @@ class Launcher(private val type: Type) {
     enum class Type {
         NORMAL,
         QUICK,
+        DUNGEON,
         BOSS_LOBBY;
     }
 }

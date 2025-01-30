@@ -4,6 +4,7 @@ import me.awabi2048.pve_arena.Main.Companion.activeSession
 import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.game.Generic
 import me.awabi2048.pve_arena.game.WaveProcessingMode
+import net.kyori.adventure.sound.Sound
 import org.bukkit.Material
 import org.bukkit.attribute.Attribute
 import org.bukkit.configuration.ConfigurationSection
@@ -83,6 +84,15 @@ object Lib {
         val healedHealth = player.health + amount
         val playerMaxHealth = player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
         player.health = if (healedHealth > playerMaxHealth) playerMaxHealth else healedHealth
+    }
+
+    fun playGlobalSound(player: Player, sound: org.bukkit.Sound, pitch: Float) {
+        player.getNearbyEntities(3.0, 3.0, 3.0).forEach {
+            player.playSound(it, sound, 1.0f, pitch)
+            player.playSound(it, sound, 1.0f, pitch)
+        }
+
+        player.playSound(player, sound, 1.0f, pitch)
     }
 
     class SidebarManager(player: Player) {

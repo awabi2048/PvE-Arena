@@ -65,19 +65,20 @@ object EventListener : Listener {
     @EventHandler
     fun playerDamageModify(event: EntityDamageByEntityEvent) {
         if (event.damager !is Player) return
+        println("called")
 
         val player = event.damager as Player
         if (AccessoryItem.searchPlayerInventory(player, ItemManager.ArenaItem.HUNTER_ACCESSORY) > 0) {
             event.damage *= 1.3
-            player.heal(event.damage * 0.1)
+            Lib.healPlayer(player, event.damage * 0.1)
         }
 
-        if (event.entity.isDead) {
+        if ((event.entity as LivingEntity).health <= event.damage) {
             val uuid = event.entity.world.name.substringAfter("arena_session.")
             val session = Lib.lookForSession(uuid)!!
             if (session.status !is Generic.Status.InGame) return
-
-            if (event.entity.world.entities.none { it.scoreboardTags.contains("arena.mob") } && session is WaveProcessingMode) {
+            
+            if (event.entity.world.entities.filter { it.scoreboardTags.contains("arena.mob") }.size == 1 && session is WaveProcessingMode) {
                 val lastWave = when (session) {
                     is NormalArena -> session.lastWave
                     is QuickArena -> DataFile.config.getInt("misc.game.quick_arena", 10)

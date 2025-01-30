@@ -38,6 +38,14 @@ misc:
     # モブ召喚の間隔
     mob_summon_interval: 10
 
+    # コレクションへのカウント
+    collection_scale_easy: 1
+    collection_scale_normal: 2
+    collection_scale_hard: 3
+    collection_scale_expert: 5
+    collection_scale_nightmare: 7
+
+
   item:
     #
     sacrifice_item_charge_amount: 2500

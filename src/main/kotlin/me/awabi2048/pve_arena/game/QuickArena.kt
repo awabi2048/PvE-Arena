@@ -53,9 +53,8 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
         player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.2f)
         player.sendMessage("$prefix §eクイックアリーナ§7に入場しました。")
 
-        val displayScoreboard = setupScoreboard(player)
-        player.scoreboard = displayScoreboard.scoreboard!!
-        Main.displayScoreboardMap[player] = displayScoreboard
+        setupScoreboard(player)
+
     }
 
     override fun start() {
@@ -128,7 +127,7 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
         }
     }
 
-    override fun setupScoreboard(player: Player): Objective {
+    override fun setupScoreboard(player: Player) {
         val scoreboard = Bukkit.getScoreboardManager().newScoreboard.registerNewObjective("arena_scoreboard_display.${player.uniqueId}", Criteria.DUMMY, "§7« §e§lQuick Arena §7»")
         scoreboard.displaySlot = DisplaySlot.SIDEBAR
 //        scoreboard.numberFormat(NumberFormat.blank()) → 1.21.4までおあずけ
@@ -138,7 +137,8 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
         scoreboard.getScore("").score = 3
         scoreboard.getScore("§fWave §7---").score = 2
 
-        return scoreboard
+        player.scoreboard = scoreboard.scoreboard!!
+        Main.displayScoreboardMap[player] = scoreboard
     }
 
     override fun rewardDistribute() {

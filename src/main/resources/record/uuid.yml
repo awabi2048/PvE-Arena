@@ -1,0 +1,16 @@
+ranking:
+  quest_daily: 0
+  quest_weekly: 0
+
+  # 通常:
+  clear_count_collection:
+    zombie: 0
+    skeleton: 0
+    spider: 0
+    blaze: 0
+    guardian: 0
+    enderman: 0
+
+  clear_count_quick: 0
+  clear_count_total: 0
+

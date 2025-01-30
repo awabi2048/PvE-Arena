@@ -84,9 +84,8 @@ class NormalArena(
         player.sendMessage("$prefix §eアリーナ§7に入場しました。")
 
         // scoreboard
-        val displayScoreboard = setupScoreboard(player)
-        player.scoreboard = displayScoreboard.scoreboard!!
-        displayScoreboardMap[player] = displayScoreboard
+        setupScoreboard(player)
+
     }
 
     override fun waveProcession() {
@@ -217,21 +216,31 @@ class NormalArena(
 
         Bukkit.getServer().onlinePlayers.filter { it.hasPermission("pve_arena.main.receive_announce") }.forEach {
             it.sendMessage(
-                "$prefix §e${players.joinToString()} §7さんが$arenaName§7をクリアしました！ §7[§e${Lib.tickToClock(clearTime)}§7]"
+                "$prefix §e${players.joinToString()} §7さんが$arenaName§7をクリアしました！ §7[§e${
+                    Lib.tickToClock(
+                        clearTime
+                    )
+                }§7]"
             )
         }
 
         // stats
-        getSessionWorld()!!.players.forEach{
-            val path = "${it.uniqueId}.${mobTypeToString(mobType).uppercase()}.${mobDifficultyToString(difficulty).uppercase()}"
-            DataFile.stats.set(path, DataFile.playerData.getInt(path) + 1)
+        val collectionCount = DataFile.config.getInt("collection_scale_${mobDifficultyToString(difficulty)}")
+
+        getSessionWorld()!!.players.forEach {
+            // コレクション加算
+            val path = "${it.uniqueId}.clear_count_collection.${mobTypeToString(mobType)}"
+            DataFile.stats.set(path, DataFile.stats.getInt(path) + collectionCount)
+
+            // クエスト処理
+
         }
 
         // end session
         stop()
     }
 
-    override fun setupScoreboard(player: Player): Objective {
+    override fun setupScoreboard(player: Player) {
         val scoreboard = Bukkit.getScoreboardManager().newScoreboard.registerNewObjective(
             "arena_scoreboard_display.${player.uniqueId}",
             Criteria.DUMMY,
@@ -257,6 +266,7 @@ class NormalArena(
         scoreboard.getScore("§fWave §7---").score = 2
         scoreboard.getScore("§fMobs §7---").score = 1
 
-        return scoreboard
+        player.scoreboard = scoreboard.scoreboard!!
+        displayScoreboardMap[player] = scoreboard
     }
 }

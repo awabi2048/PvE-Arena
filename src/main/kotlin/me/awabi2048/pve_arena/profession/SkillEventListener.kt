@@ -1,9 +1,13 @@
 package me.awabi2048.pve_arena.profession
 
+import me.awabi2048.pve_arena.item.SwordItem
+import me.awabi2048.pve_arena.item.WandItem
+import me.awabi2048.pve_arena.item.wand.WandAbility
 import org.bukkit.Material
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
+import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.player.PlayerInteractEvent
 
 object SkillEventListener : Listener {
@@ -16,17 +20,56 @@ object SkillEventListener : Listener {
                 Action.RIGHT_CLICK_BLOCK
             )
         ) return
+
         val player = event.player
         val item = event.item ?: return
         val playerProfession = PlayerProfession.getProfession(player) ?: return
 
-        if (playerProfession == PlayerProfession.SWORDSMAN && (item.type in listOf(
+        // Swordsman
+        if (
+//            playerProfession == PlayerProfession.SWORDSMAN &&
+            (item.type in listOf(
                 Material.WOODEN_SWORD,
                 Material.STONE_SWORD,
                 Material.IRON_SWORD,
                 Material.GOLDEN_SWORD,
                 Material.DIAMOND_SWORD,
                 Material.NETHERITE_SWORD
-            ) || SwordItem. ))
+            ) || SwordItem.getFromItem(item) in SwordItem.list )) {
+            when(event.action) {
+                in listOf(Action.LEFT_CLICK_AIR,
+                    Action.RIGHT_CLICK_AIR) -> Swordsman(player).spell(ClickType.LEFT)
+                in listOf(Action.RIGHT_CLICK_AIR,
+                    Action.RIGHT_CLICK_BLOCK) -> Swordsman(player).spell(ClickType.RIGHT)
+                else -> return
+            }
+        }
+
+        // Archer
+        if (
+//            playerProfession == PlayerProfession.ARCHER &&
+            (item.type in listOf(
+                Material.BOW
+            ) || SwordItem.getFromItem(item) in SwordItem.list )) {
+            when(event.action) {
+                in listOf(Action.LEFT_CLICK_AIR,
+                    Action.RIGHT_CLICK_AIR) -> Swordsman(player).spell(ClickType.LEFT)
+                in listOf(Action.RIGHT_CLICK_AIR,
+                    Action.RIGHT_CLICK_BLOCK) -> Swordsman(player).spell(ClickType.RIGHT)
+                else -> return
+            }
+        }
+
+        // Mage
+        if (
+//            playerProfession == PlayerProfession.MAGE &&
+            WandItem.getFromItem(item) in WandItem.list) {
+
+            val wand = WandAbility(event.player, event.item!!)
+
+            if (event.action in listOf(Action.RIGHT_CLICK_AIR, Action.RIGHT_CLICK_BLOCK) && PlayerProfession.getProfession(player) == PlayerProfession.MAGE) Mage(player).spell(
+                ClickType.RIGHT)
+            if (event.action in listOf(Action.LEFT_CLICK_AIR, Action.LEFT_CLICK_BLOCK)) wand.shoot(player.attackCooldown)
+        }
     }
 }

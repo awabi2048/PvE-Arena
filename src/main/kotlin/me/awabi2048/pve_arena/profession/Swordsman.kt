@@ -19,12 +19,12 @@ class Swordsman(val player: Player): Profession(player) {
     }
 
     fun callSkill(spell: List<ClickType>) {
-        val skill = when(spell) {
+        val skill = when (spell) {
             listOf(ClickType.RIGHT, ClickType.RIGHT, ClickType.RIGHT) -> Skill.HEAL
             else -> null
         }!!
 
-        when(skill) {
+        when (skill) {
             Skill.HEAL -> Skill.heal(player)
         }
     }

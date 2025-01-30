@@ -31,15 +31,10 @@ class WandAbility(val player: Player, val item: ItemStack) {
             Runnable {
                 player.scoreboardTags.remove("arena.misc.wand_cooldown")
             },
-            10L
+            7
         )
 
-        val range =
-            if (player.scoreboardTags.contains("arena.misc.wand_charged")) {
-                16.0 * charge
-            } else {
-                8.0 * charge
-            }
+        val range = 8.0 * charge
 
         val damage =
             player.equipment.itemInMainHand.itemMeta.getAttributeModifiers(
@@ -50,25 +45,36 @@ class WandAbility(val player: Player, val item: ItemStack) {
         val location = player.eyeLocation
         location.y -= 0.2
 
+        val damagedEntity: MutableList<Monster> = mutableListOf()
+
         while (location.distance(player.eyeLocation) < range) {
             location.world.spawnParticle(Particle.CRIT, location, 1, 0.0, 0.0, 0.0, 0.1)
             location.add(directionVec)
 
-            val decayedDamage = damage * location.distance(player.eyeLocation).pow(-0.1)
+            damagedEntity += player.getNearbyEntities(16.0, 16.0, 16.0).filterIsInstance<Monster>()
+                .filter { it.boundingBox.contains(location.toVector()) && !damagedEntity.contains(it)}
+        }
 
-            player.getNearbyEntities(16.0, 16.0, 16.0)
-                .filter { it.boundingBox.contains(location.toVector()) && it is Monster }.forEach {
-                    (it as LivingEntity)
+        damagedEntity.forEach {
+            val decayedDamage = damage * it.location.distance(player.location).pow(-0.1)
 
-                    it.damage(decayedDamage)
-                    val event = EntityDamageByEntityEvent(
-                        player,
-                        it,
-                        EntityDamageEvent.DamageCause.MAGIC,
-                        decayedDamage
-                    )
-                    Bukkit.getPluginManager().callEvent(event)
-                }
+            it.damage(decayedDamage)
+            val event = EntityDamageByEntityEvent(
+                player,
+                it,
+                EntityDamageEvent.DamageCause.MAGIC,
+                decayedDamage
+            )
+
+            Bukkit.getPluginManager().callEvent(event)
+//                it.scoreboardTags.add("arena.misc.hit_cooldown")
+//                Bukkit.getScheduler().runTaskLater(
+//                    instance,
+//                    Runnable {
+//                        it.scoreboardTags.remove("arena.misc.hit_cooldown")
+//                    },
+//                    5L
+//                )
         }
 
         // sound
@@ -77,59 +83,6 @@ class WandAbility(val player: Player, val item: ItemStack) {
         }
 
         // spell
-        spell(ClickType.LEFT)
-//        if (Mage(player).getProfession() == PlayerProfession.MAGE) spell(ClickType.LEFT)
-    }
-
-    fun charge() {
-        spell(ClickType.RIGHT)
-//        if (Mage(player).getProfession() == PlayerProfession.MAGE) spell(ClickType.RIGHT)
-    }
-
-    private fun spell(click: ClickType) {
-        if (!player.hasMetadata("arena_ability_spell")) {
-            player.setMetadata("arena_ability_spell", FixedMetadataValue(instance, listOf((click))))
-        } else {
-            val currentSpell = player.getMetadata("arena_ability_spell")[0].value() as List<ClickType>
-            player.setMetadata("arena_ability_spell", FixedMetadataValue(instance, currentSpell + click))
-        }
-
-        println(player.getMetadata("arena_ability_spell")[0].value().toString())
-        player.sendMessage(player.getMetadata("arena_ability_spell")[0].value().toString())
-        player.setMetadata("arena_ability_spell_called", FixedMetadataValue(instance, System.currentTimeMillis()))
-
-        // spelled
-        if ((player.getMetadata("arena_ability_spell")[0].value() as List<*>).size == 3) {
-            val spell = player.getMetadata("arena_ability_spell")[0].value() as List<ClickType>
-            player.removeMetadata("arena_ability_spell", instance)
-
-            Mage(player).callSkill(spell)
-        }
-
-        println("${player.getMetadata("arena_ability_spell_checking")[0].value()}")
-
-        // expire
-        if (player.getMetadata("arena_ability_spell_checking")[0].value() != true){
-            player.setMetadata(
-                "arena_ability_spell_checking",
-                FixedMetadataValue(instance, true)
-            )
-
-            object : BukkitRunnable() {
-                override fun run() {
-                    if (System.currentTimeMillis() - player.getMetadata("arena_ability_spell_called")[0].value() as Long >= 750) {
-                        player.removeMetadata(
-                            "arena_ability_spell",
-                            instance
-                        )
-                        player.removeMetadata("arena_ability_spell_checking", instance)
-                        player.playSound(player, Sound.UI_BUTTON_CLICK, 1.0f, 0.5f)
-                        player.sendMessage("STOP.")
-                        cancel()
-                        return
-                    }
-                }
-            }.runTaskTimer(instance, 1, 1)
-        }
+        if (PlayerProfession.getProfession(player) == PlayerProfession.MAGE) Mage(player).spell(ClickType.LEFT)
     }
 }

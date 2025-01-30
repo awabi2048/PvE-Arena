@@ -6,6 +6,8 @@ import me.awabi2048.pve_arena.game.Generic
 import me.awabi2048.pve_arena.game.Reward
 import me.awabi2048.pve_arena.item.wand.WandEventListener
 import me.awabi2048.pve_arena.menu.MenuEventListener
+import me.awabi2048.pve_arena.party.ChatChannel
+import me.awabi2048.pve_arena.party.Party
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -17,6 +19,8 @@ class Main : JavaPlugin() {
     companion object {
         var prefix = "§7«§cArena§7»"
 
+        val playerChatState: MutableMap<Player, ChatChannel> = mutableMapOf()
+        val activeParty: MutableSet<Party> = mutableSetOf()
         val activeSession: MutableSet<Generic> = mutableSetOf()
         val spawnSessionKillCount: MutableMap<String, Int> = mutableMapOf()
 

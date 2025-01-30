@@ -1,14 +1,14 @@
 uuid:
-  clear_count:
-    ZOMBIE:
-      EASY: 0
-      NORMAL: 0
-      HARD: 0
-      EXPERT: 0
-      NIGHTMARE: 0
-    SKELETON:
-      EASY: 0
-      NORMAL: 0
-      HARD: 0
-      EXPERT: 0
-      NIGHTMARE: 0
+  clear_count_collection:
+    normal_zombie: 0
+    normal_skeleton: 0
+    normal_spider: 0
+    normal_blaze: 0
+    normal_guardian: 0
+    normal_enderman: 0
+    quick: 0
+
+  quest:
+    daily: 0
+    weekly: 0
+

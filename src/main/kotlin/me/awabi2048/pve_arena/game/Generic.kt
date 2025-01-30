@@ -26,10 +26,7 @@ abstract class Generic(val uuid: String, val players: Set<Player>, var status: S
     fun timeTracking() {
         object : BukkitRunnable() {
             override fun run() {
-                if (Lib.lookForSession(uuid)?.status is Status.WaitingFinish || Lib.lookForSession(uuid)?.getSessionWorld()!!.players.isEmpty()) {
-                    cancel()
-                } else {
-                    // タイム加算
+                try {// タイム加算
                     (status as Status.InGame).timeElapsed += 1
                     val timeElapsed = (status as Status.InGame).timeElapsed
 
@@ -45,6 +42,9 @@ abstract class Generic(val uuid: String, val players: Set<Player>, var status: S
 
                         displayScoreboard.getScore("§fTime §7$time").score = 3
                     }
+                } catch (e: Exception) {
+                    cancel()
+                    return
                 }
             }
         }.runTaskTimer(instance, 0, 1)
@@ -85,10 +85,8 @@ abstract class Generic(val uuid: String, val players: Set<Player>, var status: S
         object: BukkitRunnable() {
             override fun run() {
                 val sessionWorld = getSessionWorld()!!
-                sessionWorld.entities.forEach {
-                    if (it is Blaze) {
-                        if (it.velocity.y > 0.0) it.velocity.y = 0.0
-                    }
+                sessionWorld.entities.filterIsInstance<Blaze>().forEach {
+                    if (it.velocity.y > 0.0) it.velocity.y = 0.0
                 }
 
                 if (status !is Status.InGame) cancel()
@@ -99,7 +97,7 @@ abstract class Generic(val uuid: String, val players: Set<Player>, var status: S
     abstract fun joinPlayer(player: Player)
     abstract fun generate()
     abstract fun start()
-    abstract fun setupScoreboard(player: Player): Objective
+    abstract fun setupScoreboard(player: Player)
     abstract fun endProcession(clearTime: Int)
 
     sealed class Status {

@@ -6,7 +6,7 @@
 
     <groupId>me.awabi2048</groupId>
     <artifactId>PvE-Arena</artifactId>
-    <version>1.0-BETA</version>
+    <version>0.1-ALPHA</version>
     <packaging>jar</packaging>
 
     <name>PvE-Arena</name>

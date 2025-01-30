@@ -10,7 +10,6 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter
 import org.bukkit.entity.Player
-import org.bukkit.permissions.Permission
 
 object MainCommand : CommandExecutor, TabCompleter {
     override fun onCommand(p0: CommandSender, p1: Command, p2: String, p3: Array<out String>?): Boolean {
@@ -40,32 +39,41 @@ object MainCommand : CommandExecutor, TabCompleter {
 
         // 引数あり
         if (p3.isNotEmpty()) {
-            // だが権限なし → 無効なコマンド
-            if (!p0.hasPermission(Permission("pve_arena.command.main"))) {
-                p0.sendError("無効なコマンドです。")
-                return true
-            }
-
             val option = when (p3[0]) {
-                "config" -> SubCommand.Option.CONFIG
-                "start_session" -> SubCommand.Option.START_SESSION
-                "join_session" -> SubCommand.Option.JOIN_SESSION
-                "stop_session" -> SubCommand.Option.STOP_SESSION
-                "get_item" -> SubCommand.Option.GET_ITEM
-                "quest_update" -> SubCommand.Option.QUEST_UPDATE
+                "party" -> SubCommand.Option.PARTY
                 else -> null
             }
 
-            if (option == null) {
-                p0.sendError("無効なコマンドです。")
+            if (option != null) {
+                SubCommand(p0, p3, option).execute()
                 return true
             }
 
-            SubCommand(p0, p3, option).execute()
+            // 権限あり
+            if (p0.hasPermission("pve_arena.command.main")){
+                val adminOption = when (p3[0]) {
+                    "config" -> SubCommandAdmin.Option.CONFIG
+                    "start_session" -> SubCommandAdmin.Option.START_SESSION
+                    "join_session" -> SubCommandAdmin.Option.JOIN_SESSION
+                    "stop_session" -> SubCommandAdmin.Option.STOP_SESSION
+                    "get_item" -> SubCommandAdmin.Option.GET_ITEM
+                    "quest_update" -> SubCommandAdmin.Option.QUEST_UPDATE
+                    else -> null
+                }
 
+                if (adminOption == null) {
+                    p0.sendError("無効なコマンドです。")
+                    return true
+                }
+
+                SubCommandAdmin(p0, p3, adminOption).execute()
+            }
+
+            // それ以外
+            p0.sendError("無効なコマンドです。")
+            return true
         }
         return true
-
     }
 
     override fun onTabComplete(
@@ -75,11 +83,11 @@ object MainCommand : CommandExecutor, TabCompleter {
         p3: Array<out String>?
     ): List<String>? {
         if (!p0.hasPermission("pve_arena.command.main")) {
-            return null
+            return listOf("party")
         } else {
             if (p3.isNullOrEmpty()) return null
 
-            if (p3.size == 1) return listOf("config", "start_session", "stop_session", "join_session", "get_item", "quest_update")
+            if (p3.size == 1) return listOf("config", "start_session", "stop_session", "join_session", "get_item", "quest_update", "party")
 
             if (p3[0] == "start_session") {
                 if (p3.size == 2) return listOf("NORMAL", "QUICK", "DUNGEON")

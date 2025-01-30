@@ -77,7 +77,7 @@ class QuestMenu(player: Player, questType: GenericQuest.QuestType) : MenuManager
         when ((menuType as MenuType.Quest).questType) {
 
             // はじめメニュー
-            GenericQuest.QuestType.OTHER -> {
+            null -> {
                 // daily
                 val dailyIcon = ItemStack(Material.BAMBOO_HANGING_SIGN)
                 val dailyIconMeta = dailyIcon.itemMeta
@@ -107,7 +107,7 @@ class QuestMenu(player: Player, questType: GenericQuest.QuestType) : MenuManager
 
             GenericQuest.QuestType.DAILY -> {
                 menu.setItem(41, black)
-                menu.setItem(36, getBackIcon())
+                menu.setItem(36, returnIcon)
                 menu.setItem(4, Lib.getHiddenItem(Material.DIAMOND_SWORD))
 
                 try {
@@ -155,6 +155,10 @@ class QuestMenu(player: Player, questType: GenericQuest.QuestType) : MenuManager
             }
 
             GenericQuest.QuestType.WEEKLY -> {
+
+            }
+
+            else -> {
 
             }
         }

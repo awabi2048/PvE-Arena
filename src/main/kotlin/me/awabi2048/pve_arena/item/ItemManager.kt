@@ -28,6 +28,8 @@ abstract class ItemManager {
         HUNTER_ACCESSORY,
         ENCHANTED_BOOK_INFINIMENDING,
         WOODEN_WAND,
+        STEEL_SWORD,
+        HUNTER_BOW
     }
 
     abstract val list: List<ArenaItem>
