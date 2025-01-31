@@ -22,6 +22,7 @@ abstract class Profession(private val player: Player) {
 
             playerSkillState[player] = ProfessionSkillState(15, mutableListOf())
 
+            // start expire timer
             object: BukkitRunnable() {
                 override fun run() {
                     if (!playerSkillState.contains(player)) {
@@ -42,7 +43,8 @@ abstract class Profession(private val player: Player) {
 
                         if (playerSkillState[player]!!.expireTimer == 0) {
                             playerSkillState.remove(player)
-                            player.sendMessage("spell expired.")
+                            player.sendTitle("", a.joinToString("§7CANCEL"), 0, 10, 0)
+                            player.playSound(player, Sound.BLOCK_FIRE_EXTINGUISH, 0.5f, 2.0f)
                             cancel()
                         }
                     }
@@ -50,12 +52,13 @@ abstract class Profession(private val player: Player) {
             }.runTaskTimer(instance, 0L, 1L)
         }
 
+        // register
         playerSkillState[player]!!.spell += click
         playerSkillState[player]!!.expireTimer = 15
 
         when(click) {
             ProfessionSkillState.SpellClick.RIGHT -> player.playSound(player, Sound.UI_BUTTON_CLICK, 1.0f, 2.0f)
-            ProfessionSkillState.SpellClick.LEFT -> player.playSound(player, Sound.BLOCK_LAVA_POP, 1.0f, 2.0f)
+            ProfessionSkillState.SpellClick.LEFT -> player.playSound(player, Sound.ENTITY_ZOMBIE_INFECT, 1.0f, 1.6f)
         }
 
         // cast

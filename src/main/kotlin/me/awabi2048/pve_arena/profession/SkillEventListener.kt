@@ -29,6 +29,8 @@ object SkillEventListener : Listener {
         val item = event.item ?: return
         val playerProfession = PlayerProfession.getProfession(player) ?: return
 
+        println("$playerProfession")
+
         // Swordsman
         if (
             playerProfession == PlayerProfession.SWORDSMAN &&

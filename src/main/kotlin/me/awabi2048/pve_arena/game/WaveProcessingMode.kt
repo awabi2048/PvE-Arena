@@ -241,6 +241,7 @@ interface WaveProcessingMode {
         SKELETON,
         SPIDER,
         BLAZE,
+        SLIME,
         GUARDIAN,
         ENDERMAN;
     }

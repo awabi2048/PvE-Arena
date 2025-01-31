@@ -1,10 +1,15 @@
 package me.awabi2048.pve_arena.profession
 
+import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.Particle
 import org.bukkit.Sound
+import org.bukkit.attribute.Attribute
 import org.bukkit.entity.Player
+import org.bukkit.potion.PotionEffect
+import org.bukkit.potion.PotionEffectType
+import org.bukkit.scheduler.BukkitRunnable
 
 class Swordsman(val player: Player): Profession(player) {
     // 個別のスキルの処理
@@ -37,13 +42,31 @@ class Swordsman(val player: Player): Profession(player) {
 //        }
     }
 
-    private fun skillSlide() {}
+    private fun skillSlide() {
+        player.velocity = player.eyeLocation.direction
+        player.velocity.setY(0.1)
+    }
 
-    private fun skillRoundSlash() {}
+    private fun skillRoundSlash() {
+        var rotated = 0
+
+        object: BukkitRunnable() {
+            override fun run() {
+                rotated += 12
+                player.eyeLocation.direction.rotateAroundY(Math.toRadians(rotated.toDouble()))
+
+                if (rotated == 360) {
+                    cancel()
+                }
+            }
+        }.runTaskTimer(instance, 0L, 1L)
+    }
 
     private fun skillBuff() {
-        Lib.healPlayer(player, 4.0)
-        Lib.playGlobalSound(player, Sound.ENTITY_PLAYER_LEVELUP, 4.0, 2.0f)
+        Lib.playGlobalSound(player, Sound.ENTITY_WOLF_HOWL, 4.0, 1.0f)
+        player.damage(player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value * 0.5)
+        player.addPotionEffect(PotionEffect(PotionEffectType.STRENGTH, 30, 5))
+        player.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 3, 0))
     }
 
     // id -> スキル呼び出し TODO: Reflectionつかえば親クラスにまとめられるかも？
@@ -51,7 +74,7 @@ class Swordsman(val player: Player): Profession(player) {
         when(id) {
             "slash" -> skillSlash()
             "slide" -> skillSlide()
-            "roundSlash" -> skillRoundSlash()
+            "round_slash" -> skillRoundSlash()
             "buff" -> skillBuff()
         }
     }
