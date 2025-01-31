@@ -29,7 +29,8 @@ abstract class ItemManager {
         ENCHANTED_BOOK_INFINIMENDING,
         WOODEN_WAND,
         STEEL_SWORD,
-        HUNTER_BOW
+        HUNTER_BOW,
+        MULTI_SHOT_BOW
     }
 
     abstract val list: List<ArenaItem>

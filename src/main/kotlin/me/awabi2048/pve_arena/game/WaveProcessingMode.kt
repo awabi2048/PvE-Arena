@@ -54,7 +54,7 @@ interface WaveProcessingMode {
         }
 
         // remove projectiles
-        world.entities.filter {it is Arrow || it is Trident}.forEach {
+        world.entities.filterIsInstance<Projectile>().forEach {
             it.remove()
         }
     }

@@ -1,0 +1,5 @@
+zombie:
+  name: "古代のジャイアント"
+  description: ""
+  health: 1000
+  base_strength: 6

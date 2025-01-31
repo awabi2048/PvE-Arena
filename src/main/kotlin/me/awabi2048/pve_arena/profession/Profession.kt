@@ -3,6 +3,7 @@ package me.awabi2048.pve_arena.profession
 import me.awabi2048.pve_arena.Main
 import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.Main.Companion.playerSkillState
+import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.profession.PlayerProfession.*
 import org.bukkit.Bukkit
 import org.bukkit.Sound
@@ -12,7 +13,13 @@ import org.bukkit.scheduler.BukkitRunnable
 abstract class Profession(private val player: Player) {
     fun spell(click: ProfessionSkillState.SpellClick) {
         if (playerSkillState[player] == null) {
-            if (click == ProfessionSkillState.SpellClick.LEFT) return
+            val playerProfession = PlayerProfession.getProfession(player)!!
+            if (playerProfession == ARCHER) {
+                if (click == ProfessionSkillState.SpellClick.RIGHT) return
+            } else {
+                if (click == ProfessionSkillState.SpellClick.LEFT) return
+            }
+
             playerSkillState[player] = ProfessionSkillState(15, mutableListOf())
 
             object: BukkitRunnable() {
@@ -54,13 +61,12 @@ abstract class Profession(private val player: Player) {
         // cast
         if (playerSkillState[player]!!.spell.size == 3) {
             val spell = playerSkillState[player]!!.spell.drop(1)
-            val profession = PlayerProfession.getProfession(player)
+            val profession = PlayerProfession.getProfession(player)!!
 
             when(profession) {
                 SWORDSMAN -> Swordsman(player).callSkill(spell)
                 ARCHER -> Archer(player).callSkill(spell)
                 MAGE -> Mage(player).callSkill(spell)
-                null -> return
             }
 
             Bukkit.getScheduler().runTaskLater(
@@ -73,5 +79,25 @@ abstract class Profession(private val player: Player) {
         }
     }
 
-    abstract fun callSkill(spell: List<ProfessionSkillState.SpellClick>)
+    abstract fun callSkillWithId(id: String)
+
+    fun callSkill(spell: List<ProfessionSkillState.SpellClick>) {
+        fun clickToString(spell: ProfessionSkillState.SpellClick): String {
+            return when(spell) {
+                ProfessionSkillState.SpellClick.LEFT -> "L"
+                ProfessionSkillState.SpellClick.RIGHT -> "R"
+            }
+        }
+
+        // config内のswordsman/archer/mageのいずれかを取得
+        val playerProfessionId = PlayerProfession.getProfession(player)!!.toString().lowercase()
+
+        // スペルを LR とかの形に変換
+        val spellString = "${clickToString(spell[0])}${clickToString(spell[1])}"
+
+        // config内、該当professionのうち、スペルが ↑ に一致するものを呼ぶ
+        for (skillId in DataFile.playerSkill.getConfigurationSection(playerProfessionId)!!.getKeys(false)) {
+            if (DataFile.playerSkill.getString("$playerProfessionId.$skillId.spell") == spellString) callSkillWithId(skillId)
+        }
+    }
 }

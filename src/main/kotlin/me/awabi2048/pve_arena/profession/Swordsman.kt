@@ -1,17 +1,14 @@
 package me.awabi2048.pve_arena.profession
 
+import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 
 class Swordsman(val player: Player): Profession(player) {
-    private fun skillHeal(player: Player) {
-        Lib.healPlayer(player, 4.0)
-        Lib.playGlobalSound(player, Sound.ENTITY_PLAYER_LEVELUP, 4.0, 2.0f)
-    }
-
-    private fun skillSlash(player: Player) {
+    // 個別のスキルの処理
+    private fun skillSlash() {
         Lib.playGlobalSound(player, Sound.ENTITY_PLAYER_ATTACK_SWEEP, 4.0, 1.2f)
 
         val deltaVec = player.eyeLocation.direction
@@ -40,10 +37,22 @@ class Swordsman(val player: Player): Profession(player) {
 //        }
     }
 
-    override fun callSkill(spell: List<ProfessionSkillState.SpellClick>) {
-        when (spell) {
-            listOf(ProfessionSkillState.SpellClick.RIGHT, ProfessionSkillState.SpellClick.RIGHT) -> skillHeal(player)
-            listOf(ProfessionSkillState.SpellClick.RIGHT, ProfessionSkillState.SpellClick.LEFT) -> skillSlash(player)
+    private fun skillSlide() {}
+
+    private fun skillRoundSlash() {}
+
+    private fun skillBuff() {
+        Lib.healPlayer(player, 4.0)
+        Lib.playGlobalSound(player, Sound.ENTITY_PLAYER_LEVELUP, 4.0, 2.0f)
+    }
+
+    // id -> スキル呼び出し TODO: Reflectionつかえば親クラスにまとめられるかも？
+    override fun callSkillWithId(id: String) {
+        when(id) {
+            "slash" -> skillSlash()
+            "slide" -> skillSlide()
+            "roundSlash" -> skillRoundSlash()
+            "buff" -> skillBuff()
         }
     }
 }

@@ -15,7 +15,7 @@ import org.bukkit.inventory.EquipmentSlot
 object SkillEventListener : Listener {
     @EventHandler
     fun onPlayerUsedActiveSkill(event: PlayerInteractEvent) {
-        println("called. ${event.action}")
+//        println("called. ${event.action}")
         if (event.action !in listOf(
                 Action.LEFT_CLICK_AIR,
                 Action.RIGHT_CLICK_AIR,

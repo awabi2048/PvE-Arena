@@ -1,0 +1,21 @@
+swordsman:
+  slash:
+    name: "斬撃"
+    description: "前方に斬撃を繰り出します。残りの体力に応じて、回数が増えます。"
+    cost: 40
+    spell: "RL"
+  slide:
+    name: "slide"
+    description: "slideします"
+    cost: 50
+    spell: "LR"
+  round_slash:
+    name: "round_slash"
+    description: "roundです"
+    cost: 60
+    spell: "LL"
+  buff:
+    name: "バフ"
+    description: "バフです"
+    cost: 30
+    spell: "RR"

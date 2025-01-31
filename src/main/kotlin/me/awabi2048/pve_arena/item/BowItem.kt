@@ -3,6 +3,7 @@ package me.awabi2048.pve_arena.item
 import me.awabi2048.pve_arena.Main.Companion.instance
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
@@ -19,6 +20,28 @@ object BowItem : ItemManager() {
                 )
                 itemMeta.setMaxStackSize(1)
                 itemMeta.setEnchantmentGlintOverride(false)
+
+                itemMeta.persistentDataContainer.set(
+                    NamespacedKey(instance, "id"),
+                    PersistentDataType.STRING,
+                    itemKind.name.substringAfter("ArenaItem.")
+                )
+
+                itemMeta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
+
+                item.itemMeta = itemMeta
+                return item
+            }
+            ArenaItem.MULTI_SHOT_BOW -> {
+                val item = ItemStack(Material.BOW)
+                val itemMeta = item.itemMeta
+
+                itemMeta.setItemName("§a三連弓")
+                itemMeta.lore = listOf(
+                )
+                itemMeta.setMaxStackSize(1)
+                itemMeta.setEnchantmentGlintOverride(false)
+                itemMeta.enchants[Enchantment.MULTISHOT] = 1
 
                 itemMeta.persistentDataContainer.set(
                     NamespacedKey(instance, "id"),
