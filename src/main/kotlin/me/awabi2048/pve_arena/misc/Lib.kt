@@ -87,8 +87,7 @@ object Lib {
     }
 
     fun playGlobalSound(player: Player, sound: org.bukkit.Sound, radius: Double, pitch: Float) {
-        player.getNearbyEntities(radius, radius, radius).forEach {
-            player.playSound(it, sound, 1.0f, pitch)
+        player.getNearbyEntities(radius, radius, radius).filter { it != player}.forEach {
             player.playSound(it, sound, 1.0f, pitch)
         }
 

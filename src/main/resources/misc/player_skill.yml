@@ -24,16 +24,16 @@ archer:
   explosive_arrow:
     name: "バクダン矢"
     description: "前方に爆弾付きの矢を3本放ちます。着弾時に爆発し、付近の敵とプレイヤーにダメージを与えます。"
-    cost: 60
+    cost: 50
     spell: "RL"
   arrow_rain:
     name: "arrow_rain"
     description: "前方に矢の雨を降らせます。"
     cost: 50
     spell: "LR"
-  arrow_revive:
+  arrow_vengeance:
     name: "arrow retrieve?"
-    description: "地面に落ちた矢を蘇らせ、近くのモブにターゲットさせます。"
+    description: "敵の打った矢を、射手に遡ってダメージを与えます。"
     cost: 80
     spell: "LL"
   buff:
