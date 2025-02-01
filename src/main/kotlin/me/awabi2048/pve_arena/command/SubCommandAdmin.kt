@@ -157,7 +157,7 @@ class SubCommandAdmin(private val sender: Player, private val args: Array<out St
 
         fun changeJob() {
             if (args[1] !in listOf("SWORDSMAN", "ARCHER", "MAGE")) {
-                sender.sendError("無効なコマンドですw。")
+                sender.sendError("無効なコマンドです。")
                 return
             }
 

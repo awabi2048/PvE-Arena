@@ -1,45 +1,65 @@
 package me.awabi2048.pve_arena.profession
 
+import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.misc.Lib
-import org.bukkit.Particle
 import org.bukkit.Sound
+import org.bukkit.entity.Arrow
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
-import org.bukkit.potion.PotionEffect
-import org.bukkit.potion.PotionEffectType
+import org.bukkit.scheduler.BukkitRunnable
+import org.bukkit.util.Vector
 
-class Archer(val player: Player): Profession(player) {
+class Archer(val player: Player) : Profession(player) {
     // 個別のスキルの処理
-    private fun skillSlash() {
-        Lib.playGlobalSound(player, Sound.ENTITY_PLAYER_ATTACK_SWEEP, 4.0, 1.2f)
+    private fun skillExplosiveArrow() {
+        Lib.playGlobalSound(player, Sound.ENTITY_ARROW_SHOOT, 4.0, 0.75f)
+        Lib.playGlobalSound(player, Sound.ITEM_FIRECHARGE_USE, 4.0, 1.0f)
 
-        val deltaVec = player.eyeLocation.direction
-        println("$deltaVec")
-        for (delta in 0..20) {
-//            val multipliedDeltaVec = deltaVec.multiply(delta * 0.1)
-            val location = player.eyeLocation
-            println("${deltaVec}, , $location")
-//            val location = player.eyeLocation.add(Vector(direction.x * 4.0 + delta * 0.1, direction.y * 4.0 + delta * 0.05, direction.z * 4.0))
-            player.world.spawnParticle(Particle.CRIT, location, 1, 0.0, 0.0, 0.0, 0.0)
+        for (angle in listOf(-10.0, 0.0, 10.0)) {
+            val arrow = player.world.spawnEntity(player.eyeLocation.add(0.0, -0.25, 0.0), EntityType.ARROW)
+            arrow.velocity = player.location.direction.rotateAroundY(Math.toRadians(angle)).multiply(3.0)
+            arrow.fireTicks = 1200
+            arrow.scoreboardTags.add("explosive_arrow")
         }
 
-//        for (angle in -60..60) {
-//            val locationDelta = player.eyeLocation.direction.multiply(4.0)
-//            locationDelta.rotateAroundY(Math.toRadians(angle.toDouble()))
-//            locationDelta.rotateAroundX(Math.toRadians(angle.toDouble() * 0.5))
-//
-//            val location = locationDelta.toLocation(player.world).add(player.eyeLocation)
-//            println(location)
-//            player.world.spawnParticle(Particle.CRIT, location, 1, 0.0, 0.0, 0.0, 0.0)
-//
-//            player.getNearbyEntities(10.0, 10.0, 10.0).filter {it is Monster && it.boundingBox.contains(location.toVector())}.forEach {
-//                it as LivingEntity
-//                it.damage(5.0)
-//            }
-//        }
+        player.velocity = player.eyeLocation.direction.setY(0.0).normalize().multiply(-0.5).setY(0.5)
     }
 
-    private fun skillSlide() {}
+    private fun skillArrowRain() {
+        Lib.playGlobalSound(player, Sound.ENTITY_ARROW_SHOOT, 4.0, 0.75f)
+        Lib.playGlobalSound(player, Sound.ENTITY_DOLPHIN_PLAY, 4.0, 0.75f)
+
+        val deltaVec = player.eyeLocation.direction.setY(0.0).normalize().multiply(0.5)
+        println(deltaVec)
+
+        val location = player.location.add(0.0, 3.0, 0.0).add(deltaVec)
+        val startLocation = player.location.add(0.0, 3.0, 0.0).add(deltaVec)
+
+        object : BukkitRunnable() {
+            override fun run() {
+                location.add(deltaVec)
+
+                for (i in 1..5) {
+                    val arrow = player.world.spawnEntity(
+                        location, EntityType.ARROW
+                    )
+
+                    val biased = arrow.location.add(
+                        (-15..15).random() * 0.1,
+                        (-15..15).random() * 0.1,
+                        (-15..15).random() * 0.1
+                    )
+
+                    arrow.teleport(biased)
+
+                    arrow.velocity = Vector(0.0, -0.5, 0.0)
+                    (arrow as Arrow).shooter = player
+                }
+
+                if (location.distance(startLocation) >= 10) cancel()
+            }
+        }.runTaskTimer(instance, 0L, 1L)
+    }
 
     private fun skillRoundSlash() {}
 
@@ -50,10 +70,10 @@ class Archer(val player: Player): Profession(player) {
 
     // id -> スキル呼び出し TODO: Reflectionつかえば親クラスにまとめられるかも？
     override fun callSkillWithId(id: String) {
-        when(id) {
-            "slash" -> skillSlash()
-            "slide" -> skillSlide()
-            "roundSlash" -> skillRoundSlash()
+        when (id) {
+            "explosive_arrow" -> skillExplosiveArrow()
+            "arrow_rain" -> skillArrowRain()
+            "arrow_revive" -> skillRoundSlash()
             "buff" -> skillBuff()
         }
     }

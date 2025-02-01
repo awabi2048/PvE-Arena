@@ -57,9 +57,9 @@ object Reward {
         players.forEach {
             it.inventory.addItem(ticketItem)
 
-            val playerStats = PlayerData(it)
-            playerStats.addExp(exp)
-            playerStats.addArenaPoint(point)
+//            val playerStats = PlayerData(it)
+//            playerStats.addExp(exp)
+//            playerStats.addArenaPoint(point)
 
             it.sendMessage(Lib.getBar(40, "§7"))
             it.sendMessage("$prefix §e報酬を受け取りました！")

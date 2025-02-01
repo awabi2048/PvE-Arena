@@ -68,6 +68,7 @@ object MainCommand : CommandExecutor, TabCompleter {
                 }
 
                 SubCommandAdmin(p0, p3, adminOption).execute()
+                return true
             }
 
             // それ以外

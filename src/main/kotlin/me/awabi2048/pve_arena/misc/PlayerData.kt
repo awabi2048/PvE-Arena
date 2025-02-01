@@ -48,7 +48,7 @@ class PlayerData(private val player: Player) {
             player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 2.0f)
         }
 
-        YamlUtil.save("player_data/main.yml", DataFile.playerData as YamlConfiguration)
+        YamlUtil.save("player_data/main.yml", DataFile.playerData)
         DataFile.reloadPlayerData()
     }
 

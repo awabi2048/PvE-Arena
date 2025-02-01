@@ -1,7 +1,7 @@
 swordsman:
   slash:
     name: "斬撃"
-    description: "前方に斬撃を繰り出します。残りの体力に応じて、回数が増えます?"
+    description: "前方に斬撃を3回繰り出します。"
     cost: 40
     spell: "RL"
   slide:

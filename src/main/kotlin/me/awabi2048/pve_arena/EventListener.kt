@@ -358,7 +358,7 @@ object EventListener : Listener {
     fun onArrowHit(event: ProjectileHitEvent) {
         if (event.entity.scoreboardTags.contains("explosive_arrow")) {
             val entity = event.entity
-            entity.location.world.createExplosion(entity.location, 2.0f, false, false)
+            entity.location.world.createExplosion(entity.location, 3.0f, false, false)
             entity.remove()
         }
     }
