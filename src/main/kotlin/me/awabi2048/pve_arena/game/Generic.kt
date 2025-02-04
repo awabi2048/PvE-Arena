@@ -8,9 +8,9 @@ import me.awabi2048.pve_arena.Main.Companion.prefix
 import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.*
-import org.bukkit.entity.Blaze
-import org.bukkit.entity.Player
-import org.bukkit.entity.Spider
+import org.bukkit.attribute.Attribute
+import org.bukkit.entity.*
+import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scoreboard.Objective
 import org.codehaus.plexus.util.FileUtils
@@ -18,6 +18,69 @@ import org.codehaus.plexus.util.FileUtils
 abstract class Generic(val uuid: String, val players: Set<Player>, var status: Status = Status.Standby) {
 
     val originLocation = Location(Bukkit.getWorld("arena_session.${uuid}"), 0.5, 0.0, 0.5)
+
+    fun summonMobFromId(id: String, world: World, location: Location): Entity {
+        val mobData = DataFile.mobDefinition.getConfigurationSection(id)!!
+        val entityType = EntityType.valueOf(mobData.getString("entity_type") ?: throw IllegalStateException("Invalid entity type for $id specified. @stage_data/mob_definition.yml"))
+
+        val mob = world.spawnEntity(location, entityType) as LivingEntity
+        mob.customName = mobData.getString("display_name")
+        mob.isCustomNameVisible = true
+
+        // armor
+        mob.equipment!!.helmet =
+            ItemStack(Material.getMaterial(mobData.getString("equipment.helmet") ?: "AIR") ?: Material.AIR)
+        mob.equipment!!.chestplate =
+            ItemStack(Material.getMaterial(mobData.getString("equipment.chestplate") ?: "AIR") ?: Material.AIR)
+        mob.equipment!!.leggings =
+            ItemStack(Material.getMaterial(mobData.getString("equipment.leggings") ?: "AIR") ?: Material.AIR)
+        mob.equipment!!.boots =
+            ItemStack(Material.getMaterial(mobData.getString("equipment.boots") ?: "AIR") ?: Material.AIR)
+
+        mob.equipment!!.helmetDropChance = -1.0f
+        mob.equipment!!.chestplateDropChance = -1.0f
+        mob.equipment!!.leggingsDropChance = -1.0f
+        mob.equipment!!.bootsDropChance = -1.0f
+
+        // hands
+        mob.equipment!!.setItemInMainHand(
+            ItemStack(
+                Material.getMaterial(
+                    mobData.getString("equipment.hand") ?: "AIR"
+                ) ?: Material.AIR
+            )
+        )
+        mob.equipment!!.setItemInOffHand(
+            ItemStack(
+                Material.getMaterial(
+                    mobData.getString("equipment.offhand") ?: "AIR"
+                ) ?: Material.AIR
+            )
+        )
+
+        mob.equipment!!.itemInMainHandDropChance = -1.0f
+        mob.equipment!!.itemInOffHandDropChance = -1.0f
+
+        // attribute
+        mob.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.baseValue = mobData.getDouble("base_stats.health")
+        mob.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.baseValue = mobData.getDouble("base_stats.strength")
+        mob.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)!!.baseValue = mobData.getDouble("base_stats.speed")
+
+        val scaleModifier = (90..110).random().toDouble() / 100
+        mob.getAttribute(Attribute.GENERIC_SCALE)!!.baseValue = mobData.getDouble("scale") * scaleModifier
+
+        mob.health = mob.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.baseValue
+
+        // 識別タグ
+        mob.scoreboardTags.add("arena.mob")
+
+        if (mob is Zombie) mob.isBaby = false
+        mob.maximumNoDamageTicks = 2
+
+        mob.getAttribute(Attribute.GENERIC_FOLLOW_RANGE)!!.baseValue = 64.0
+
+        return mob
+    }
 
     fun getSessionWorld(): World? {
         return Bukkit.getWorld("arena_session.${uuid}")

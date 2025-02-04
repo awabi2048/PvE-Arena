@@ -61,5 +61,6 @@ object BowItem : ItemManager() {
 
     override val list = listOf(
         ArenaItem.HUNTER_BOW,
+        ArenaItem.MULTI_SHOT_BOW,
     )
 }

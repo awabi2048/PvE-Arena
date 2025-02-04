@@ -43,8 +43,8 @@ abstract class Profession(private val player: Player) {
 
                         if (playerSkillState[player]!!.expireTimer == 0) {
                             playerSkillState.remove(player)
-                            player.sendTitle("", "§7CANCEL", 0, 10, 0)
-                            player.playSound(player, Sound.BLOCK_FIRE_EXTINGUISH, 0.5f, 2.0f)
+                            player.sendTitle("", "§7CANCEL", 0, 20, 0)
+                            player.playSound(player, Sound.BLOCK_FIRE_EXTINGUISH, 0.5f, 1.7f)
                             cancel()
                         }
                     }

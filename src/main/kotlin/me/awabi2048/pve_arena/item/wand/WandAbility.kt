@@ -79,7 +79,7 @@ class WandAbility(val player: Player, val item: ItemStack) {
 
         // sound
         location.world.players.filter { it.location.distance(location) <= 10 }.forEach {
-            it.playSound(it, Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1.0f, ((12..18).random() / 10).toFloat())
+                it.playSound(it, Sound.ENTITY_ZOMBIE_INFECT, 1.0f, ((12..18).random() / 10).toFloat())
         }
 
         // spell

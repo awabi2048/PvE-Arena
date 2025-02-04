@@ -4,10 +4,14 @@ import me.awabi2048.pve_arena.Main.Companion.activeSession
 import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.game.Generic
 import me.awabi2048.pve_arena.game.WaveProcessingMode
-import net.kyori.adventure.sound.Sound
+import me.awabi2048.pve_arena.profession.ArrowType
 import org.bukkit.Material
+import org.bukkit.World
 import org.bukkit.attribute.Attribute
 import org.bukkit.configuration.ConfigurationSection
+import org.bukkit.enchantments.Enchantment
+import org.bukkit.entity.AbstractArrow
+import org.bukkit.entity.Arrow
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
@@ -92,6 +96,29 @@ object Lib {
         }
 
         player.playSound(player, sound, 1.0f, pitch)
+    }
+
+    fun setArrowAttribute(arrowEntity: AbstractArrow, bowItem: ItemStack, arrowType: ArrowType) {
+        // tag
+        arrowEntity.addScoreboardTag("$arrowType")
+
+        // damage
+        val baseDamage = when(arrowType) {
+            ArrowType.FLINT_TIPPED -> 2.0
+            ArrowType.IRON_TIPPED -> 4.0
+            ArrowType.DIAMOND_TIPPED -> 7.0
+            else -> 2.0
+        }
+
+        val powerEnchantLevel = bowItem.getEnchantmentLevel(Enchantment.POWER)
+        val enchantmentModifier = (powerEnchantLevel + 1) * 0.25 + 1.0
+
+        val arrowDamage = baseDamage * enchantmentModifier
+        arrowEntity.damage = arrowDamage
+    }
+
+    fun getUUID(world: World): String {
+        return world.name.substringAfter("arena_session.")
     }
 
     class SidebarManager(player: Player) {

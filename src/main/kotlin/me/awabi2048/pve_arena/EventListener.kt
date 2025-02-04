@@ -5,10 +5,7 @@ import me.awabi2048.pve_arena.Main.Companion.lobbyOriginLocation
 import me.awabi2048.pve_arena.Main.Companion.prefix
 import me.awabi2048.pve_arena.Main.Companion.spawnSessionKillCount
 import me.awabi2048.pve_arena.config.DataFile
-import me.awabi2048.pve_arena.game.Generic
-import me.awabi2048.pve_arena.game.NormalArena
-import me.awabi2048.pve_arena.game.QuickArena
-import me.awabi2048.pve_arena.game.WaveProcessingMode
+import me.awabi2048.pve_arena.game.*
 import me.awabi2048.pve_arena.item.AccessoryItem
 import me.awabi2048.pve_arena.item.ItemManager
 import me.awabi2048.pve_arena.item.SacrificeItem
@@ -27,10 +24,7 @@ import org.bukkit.event.entity.ProjectileHitEvent
 import org.bukkit.event.entity.ProjectileLaunchEvent
 import org.bukkit.event.entity.SlimeSplitEvent
 import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.event.player.PlayerChangedWorldEvent
-import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerLoginEvent
-import org.bukkit.event.player.PlayerToggleSneakEvent
+import org.bukkit.event.player.*
 import org.bukkit.inventory.ItemStack
 import org.bukkit.metadata.FixedMetadataValue
 import org.bukkit.scheduler.BukkitRunnable
@@ -355,11 +349,18 @@ object EventListener : Listener {
     }
 
     @EventHandler
-    fun onArrowHit(event: ProjectileHitEvent) {
-        if (event.entity.scoreboardTags.contains("explosive_arrow")) {
-            val entity = event.entity
-            entity.location.world.createExplosion(entity.location, 3.0f, false, false)
-            entity.remove()
+    fun onAA(event: PlayerMoveEvent) {
+        if (event.player.world.name.startsWith("arena_session.")) {
+            val uuid = Lib.getUUID(event.player.world)
+            val session = Lib.lookForSession(uuid)
+            if (session is ArenaDungeon) {
+                for (entranceEntity in event.player.world.entities.filter {it.scoreboardTags.contains("arena.game.dungeon_exit") && !it.scoreboardTags.contains("arena.game.dungeon_entrance")}) {
+                    if (event.player.world.players.all { entranceEntity.boundingBox.contains(it.location.toVector()) } ) {
+                        session.playerChangeRoom(entranceEntity.scoreboardTags.contains("arena.game.dungeon_floor_changer"))
+                        break
+                    }
+                }
+            }
         }
     }
 }

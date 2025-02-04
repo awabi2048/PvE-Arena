@@ -141,7 +141,7 @@ interface WaveProcessingMode {
 //        println("CANDIDATES: $spawnCandidate, SEED:$seed ,MOB ID:$spawnMobId")
 
         val mobData = DataFile.mobDefinition.getConfigurationSection(spawnMobId)!!
-        val entityType = EntityType.valueOf(mobData.getString("entity_type") ?: "".uppercase())
+        val entityType = EntityType.valueOf(mobData.getString("entity_type") ?: throw IllegalStateException("Invalid entity type for $spawnMobId specified. @stage_data/mob_definition.yml"))
 
         val mob = world.spawnEntity(spawnLocation, entityType) as LivingEntity
         mob.customName = mobData.getString("display_name")
@@ -186,19 +186,6 @@ interface WaveProcessingMode {
         mob.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.baseValue = mobStatsCalc(spawnMobId, "strength")
         mob.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)!!.baseValue = mobStatsCalc(spawnMobId, "speed")
 
-        val scaleModifier = (90..110).random().toDouble() / 100
-        mob.getAttribute(Attribute.GENERIC_SCALE)!!.baseValue = mobData.getDouble("scale") * scaleModifier
-
-        mob.health = mob.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.baseValue
-
-        // 識別タグ
-        mob.scoreboardTags.add("arena.mob")
-
-        if (mob is Zombie) mob.isBaby = false
-        mob.maximumNoDamageTicks = 2
-
-        mob.getAttribute(Attribute.GENERIC_FOLLOW_RANGE)!!.baseValue = 64.0
-        (mob as Monster).target = world.players.random()
 
         world.spawnParticle(Particle.TRIAL_SPAWNER_DETECTION, spawnLocation, 10, 0.1, 0.1, 0.1, 0.1)
 

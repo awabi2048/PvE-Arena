@@ -6,10 +6,7 @@ import me.awabi2048.pve_arena.Main.Companion.prefix
 import me.awabi2048.pve_arena.command.SubCommandAdmin.Option.*
 import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.config.YamlUtil
-import me.awabi2048.pve_arena.game.Launcher
-import me.awabi2048.pve_arena.game.NormalArena
-import me.awabi2048.pve_arena.game.QuickArena
-import me.awabi2048.pve_arena.game.WaveProcessingMode
+import me.awabi2048.pve_arena.game.*
 import me.awabi2048.pve_arena.item.*
 import me.awabi2048.pve_arena.misc.Lib
 import me.awabi2048.pve_arena.misc.sendError
@@ -35,55 +32,103 @@ class SubCommandAdmin(private val sender: Player, private val args: Array<out St
         }
 
         fun startSession() {
-            try {
-                sender.sendMessage("$prefix §開始処理を実行中です。通常§n2秒程度§7掛かります。")
 
-                val type = Launcher.Type.valueOf(args[1])
-
+            val type = Launcher.Type.valueOf(args[1])
+//
                 val uuid = sender.uniqueId.toString()
                 val players = setOf(sender)
 
-                if (type == Launcher.Type.NORMAL) {
-                    val mobType = WaveProcessingMode.MobType.valueOf(args[2])
-                    val difficulty = WaveProcessingMode.MobDifficulty.valueOf(args[3])
-                    val sacrifice = args[4].toInt()
+            if (type == Launcher.Type.DUNGEON) {
+                val session = ArenaDungeon(
+                    uuid = uuid,
+                    players = players,
+                    status = ArenaDungeon.Status.WaitingGeneration,
+                    structureType = ArenaDungeon.StructureType.DESERT_TEMPLE
+                )
 
-//                    val initialStatus = NormalArena.Status(0, players.toMutableSet(), Generic.StatusCode.WAITING_GENERATION)
-                    val session = NormalArena(uuid, players, mobType, difficulty, sacrifice)
+                activeSession += session
+                session.generate()
 
-                    activeSession += session
-                    session.generate()
-
-                    Bukkit.getScheduler().runTaskLater(
-                        instance,
-                        Runnable {
-                            session.joinPlayer(sender)
-                            session.start()
-                        },
-                        40L
-                    )
-                }
-
-                if (type == Launcher.Type.QUICK) {
-
-                    val session = QuickArena(uuid, players)
-
-                    activeSession += session
-                    session.generate()
-
-                    Bukkit.getScheduler().runTaskLater(
-                        instance,
-                        Runnable {
-                            session.joinPlayer(sender)
-                            session.start()
-                        },
-                        40L
-                    )
-                }
-
-            } catch (e: Exception) {
-                sender.sendError("無効なセッション情報です: start_session <TYPE> <MobType> <Difficulty> <Sacrifice>")
+                Bukkit.getScheduler().runTaskLater(
+                    instance,
+                    Runnable {
+                        session.joinPlayer(sender)
+                        session.start()
+                    },
+                    40L
+                )
             }
+
+//            try {
+//                sender.sendMessage("$prefix §7開始処理を実行中です。通常§n2秒程度§7掛かります。")
+//
+//                val type = Launcher.Type.valueOf(args[1])
+//
+//                val uuid = sender.uniqueId.toString()
+//                val players = setOf(sender)
+//
+//                if (type == Launcher.Type.NORMAL) {
+//                    val mobType = WaveProcessingMode.MobType.valueOf(args[2])
+//                    val difficulty = WaveProcessingMode.MobDifficulty.valueOf(args[3])
+//                    val sacrifice = args[4].toInt()
+//
+////                    val initialStatus = NormalArena.Status(0, players.toMutableSet(), Generic.StatusCode.WAITING_GENERATION)
+//                    val session = NormalArena(uuid, players, mobType, difficulty, sacrifice)
+//
+//                    activeSession += session
+//                    session.generate()
+//
+//                    Bukkit.getScheduler().runTaskLater(
+//                        instance,
+//                        Runnable {
+//                            session.joinPlayer(sender)
+//                            session.start()
+//                        },
+//                        40L
+//                    )
+//                }
+//
+//                if (type == Launcher.Type.QUICK) {
+//
+//                    val session = QuickArena(uuid, players)
+//
+//                    activeSession += session
+//                    session.generate()
+//
+//                    Bukkit.getScheduler().runTaskLater(
+//                        instance,
+//                        Runnable {
+//                            session.joinPlayer(sender)
+//                            session.start()
+//                        },
+//                        40L
+//                    )
+//                }
+//
+//                if (type == Launcher.Type.DUNGEON) {
+//                    val session = ArenaDungeon(
+//                        uuid = uuid,
+//                        players = players,
+//                        status = ArenaDungeon.Status.WaitingGeneration,
+//                        structureType = ArenaDungeon.StructureType.DESERT_TEMPLE
+//                    )
+//
+//                    activeSession += session
+//                    session.generate()
+//
+//                    Bukkit.getScheduler().runTaskLater(
+//                        instance,
+//                        Runnable {
+//                            session.joinPlayer(sender)
+//                            session.start()
+//                        },
+//                        40L
+//                    )
+//                }
+//
+//            } catch (e: Exception) {
+//                sender.sendError("無効なセッション情報です: start_session <TYPE> <MobType> <Difficulty> <Sacrifice>")
+//            }
         }
 
         fun stopSession() {
@@ -135,10 +180,12 @@ class SubCommandAdmin(private val sender: Player, private val args: Array<out St
                 val item = when (val itemKind = ItemManager.ArenaItem.valueOf(itemId)) {
                     in AccessoryItem.list -> AccessoryItem.get(itemKind)
                     in BoosterItem.list -> BoosterItem.get(itemKind)
+                    in BowItem.list -> BowItem.get(itemKind)
                     in EnchantmentItem.list -> EnchantmentItem.get(itemKind)
                     in EnterCostItem.list -> EnterCostItem.get(itemKind)
                     in KeyItem.list -> KeyItem.get(itemKind)
                     in SacrificeItem.list -> SacrificeItem.get(itemKind)
+                    in SwordItem.list -> SwordItem.get(itemKind)
                     in TicketItem.list -> TicketItem.get(itemKind)
                     in WandItem.list -> WandItem.get(itemKind)
                     else -> throw IllegalArgumentException()
@@ -162,7 +209,6 @@ class SubCommandAdmin(private val sender: Player, private val args: Array<out St
             }
 
             DataFile.playerData.set("${sender.uniqueId}.profession", args[1])
-            YamlUtil.save("player_data/main.yml", DataFile.playerData)
             DataFile.reloadPlayerData()
         }
 

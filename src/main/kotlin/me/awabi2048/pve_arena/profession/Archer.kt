@@ -16,11 +16,11 @@ class Archer(val player: Player) : Profession(player) {
         Lib.playGlobalSound(player, Sound.ENTITY_ARROW_SHOOT, 4.0, 0.75f)
         Lib.playGlobalSound(player, Sound.ITEM_FIRECHARGE_USE, 4.0, 1.0f)
 
-        for (angle in listOf(-10.0, 0.0, 10.0)) {
-            val arrow = player.world.spawnEntity(player.eyeLocation.add(0.0, -0.25, 0.0), EntityType.ARROW)
+        for (angle in listOf(-5.0, 0.0, 5.0)) {
+            val arrow = player.world.spawnEntity(player.eyeLocation.add(0.0, -0.25, 0.0), EntityType.ARROW) as Arrow
             arrow.velocity = player.location.direction.rotateAroundY(Math.toRadians(angle)).multiply(3.0)
             arrow.fireTicks = 1200
-            arrow.scoreboardTags.add("explosive_arrow")
+            Lib.setArrowAttribute(arrow, player.equipment.itemInMainHand, ArrowType.EXPLOSIVE)
         }
 
         player.velocity = player.eyeLocation.direction.setY(0.0).normalize().multiply(-0.5).setY(0.5)
@@ -34,28 +34,30 @@ class Archer(val player: Player) : Profession(player) {
 
         val location = player.location.add(0.0, 3.0, 0.0).add(deltaVec)
         val startLocation = player.location.add(0.0, 3.0, 0.0).add(deltaVec)
+        val bowItem = player.equipment.itemInMainHand
 
         object : BukkitRunnable() {
             override fun run() {
                 location.add(deltaVec)
+                Lib.playGlobalSound(player, Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED, 3.0, 1.0f)
 
                 for (i in 1..5) {
                     val arrow = player.world.spawnEntity(
                         location, EntityType.ARROW
                     )
 
-                    val biased = arrow.location.add(
+                    val displaced = arrow.location.add(
                         (-15..15).random() * 0.1,
                         (-15..15).random() * 0.1,
                         (-15..15).random() * 0.1
                     )
 
-                    arrow.teleport(biased)
+                    arrow.teleport(displaced)
 
                     arrow.velocity = Vector(0.0, -0.5, 0.0)
                     (arrow as Arrow).shooter = player
                     arrow.pickupStatus = AbstractArrow.PickupStatus.CREATIVE_ONLY
-                    arrow.damage = 6.0
+                    Lib.setArrowAttribute(arrow, bowItem, ArrowType.IRON_TIPPED)
                 }
 
                 if (location.distance(startLocation) >= 10) cancel()

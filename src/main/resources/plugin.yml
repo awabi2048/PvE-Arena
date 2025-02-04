@@ -8,6 +8,9 @@ commands:
   arena:
     description: "Main arena command."
 
+  test_fawe:
+    description: "wawa"
+
 permissions:
   pve_arena.main.admin:
     description: ""

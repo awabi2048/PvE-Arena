@@ -1,5 +1,6 @@
 package me.awabi2048.pve_arena.item.wand
 
+import me.awabi2048.pve_arena.Main
 import me.awabi2048.pve_arena.item.WandItem
 import me.awabi2048.pve_arena.profession.Mage
 import me.awabi2048.pve_arena.profession.PlayerProfession
@@ -26,7 +27,7 @@ object WandEventListener: Listener {
         val player = event.player
 
 //        if (event.action in listOf(Action.RIGHT_CLICK_AIR, Action.RIGHT_CLICK_BLOCK) && PlayerProfession.getProfession(player) == PlayerProfession.MAGE) Mage(player).spell(ClickType.RIGHT)
-        if (event.action in listOf(Action.LEFT_CLICK_AIR, Action.LEFT_CLICK_BLOCK)) wand.shoot(player.attackCooldown)
+        if (event.action in listOf(Action.LEFT_CLICK_AIR, Action.LEFT_CLICK_BLOCK) && Main.playerSkillState[player] == null) wand.shoot(player.attackCooldown)
     }
 
     @EventHandler

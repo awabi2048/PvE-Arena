@@ -48,14 +48,14 @@ mage:
     description: "目線の先に小さな隕石を召喚します。"
     cost: 60
     spell: "RL"
-  health_absorption:
+  gravity_well:
     name: "absorb"
-    description: "敵にターゲットする弾幕を放ちます。ヒット時に敵の体力を奪い、衰弱状態を付与します。"
+    description: "小さな重力井戸を作り出します。敵を吸い寄せ、ダメージを与えます。"
     cost: 60
     spell: "LR"
-  wave:
-    name: "wave"
-    description: "波動"
+  lightning:
+    name: "lightning"
+    description: "かみなり"
     cost: 80
     spell: "LL"
   buff:

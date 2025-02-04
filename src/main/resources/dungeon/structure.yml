@@ -1,4 +1,10 @@
 structure_type:
+
   desert_temple:
-    - normal_1
-    - normal_2
+    possible_structure:
+      - room_3
+    possible_mob:
+      - armored_zombie
+      - skeleton_soldier
+      - mother_spider
+

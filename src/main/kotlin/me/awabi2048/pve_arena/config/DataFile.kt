@@ -31,7 +31,7 @@ object DataFile {
         "player_data/stats.yml",
         "player_data/record.yml",
         "misc/custom_model_data.yml",
-//        "dungeon/structure.yml",
+        "dungeon/structure.yml",
         "misc/player_skill.yml",
     )
 
@@ -47,7 +47,7 @@ object DataFile {
         ongoingQuestData = YamlUtil.load("ongoing_quest.yml")
         record = YamlUtil.load("player_data/record.yml")
         customModelData = YamlUtil.load("misc/custom_model_data.yml")
-//        dungeonStructure = YamlUtil.load("misc/custom_model_data.yml")
+        dungeonStructure = YamlUtil.load("dungeon/structure.yml")
         playerSkill = YamlUtil.load("misc/player_skill.yml")
     }
 
@@ -62,10 +62,10 @@ object DataFile {
     }
 
     fun reloadPlayerData() {
-        YamlUtil.save("player_data/main.yml", playerData)
+//        YamlUtil.save("player_data/main.yml", playerData)
         playerData = YamlUtil.load("player_data/main.yml")
 
-        YamlUtil.save("player_data/quest.yml", playerQuestData)
+//        YamlUtil.save("player_data/quest.yml", playerQuestData)
         playerData = YamlUtil.load("player_data/quest.yml")
     }
 
