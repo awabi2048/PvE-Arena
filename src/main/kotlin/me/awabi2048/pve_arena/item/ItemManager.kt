@@ -28,8 +28,16 @@ abstract class ItemManager {
         HUNTER_ACCESSORY,
         ENCHANTED_BOOK_INFINIMENDING,
         WOODEN_WAND,
+        STEADY_WOODEN_WAND,
+        WISDOM_OAK_WAND,
+        CRYSTAL_WAND,
+        MOON_STONE_WAND,
+        DRAGON_BORN_WAND,
         STEEL_SWORD,
         HUNTER_BOW,
+        STEADY_BOW,
+        SCULK_BOW,
+        DRAGON_BORN_BOW,
         MULTI_SHOT_BOW
     }
 

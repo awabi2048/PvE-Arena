@@ -58,11 +58,11 @@ class WandAbility(val player: Player, val item: ItemStack) {
         damagedEntity.forEach {
             val decayedDamage = damage * it.location.distance(player.location).pow(-0.1)
 
-            it.damage(decayedDamage)
+            it.damage(decayedDamage, player)
             val event = EntityDamageByEntityEvent(
                 player,
                 it,
-                EntityDamageEvent.DamageCause.MAGIC,
+                EntityDamageEvent.DamageCause.ENTITY_ATTACK,
                 decayedDamage
             )
 

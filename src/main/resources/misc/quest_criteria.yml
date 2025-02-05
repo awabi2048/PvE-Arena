@@ -60,7 +60,7 @@ daily:
       index_min: 1
       index_max: 1
       title: "§bもっとクイック"
-      description: "クイックアリーナを{value}以内にクリアしよう。"
+      description: "クイックアリーナを{value}分以内にクリアしよう。"
       reward:
         point: 3
         quest_note: 1

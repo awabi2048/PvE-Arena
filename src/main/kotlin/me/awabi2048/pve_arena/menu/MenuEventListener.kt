@@ -86,7 +86,7 @@ object MenuEventListener : Listener {
                     20 -> TODO()
                     22 -> TODO()
                     24 -> TODO()
-                    36 -> QuestMenu(player, GenericQuest.QuestType.OTHER).open()
+                    36 -> QuestMenu(player, null).open()
                 }
             }
 
@@ -120,9 +120,8 @@ object MenuEventListener : Listener {
 
         // クエストメニュー
         if (interactionTag.contains("arena.misc.quest_menu")) {
-            val menu = QuestMenu(event.player, GenericQuest.QuestType.OTHER)
+            val menu = QuestMenu(event.player, null)
             menu.open()
         }
-
     }
 }

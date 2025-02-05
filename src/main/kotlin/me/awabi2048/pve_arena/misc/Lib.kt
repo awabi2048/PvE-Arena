@@ -76,11 +76,19 @@ object Lib {
         val filled = (current.toDouble() / max).toInt() * length
         val unfilled = length - filled
 
-        val bar = "§a"
+        println("$filled / $unfilled==========================")
+        var bar = "§a"
+        println(bar)
 
-        bar + "|".repeat(filled)
-        bar.plus("§7")
-        bar + "|".repeat(unfilled)
+        bar += "|".repeat(filled)
+        println(bar)
+        bar += "§7"
+        println(bar)
+        bar += "|".repeat(unfilled)
+        println(bar)
+
+        println("==========================")
+
         return bar
     }
 

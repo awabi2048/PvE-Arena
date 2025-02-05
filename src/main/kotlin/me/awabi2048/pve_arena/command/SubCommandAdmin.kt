@@ -208,8 +208,10 @@ class SubCommandAdmin(private val sender: Player, private val args: Array<out St
                 return
             }
 
+            sender.sendMessage("$prefix §7職種を${args[1]}に変更しました。")
+
             DataFile.playerData.set("${sender.uniqueId}.profession", args[1])
-            DataFile.reloadPlayerData()
+            YamlUtil.save("player_data/main.yml", DataFile.playerData)
         }
 
         when (option) {

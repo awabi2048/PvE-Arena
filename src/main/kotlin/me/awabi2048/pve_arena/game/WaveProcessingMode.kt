@@ -3,6 +3,8 @@ package me.awabi2048.pve_arena.game
 import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.Main.Companion.prefix
 import me.awabi2048.pve_arena.config.DataFile
+import me.awabi2048.pve_arena.custom_mob.mob_behavior.forceBehavior
+import me.awabi2048.pve_arena.custom_mob.mob_behavior.startBehavior
 import org.bukkit.*
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.*
@@ -186,6 +188,17 @@ interface WaveProcessingMode {
         mob.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.baseValue = mobStatsCalc(spawnMobId, "strength")
         mob.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)!!.baseValue = mobStatsCalc(spawnMobId, "speed")
 
+        mob.health = mobStatsCalc(spawnMobId, "health")
+
+        // 識別タグ
+        mob.scoreboardTags.add("arena.mob")
+
+        if (mob is Zombie) mob.isBaby = false
+        mob.maximumNoDamageTicks = 2
+
+        mob.getAttribute(Attribute.GENERIC_FOLLOW_RANGE)!!.baseValue = 64.0
+        (mob as Monster).target = world.players.random()
+        mob.startBehavior()
 
         world.spawnParticle(Particle.TRIAL_SPAWNER_DETECTION, spawnLocation, 10, 0.1, 0.1, 0.1, 0.1)
 

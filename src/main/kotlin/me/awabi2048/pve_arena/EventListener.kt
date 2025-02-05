@@ -178,19 +178,30 @@ object EventListener : Listener {
                     shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value * 0.6
             }
 
-            if (event.entity is SmallFireball) {
-                val shooter = (event.entity as SmallFireball).shooter
-                val entity = event.entity as SmallFireball
-                if (shooter is Blaze) {
-                    entity.displayItem = ItemStack(Material.STONE)
-                    entity.setMetadata(
-                        "damage",
-                        FixedMetadataValue(
-                            instance,
-                            shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value * 0.5
-                        )
-                    )
-                }
+//            if (event.entity is Fireball) {
+//                println("shoot fire ball")
+//                val shooter = (event.entity as Fireball).shooter
+//                val entity = event.entity as Fireball
+//                if (shooter is Blaze) {
+//                    entity.setMetadata(
+//                        "damage",
+//                        FixedMetadataValue(
+//                            instance,
+//                            shooter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value * 0.5
+//                        )
+//                    )
+//                }
+//            }
+        }
+    }
+
+    @EventHandler
+    fun fireballHit(event: ProjectileHitEvent) {
+        if (event.entity is Fireball && event.hitEntity is Player && event.entity.world.name.startsWith("arena_session.")) {
+            if (event.entity.shooter is Blaze) {
+                (event.hitEntity as Player).damage((event.entity.shooter as Blaze).getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value,
+                    event.entity.shooter as Blaze
+                )
             }
         }
     }

@@ -12,7 +12,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import kotlin.math.roundToInt
 
-class QuestMenu(player: Player, questType: GenericQuest.QuestType) : MenuManager(player, MenuType.Quest(questType)) {
+class QuestMenu(player: Player, questType: GenericQuest.QuestType?) : MenuManager(player, MenuType.Quest(questType)) {
     override fun open() {
         val menu = Bukkit.createInventory(null, 45, "")
 
@@ -155,7 +155,52 @@ class QuestMenu(player: Player, questType: GenericQuest.QuestType) : MenuManager
             }
 
             GenericQuest.QuestType.WEEKLY -> {
+                menu.setItem(41, black)
+                menu.setItem(36, returnIcon)
+                menu.setItem(4, Lib.getHiddenItem(Material.GOLDEN_SWORD))
 
+                try {
+                    for (id in listOf("normal_1", "normal_2", "challenge")) {
+                        val material =
+                            Material.valueOf(
+                                DataFile.ongoingQuestData.getString("daily.$id.icon")!!
+                            )
+                        val questTitle = DataFile.ongoingQuestData.getString("daily.$id.title")!!
+                        val questDescription = DataFile.ongoingQuestData.getString("daily.$id.description")!!
+
+                        val icon = ItemStack(material)
+
+                        val current = DataFile.playerQuestData.getInt("${player.uniqueId}.daily.$id.current")
+                        val objective = DataFile.ongoingQuestData.getInt("daily.$id.value")
+
+                        val iconMeta = icon.itemMeta
+                        iconMeta.setItemName("§7« $questTitle §7»")
+                        iconMeta.lore = listOf(
+                            Lib.getBar(40, "§7"),
+                            "§7$questDescription",
+                            "",
+                            "§f進行度§7: ${Lib.getProgressionBar(current, objective, 30)}",
+                            "　　§6${((current.toDouble() / objective) * 100).roundToInt()}% §7(§b$current§7/$objective§7)",
+                            Lib.getBar(40, "§7"),
+                        )
+
+                        icon.itemMeta = iconMeta
+                        val slot = when(id) {
+                            "normal_1" -> 20
+                            "normal_2" -> 22
+                            "challenge" -> 24
+                            else -> 0
+                        }
+                        menu.setItem(slot, icon)
+                    }
+
+                    player.openInventory(menu)
+                    player.playSound(player, Sound.UI_BUTTON_CLICK, 1.0f, 2.0f)
+                    player.playSound(player, Sound.BLOCK_BAMBOO_WOOD_BREAK, 1.0f, 2.0f)
+
+                } catch (e: Exception) {
+                    throw IllegalStateException("Failed to construct arena menu. @QuestMenu#open()")
+                }
             }
 
             else -> {

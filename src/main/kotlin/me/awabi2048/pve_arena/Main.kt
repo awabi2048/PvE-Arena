@@ -60,8 +60,6 @@ class Main : JavaPlugin() {
         server.pluginManager.registerEvents(MenuEventListener, instance)
         server.pluginManager.registerEvents(WandEventListener, instance)
         server.pluginManager.registerEvents(SkillEventListener, instance)
-
-
     }
 
     override fun onDisable() {

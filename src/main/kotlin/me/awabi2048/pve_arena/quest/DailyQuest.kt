@@ -50,11 +50,12 @@ object DailyQuest: GenericQuest {
             }
 
             DataFile.ongoingQuestData.set("daily.normal_${index + 1}.title", dataSection.getString("title"))
-            DataFile.ongoingQuestData.set("daily.normal_${index + 1}.description", dataSection.getString("description")!!.replace("{criteria}", "$criteria§r").replace("{value}",
-                "§a$value§r"
+            DataFile.ongoingQuestData.set("daily.normal_${index + 1}.description", dataSection.getString("description")!!.replace("{criteria}", "$criteria§7").replace("{value}",
+                "§a$value§7"
             ))
 
-            if (DataFile.ongoingQuestData.getString("daily.normal_${index + 1}.description")!!.contains("§7回")) DataFile.ongoingQuestData.set("daily.normal_${index + 1}.description", DataFile.ongoingQuestData.getString("daily.normal_${index + 1}.description")!!.replace("§r回", "回§r"))
+            // 数字のところを色付きにするから、「回」も色付きにしたいよね
+            if (DataFile.ongoingQuestData.getString("daily.normal_${index + 1}.description")!!.contains("§7回")) DataFile.ongoingQuestData.set("daily.normal_${index + 1}.description", DataFile.ongoingQuestData.getString("daily.normal_${index + 1}.description")!!.replace("§7回", "回§7"))
         }
 
         // チャレンジ目標1つを決定、ファイルに書き込み
