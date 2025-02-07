@@ -6,26 +6,32 @@ zombie:
     level_experience: 10
   base_cost: 2
   base_summon_count: 12
+  structure: "standard"
   mobs:
     normal_zombie:
       base_multiplier: 1.0
       wave: 1..6
+      min_difficulty: EASY
       weight: 40
     armored_zombie:
       base_multiplier: 1.0
       wave: 2..7
+      min_difficulty: NORMAL
       weight: 30
     zombie_soldier:
       base_multiplier: 1.0
       wave: 3..8
+      min_difficulty: NORMAL
       weight: 20
     zombie_knight:
       base_multiplier: 1.0
       wave: 4..8
+      min_difficulty: HARD
       weight: 10
     tank_zombie:
       base_multiplier: 1.0
       wave: 5..8
+      min_difficulty: HARD
       weight: 3
   icon: ROTTEN_FLESH
 
@@ -37,30 +43,37 @@ skeleton:
     level_experience: 10
   base_cost: 3
   base_summon_count: 12
+  structure: "standard"
   mobs:
     normal_skeleton:
       base_multiplier: 1.0
       wave: 1..3
+      min_difficulty: EASY
       weight: 10
     armored_skeleton:
       base_multiplier: 1.0
       wave: 2..4
+      min_difficulty: EASY
       weight: 5
     skeleton_soldier:
       base_multiplier: 1.0
       wave: 3..8
+      min_difficulty: NORMAL
       weight: 5
     stray_soldier:
       base_multiplier: 1.0
       wave: 3..8
+      min_difficulty: HARD
       weight: 5
     bogged_soldier:
       base_multiplier: 1.0
       wave: 4..8
+      min_difficulty: HARD
       weight: 5
     skeleton_knight:
       base_multiplier: 1.0
       wave: 5..8
+      min_difficulty: HARD
       weight: 3
   icon: BONE
 
@@ -72,26 +85,32 @@ spider:
     level_experience: 10
   base_cost: 3
   base_summon_count: 12
+  structure: "standard"
   mobs:
     normal_spider:
       base_multiplier: 1.0
       wave: 1..8
+      min_difficulty: EASY
       weight: 10
     cave_spider:
       base_multiplier: 1.0
       wave: 2..8
+      min_difficulty: NORMAL
       weight: 8
     mother_spider:
       base_multiplier: 1.0
       wave: 3..8
+      min_difficulty: NORMAL
       weight: 3
     silverfish:
       base_multiplier: 1.0
       wave: 3..8
+      min_difficulty: NORMAL
       weight: 5
     witch:
       base_multiplier: 1.0
       wave: 3..8
+      min_difficulty: HARD
       weight: 2
   icon: STRING
 
@@ -103,22 +122,27 @@ blaze:
     level_experience: 10
   base_cost: 3
   base_summon_count: 12
+  structure: "standard"
   mobs:
     normal_blaze:
       base_multiplier: 1.0
       wave: 1..8
+      min_difficulty: EASY
       weight: 10
     mutant_blaze:
-      base_multiplier: 1.0
+      base_multiplier: 1.2
       wave: 3..8
+      min_difficulty: NORMAL
       weight: 1
     wither_skeleton:
       base_multiplier: 1.0
       wave: 3..8
+      min_difficulty: HARD
       weight: 7
     wither_skeleton_archer:
       base_multiplier: 1.0
       wave: 4..8
+      min_difficulty: HARD
       weight: 5
   icon: BLAZE_ROD
 
@@ -130,22 +154,27 @@ guardian:
     level_experience: 10
   base_cost: 4
   base_summon_count: 12
+  structure: "water"
   mobs:
     guardian:
       base_multiplier: 1.0
       wave: 1..8
+      min_difficulty: EASY
       weight: 10
     elder_guardian:
       base_multiplier: 1.0
       wave: 3..8
+      min_difficulty: NORMAL
       weight: 1
     drowned:
       base_multiplier: 1.0
       wave: 2..8
+      min_difficulty: HARD
       weight: 5
     phantom:
       base_multiplier: 1.0
       wave: 4..8
+      min_difficulty: HARD
       weight: 3
   icon: PRISMARINE_SHARD
 
@@ -157,18 +186,22 @@ enderman:
     level_experience: 10
   base_cost: 5
   base_summon_count: 12
+  structure: "standard"
   mobs:
     enderman:
       base_multiplier: 1.0
       wave: 1..8
+      min_difficulty: EASY
       weight: 10
     shulker:
       base_multiplier: 1.0
       wave: 3..8
+      min_difficulty: NORMAL
       weight: 5
     mutant_enderman:
       base_multiplier: 1.0
       wave: 4..8
+      min_difficulty: HARD
       weight: 3
   icon: ENDER_PEARL
 

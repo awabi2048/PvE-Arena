@@ -154,6 +154,19 @@ object Lib {
         return null
     }
 
+    /**
+     * StringからIntRangeへ変換しまし。
+     */
+    fun intRangeOf(rangeString: String): IntRange? {
+        rangeString.contains("..")
+        val minValue = rangeString.substringBefore("..").toIntOrNull()?: return null
+        val maxValue = rangeString.substringAfter("..").toIntOrNull()?: return null
+        if (minValue > maxValue) return null
+
+        return minValue..maxValue
+    }
+
+
     class SidebarManager(player: Player) {
         fun unregister(scoreboard: String) {
 

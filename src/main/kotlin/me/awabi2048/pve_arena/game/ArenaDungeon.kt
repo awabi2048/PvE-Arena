@@ -7,10 +7,11 @@ import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.Particle
 import org.bukkit.Sound
+import org.bukkit.attribute.Attribute
 import org.bukkit.block.structure.Mirror
 import org.bukkit.block.structure.StructureRotation
+import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Monster
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Criteria
@@ -21,6 +22,13 @@ import kotlin.math.roundToInt
 
 class ArenaDungeon(uuid: String, players: Set<Player>, status: Status, val structureType: StructureType) :
     Generic(uuid, players) {
+    val roomCount: Int?
+        get() = if (status is Status.InGame) {
+            (status as Status.InGame).floor + 2
+        } else {
+            null
+        }
+
     private fun roomUpdate(floorChanged: Boolean) {
         val floor = if (status is Status.InGame) {
             (status as Status.InGame).floor
@@ -30,14 +38,13 @@ class ArenaDungeon(uuid: String, players: Set<Player>, status: Status, val struc
             (status as Status.InGame).room
         } else 0
 
-        val roomCount = floor + 2
         val isFirstEntry = floor == 0 && room == 0
 
         // ストラクチャ選択
-        val structureName = if (room >= roomCount) { // ある一定の部屋数を越えたら、次フロアの階段をだすように
-            "stairs_room"
-        } else if (floor == 0 && room == 0) { // 最初は入場前の部屋
+        val structureName = if (roomCount == null) {
             "entrance"
+        } else if (room >= roomCount!!) { // ある一定の部屋数を越えたら、次フロアの階段をだすように
+            "stairs_room"
         } else { // いずれでもなければ普通に部屋選択
             // random choose
             DataFile.dungeonStructure.getStringList(
@@ -78,12 +85,12 @@ class ArenaDungeon(uuid: String, players: Set<Player>, status: Status, val struc
             val summonCount = (8 * ((status as Status.InGame).floor * 0.25 + 1.0)).roundToInt()
 
             for (spawnLocationEntity in getSessionWorld()!!.entities.filter { it.scoreboardTags.contains("arena.game.dungeon_mob_spawn") }) {
-                for (i in 1..summonCount) {
+                repeat(summonCount) {
                     mobSpawn(spawnLocationEntity.location)
                 }
             }
 
-            getSessionWorld()!!.entities.filter{it.scoreboardTags.contains("arena.mob")}.forEach {
+            getSessionWorld()!!.entities.filter { it.scoreboardTags.contains("arena.mob") }.forEach {
                 (it as Monster).target = getSessionWorld()!!.players.random()
             }
 
@@ -102,11 +109,10 @@ class ArenaDungeon(uuid: String, players: Set<Player>, status: Status, val struc
             }
 
             displayScoreboard.getScore("§fRoom §a${room}§7/$roomCount").score = 2
-            if (floorChanged) {
-                displayScoreboard.scoreboard!!.resetScores("§fFloor §7---")
+            displayScoreboard.getScore("§fFloor §a${floor}").score = 3
 
+            if (floorChanged) {
                 displayScoreboard.scoreboard!!.resetScores("§fFloor §6${floor - 1}§7/$roomCount")
-                displayScoreboard.getScore("§fFloor §6${floor}§7/$roomCount").score = 2
             }
         }
 
@@ -118,6 +124,7 @@ class ArenaDungeon(uuid: String, players: Set<Player>, status: Status, val struc
         } else {
             if (floorChanged) {
                 (status as Status.InGame).floor += 1
+                (status as Status.InGame).room = 0
             }
 
             (status as Status.InGame).room += 1
@@ -130,13 +137,12 @@ class ArenaDungeon(uuid: String, players: Set<Player>, status: Status, val struc
                 structureType.toString().lowercase()
             }.possible_mob"
         )!!
+        val floor = (status as Status.InGame).floor
+        val room = (status as Status.InGame).room
 
-        val spawnCandidateKey = spawnCandidate.getKeys(false)
-        val spawnCandidateMap: MutableMap<String, Int> = mutableMapOf()
-
-        for (key in spawnCandidateKey) {
-            spawnCandidateMap[key] = spawnCandidate.getInt(key)
-        }
+        val spawnCandidateMap = spawnCandidate.getKeys(false) // キー(モブid)をlistでSetで取得
+            .filter { floor in Lib.intRangeOf(spawnCandidate.getString("$it.floor")!!)!! } // そのうちウェーブ要件を満たすものをフィルター
+            .associateWith { spawnCandidate.getInt("$it.weight") } // 上で選んだキーに重み付けを紐づけ
 
         val spawnMobId = Lib.simulateWeight(spawnCandidateMap.toMap()) as String
 
@@ -146,9 +152,18 @@ class ArenaDungeon(uuid: String, players: Set<Player>, status: Status, val struc
             location.y,
             location.z + (-15..15).random() * 0.1
         )
-        val mob = summonMobFromId(spawnMobId, getSessionWorld()!!, spawnLocation)
+        val mob = summonMobFromId(spawnMobId, getSessionWorld()!!, spawnLocation) as LivingEntity
 
-        location.world.spawnParticle(Particle.TRIAL_SPAWNER_DETECTION_OMINOUS, spawnLocation, 10, 0.1, 0.1, 0.1, 0.1)
+        // status
+        val health = mob.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
+        val strength = mob.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.value
+        val speed = mob.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)!!.value
+
+        val progressModifier = (floor + room / roomCount!!) * 0.1
+
+        mob.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.baseValue = health * (1 + progressModifier)
+        mob.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)!!.baseValue = strength * (1 + progressModifier)
+        mob.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)!!.baseValue = speed * (1 + progressModifier * 0.1)
     }
 
     fun playerChangeRoom(floorChanged: Boolean) {
@@ -156,9 +171,13 @@ class ArenaDungeon(uuid: String, players: Set<Player>, status: Status, val struc
         roomUpdate(floorChanged)
 
         // warp etc
-        val entranceLocation =
-            getSessionWorld()!!.entities.filter { it.scoreboardTags.contains("arena.game.dungeon_entrance") }
-                .random().location
+        val entranceEntity =
+            getSessionWorld()!!.entities.filter { it.scoreboardTags.contains("arena.game.dungeon_entrance") && !it.scoreboardTags.contains("arena.temp.dungeon_used_entrance")}
+                .random()
+
+        val entranceLocation = entranceEntity.location
+        getSessionWorld()!!.entities.filter{it.scoreboardTags.contains("arena.temp.dungeon_used_entrance")}.forEach{it.removeScoreboardTag("arena.temp.dungeon_used_entrance")}
+        entranceEntity.scoreboardTags.add("arena.temp.dungeon_used_entrance")
 
         getSessionWorld()!!.players.forEach {
             it.teleport(entranceLocation)
@@ -201,7 +220,7 @@ class ArenaDungeon(uuid: String, players: Set<Player>, status: Status, val struc
         println("$prefix Started arena session for uuid: ${uuid}, type: DUNGEON, STATUS: $status")
 
         // structure load
-        roomUpdate(false)
+        roomUpdate(true)
 
         Bukkit.getScheduler().runTaskLater(
             instance,

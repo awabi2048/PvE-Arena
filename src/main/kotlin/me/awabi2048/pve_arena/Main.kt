@@ -24,7 +24,6 @@ class Main : JavaPlugin() {
     companion object {
         var prefix = "§7«§cArena§7»"
 
-        val playerChatState: MutableMap<Player, ChatChannel> = mutableMapOf()
         val activeParty: MutableSet<Party> = mutableSetOf()
         val activeSession: MutableSet<Generic> = mutableSetOf()
 
@@ -58,6 +57,7 @@ class Main : JavaPlugin() {
         )
 
         getCommand("arena")?.setExecutor(MainCommand)
+        getCommand("arena_party_join")?.setExecutor(MainCommand)
 
         server.pluginManager.registerEvents(EventListener, instance)
         server.pluginManager.registerEvents(GameEventListener, instance)

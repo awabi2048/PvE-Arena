@@ -4,7 +4,13 @@ structure_type:
     possible_structure:
       - room_3
     possible_mob:
-      armored_zombie: 10
-      skeleton_soldier: 10
-      mother_spider: 10
+      armored_zombie:
+        weight: 5
+        floor: 1..2048
+      skeleton_soldier:
+        weight: 5
+        floor: 1..2048
+      mother_spider:
+        weight: 1
+        floor: 1..2048
 

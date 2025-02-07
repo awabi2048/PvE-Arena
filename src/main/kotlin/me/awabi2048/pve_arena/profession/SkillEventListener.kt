@@ -33,6 +33,12 @@ object SkillEventListener : Listener {
         ) return
         if (event.hand != EquipmentSlot.HAND) return
 
+        val click = when(event.action) {
+            in listOf(Action.LEFT_CLICK_AIR, Action.LEFT_CLICK_BLOCK, ) -> ProfessionSkillState.SpellClick.LEFT
+            in listOf(Action.RIGHT_CLICK_AIR, Action.RIGHT_CLICK_BLOCK, ) -> ProfessionSkillState.SpellClick.RIGHT
+            else -> null
+        }!!
+
         val player = event.player
         val item = event.item ?: return
         val playerProfession = PlayerProfession.getProfession(player) ?: return
@@ -62,10 +68,9 @@ object SkillEventListener : Listener {
 
             ) || SwordItem.getFromItem(item) in SwordItem.list)
         ) {
-            when (event.action) {
-                Action.LEFT_CLICK_AIR -> Swordsman(player).spell(ProfessionSkillState.SpellClick.LEFT)
-                Action.RIGHT_CLICK_AIR -> Swordsman(player).spell(ProfessionSkillState.SpellClick.RIGHT)
-                else -> return
+            when (click) {
+                ProfessionSkillState.SpellClick.LEFT -> Swordsman(player).spell(ProfessionSkillState.SpellClick.LEFT)
+                ProfessionSkillState.SpellClick.RIGHT -> Swordsman(player).spell(ProfessionSkillState.SpellClick.RIGHT)
             }
         }
 
@@ -76,10 +81,9 @@ object SkillEventListener : Listener {
                 Material.BOW
             ) || BowItem.getFromItem(item) in BowItem.list)
         ) {
-            when (event.action) {
-                Action.LEFT_CLICK_AIR -> Archer(player).spell(ProfessionSkillState.SpellClick.LEFT)
-                Action.RIGHT_CLICK_AIR -> Archer(player).spell(ProfessionSkillState.SpellClick.RIGHT)
-                else -> return
+            when (click) {
+                ProfessionSkillState.SpellClick.LEFT -> Archer(player).spell(ProfessionSkillState.SpellClick.LEFT)
+                ProfessionSkillState.SpellClick.RIGHT -> Archer(player).spell(ProfessionSkillState.SpellClick.RIGHT)
             }
         }
 
@@ -91,10 +95,10 @@ object SkillEventListener : Listener {
 
             val wand = WandAbility(event.player, event.item!!)
 
-            if (event.action == Action.RIGHT_CLICK_AIR && PlayerProfession.getProfession(player) == PlayerProfession.MAGE) Mage(
+            if (click == ProfessionSkillState.SpellClick.RIGHT && PlayerProfession.getProfession(player) == PlayerProfession.MAGE) Mage(
                 player
             ).spell(ProfessionSkillState.SpellClick.RIGHT)
-            if (event.action == Action.LEFT_CLICK_AIR && Main.playerSkillState[player] != null) Mage(player).spell(
+            if (click == ProfessionSkillState.SpellClick.LEFT && Main.playerSkillState[player] != null) Mage(player).spell(
                 ProfessionSkillState.SpellClick.LEFT
             )
         }

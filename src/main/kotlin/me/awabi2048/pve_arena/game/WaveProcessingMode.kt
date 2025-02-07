@@ -5,6 +5,7 @@ import me.awabi2048.pve_arena.Main.Companion.prefix
 import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.custom_mob.mob_behavior.forceBehavior
 import me.awabi2048.pve_arena.custom_mob.mob_behavior.startBehavior
+import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.*
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.*
@@ -103,47 +104,23 @@ interface WaveProcessingMode {
             ).random()
 
         // select
-        val availableMobSection = mobTypeSection.getConfigurationSection("mobs")!!
-        val availableMobSet = availableMobSection.getKeys(false)
+        val candidateMap =
+            mobTypeSection.getKeys(false) // 召喚モブのキーをSetで取得
+                .filter { // 以下でウェーブ・難易度条件に適しているものを抽出
+                    wave in Lib.intRangeOf(mobTypeSection.getString("$it.wave")!!)!! // ウェーブ判定
+                            && difficulty.ordinal >= MobDifficulty.valueOf(mobTypeSection.getString("$it.min_difficulty")!!).ordinal // 難易度判定
+                }.associateWith {
+                    mobTypeSection.getInt("$it.weight") // 重み付けと紐づける
+                }
 
-        val spawnCandidate: MutableList<String> = mutableListOf()
-        for (key in availableMobSet) {
-
-            // wave check
-            val waveRangeString = availableMobSection.getString("$key.wave")!!
-            val waveRangeMin = waveRangeString.substringBefore("..").toInt()
-            val waveRangeMax = waveRangeString.substringAfter("..").toInt()
-            val waveRange = waveRangeMin..waveRangeMax
-
-            // difficulty check
-
-            if (wave in waveRange) spawnCandidate += key
-        }
-
-        var weightSum = 0
-
-        for (key in spawnCandidate) {
-            weightSum += availableMobSection.getInt("$key.weight")
-        }
-
-        val seed = (1..weightSum).random()
-
-        var weightSumPreliminary = 0
-        var spawnMobId = "none"
-
-        for (key in spawnCandidate) {
-            if (seed in weightSumPreliminary + 1..(weightSumPreliminary + availableMobSection.getInt("$key.weight"))) {
-                spawnMobId = key
-                break
-            }
-            weightSumPreliminary += availableMobSection.getInt("$key.weight")
-        }
+        val spawnMobId = Lib.simulateWeight(candidateMap.toMap()) as String
 
         // spawn
-//        println("CANDIDATES: $spawnCandidate, SEED:$seed ,MOB ID:$spawnMobId")
-
         val mobData = DataFile.mobDefinition.getConfigurationSection(spawnMobId)!!
-        val entityType = EntityType.valueOf(mobData.getString("entity_type") ?: throw IllegalStateException("Invalid entity type for $spawnMobId specified. @stage_data/mob_definition.yml"))
+        val entityType = EntityType.valueOf(
+            mobData.getString("entity_type")
+                ?: throw IllegalStateException("Invalid entity type for $spawnMobId specified. @stage_data/mob_definition.yml")
+        )
 
         val mob = world.spawnEntity(spawnLocation, entityType) as LivingEntity
         mob.customName = mobData.getString("display_name")
@@ -153,9 +130,13 @@ interface WaveProcessingMode {
         mob.equipment!!.helmet =
             ItemStack(Material.getMaterial(mobData.getString("equipment.helmet") ?: "AIR") ?: Material.AIR)
         mob.equipment!!.chestplate =
-            ItemStack(Material.getMaterial(mobData.getString("equipment.chestplate") ?: "AIR") ?: Material.AIR)
+            ItemStack(
+                Material.getMaterial(mobData.getString("equipment.chestplate") ?: "AIR") ?: Material.AIR
+            )
         mob.equipment!!.leggings =
-            ItemStack(Material.getMaterial(mobData.getString("equipment.leggings") ?: "AIR") ?: Material.AIR)
+            ItemStack(
+                Material.getMaterial(mobData.getString("equipment.leggings") ?: "AIR") ?: Material.AIR
+            )
         mob.equipment!!.boots =
             ItemStack(Material.getMaterial(mobData.getString("equipment.boots") ?: "AIR") ?: Material.AIR)
 
@@ -215,7 +196,7 @@ interface WaveProcessingMode {
     fun startCountdown(time: Int, world: World) {
         var timeRemaining = time
 
-        object: BukkitRunnable() {
+        object : BukkitRunnable() {
             override fun run() {
                 world.players.forEach {
                     if (timeRemaining in 1..5) {
@@ -253,3 +234,5 @@ interface WaveProcessingMode {
         NIGHTMARE;
     }
 }
+
+

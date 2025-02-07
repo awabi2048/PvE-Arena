@@ -439,7 +439,7 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
 
         fun getMobTypeLore(mobType: WaveProcessingMode.MobType): List<String> {
             val lore = mutableListOf(
-                Lib.getBar(40, "§7"), "§f左クリック§7: §a次へ, §f右クリック§7: §c前へ", "", Lib.getBar(40, "§7")
+                Lib.getBar(40, "§7"), "§f左クリック§7: §a次へ, §f右クリック§7: §c前へ", Lib.getBar(40, "§7")
             )
             for (key in DataFile.mobType.getKeys(false)) {
                 val addValue = if (key == mobType.toString().substringAfter("MobType.").lowercase()) {
