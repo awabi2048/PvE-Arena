@@ -6,13 +6,23 @@ import org.bukkit.Sound
 import org.bukkit.entity.Player
 import java.util.*
 
-data class Party(val uuid: String = UUID.randomUUID().toString(), val name: String = "", val description: String = "", val size: Int = 6, var isRecruiting: Boolean = false, val players: MutableSet<Player>, val leader: Player) {
+data class Party(val uuid: String = UUID.randomUUID().toString(), var name: String = "", var description: String = "", val size: Int = 6, var isRecruiting: Boolean = false, val players: MutableSet<Player>, val leader: Player) {
     fun register() {
         activeParty += this
     }
 
-    fun remove() {
+    fun disband() {
         activeParty -= this
+    }
+
+    fun changeName(newName: String) {
+        this.name = newName
+        this.sendPartyMessage(null, "§7パーティーの名前が §a${newName}§7 に変更されました。")
+    }
+
+    fun changeDescription(newDescription: String) {
+        this.description = newDescription
+        this.sendPartyMessage(null, "§7パーティーの説明が変更されました。")
     }
 
     fun joinPlayer(player: Player) {
@@ -24,10 +34,14 @@ data class Party(val uuid: String = UUID.randomUUID().toString(), val name: Stri
         }
     }
 
-    fun sendPartyMessage(sender: Player, message: String) {
+    fun sendPartyMessage(sender: Player?, message: String) {
         this.players.forEach {
-            it.sendMessage("$prefix §7[§bParty§7] §6${sender.displayName}§7: $message")
             it.playSound(it, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 2.0f)
+            if (sender != null){
+                it.sendMessage("$prefix §7[§bParty§7] §6${sender.displayName}§7: $message")
+            } else {
+                it.sendMessage("$prefix §7[§bParty§7] §2System§7: $message")
+            }
         }
     }
 
@@ -37,5 +51,10 @@ data class Party(val uuid: String = UUID.randomUUID().toString(), val name: Stri
             true -> false
             false -> true
         }
+    }
+
+    companion object {
+        var playerChatState: MutableMap<Player, ChatChannel> = mutableMapOf()
+        var playerChatListening: MutableMap<Player, String> = mutableMapOf()
     }
 }

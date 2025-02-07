@@ -1,9 +1,9 @@
 package me.awabi2048.pve_arena.menu
 
 import me.awabi2048.pve_arena.Main.Companion.activeParty
-import me.awabi2048.pve_arena.Main.Companion.playerChatState
 import me.awabi2048.pve_arena.config.DataFile
 import me.awabi2048.pve_arena.party.ChatChannel.*
+import me.awabi2048.pve_arena.party.Party.Companion.playerChatState
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -14,7 +14,7 @@ import org.bukkit.inventory.meta.SkullMeta
 class PartyMenu(player: Player) : MenuManager(player, MenuType.Party) {
     override fun open() {
         // get data
-        val party = activeParty.filter { it.players.contains(player) }[0]
+        val party = activeParty.find { it.players.contains(player) }!!
 
         val recruitingState = when (party.isRecruiting) {
             true -> "§a募集中"
@@ -46,8 +46,7 @@ class PartyMenu(player: Player) : MenuManager(player, MenuType.Party) {
             )
 
             false -> listOf(
-                "§7クリックしてパーティーを§c解散§7します。",
-                "§c§nパーティーリーダーのみ実行可能です。"
+                "§7クリックしてパーティーを§c解散§7します。"
             )
         }
         disbandIcon.itemMeta = disbandIconMeta
@@ -82,19 +81,6 @@ class PartyMenu(player: Player) : MenuManager(player, MenuType.Party) {
             "§7- §fパーティー説明§7: §7${party.description}§7",
         )
         settingIcon.itemMeta = settingIconMeta
-
-        // size
-        val sizeSettingIcon = ItemStack(Material.PLAYER_HEAD)
-        val sizeSettingIconMeta = sizeSettingIcon.itemMeta
-        sizeSettingIcon.amount = party.size
-        sizeSettingIconMeta.setItemName("§eパーティーサイズの変更")
-        sizeSettingIconMeta.lore = listOf(
-            "§7クリックして§fパーティーの最大人数§7を設定します。",
-            "",
-            "§7« §b現在の設定 §7»",
-            "§7- §fサイズ§7: ${party.size}",
-        )
-        sizeSettingIcon.itemMeta = sizeSettingIconMeta
 
         // chat toggle
         val toggleChatIcon = when (playerChatState[player]) {
@@ -139,6 +125,7 @@ class PartyMenu(player: Player) : MenuManager(player, MenuType.Party) {
         val inviteIcon = ItemStack(Material.LEATHER_HELMET)
         val inviteIconMeta = inviteIcon.itemMeta
         inviteIconMeta.setItemName("§bプレイヤーを招待")
+        inviteIconMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
         inviteIconMeta.lore = when (party.players.size < DataFile.config.getInt("misc.game.player_max")){
             true -> listOf(
                 "§7クリックしてほかのプレイヤーを§f招待§7します。",
@@ -154,10 +141,9 @@ class PartyMenu(player: Player) : MenuManager(player, MenuType.Party) {
         inviteIcon.itemMeta = inviteIconMeta
 
         // place icon
-        menu.setItem(19, settingIcon)
-        menu.setItem(21, sizeSettingIcon)
-        menu.setItem(23, toggleRecruitIcon)
-        menu.setItem(25, disbandIcon)
+        menu.setItem(20, settingIcon)
+        menu.setItem(22, toggleRecruitIcon)
+        menu.setItem(24, disbandIcon)
         menu.setItem(38, toggleChatIcon)
         menu.setItem(40, partyInfoIcon)
         menu.setItem(42, inviteIcon)

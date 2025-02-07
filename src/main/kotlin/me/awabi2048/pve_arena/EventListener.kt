@@ -1,5 +1,6 @@
 package me.awabi2048.pve_arena
 
+import me.awabi2048.pve_arena.Main.Companion.activeParty
 import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.Main.Companion.lobbyOriginLocation
 import me.awabi2048.pve_arena.Main.Companion.prefix
@@ -10,6 +11,10 @@ import me.awabi2048.pve_arena.item.AccessoryItem
 import me.awabi2048.pve_arena.item.ItemManager
 import me.awabi2048.pve_arena.item.SacrificeItem
 import me.awabi2048.pve_arena.misc.Lib
+import me.awabi2048.pve_arena.party.ChatChannel
+import me.awabi2048.pve_arena.party.Party
+import me.awabi2048.pve_arena.party.Party.Companion.playerChatListening
+import me.awabi2048.pve_arena.party.Party.Companion.playerChatState
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -158,5 +163,13 @@ object EventListener : Listener {
         }
     }
 
+    @EventHandler
+    fun onPlayerSendMessage(event: PlayerChatEvent) {
+        if (playerChatState[event.player] == ChatChannel.PARTY && playerChatListening[event.player] == null) {
+            val party = activeParty.find { it.players.contains(event.player) }!!
+            party.sendPartyMessage(event.player, event.message)
 
+            event.isCancelled = true
+        }
+    }
 }
