@@ -19,6 +19,9 @@ mob_stats:
 
 misc:
   game:
+    # アリーナダンジョン: フロアごと部屋数
+    dungeon_room_per_floor_index_1: 10
+
     # クイックアリーナ: 全ウェーブ数
     quick_arena_wave: 10
 

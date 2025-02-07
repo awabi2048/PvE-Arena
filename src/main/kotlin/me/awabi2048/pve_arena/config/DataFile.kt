@@ -20,9 +20,9 @@ object DataFile {
     lateinit var playerSkill: YamlConfiguration
 
     private val resourceSet = setOf(
-        "stage_data/mob_type.yml",
-        "stage_data/difficulty.yml",
-        "stage_data/mob_definition.yml",
+        "normal_arena/mob_type.yml",
+        "normal_arena/difficulty.yml",
+        "normal_arena/mob_definition.yml",
         "misc/quest_criteria.yml",
         "ongoing_quest.yml",
         "config.yml",
@@ -36,9 +36,9 @@ object DataFile {
     )
 
     fun loadAll() {
-        mobType = YamlUtil.load("stage_data/mob_type.yml")
-        mobDifficulty = YamlUtil.load("stage_data/difficulty.yml")
-        mobDefinition = YamlUtil.load("stage_data/mob_definition.yml")
+        mobType = YamlUtil.load("normal_arena/mob_type.yml")
+        mobDifficulty = YamlUtil.load("normal_arena/difficulty.yml")
+        mobDefinition = YamlUtil.load("normal_arena/mob_definition.yml")
         config = YamlUtil.load("config.yml")
         playerData = YamlUtil.load("player_data/main.yml")
         stats = YamlUtil.load("player_data/stats.yml")

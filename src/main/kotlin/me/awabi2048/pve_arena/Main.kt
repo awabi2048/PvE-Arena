@@ -2,8 +2,10 @@ package me.awabi2048.pve_arena
 
 import me.awabi2048.pve_arena.command.MainCommand
 import me.awabi2048.pve_arena.config.DataFile
+import me.awabi2048.pve_arena.game.GameEventListener
 import me.awabi2048.pve_arena.game.Generic
 import me.awabi2048.pve_arena.game.Reward
+import me.awabi2048.pve_arena.item.storage_item.StorageItemEventListener
 import me.awabi2048.pve_arena.item.wand.WandEventListener
 import me.awabi2048.pve_arena.menu.MenuEventListener
 import me.awabi2048.pve_arena.party.ChatChannel
@@ -11,6 +13,7 @@ import me.awabi2048.pve_arena.party.Party
 import me.awabi2048.pve_arena.profession.ProfessionSkillState
 import me.awabi2048.pve_arena.profession.SkillEventListener
 import org.bukkit.Bukkit
+import org.bukkit.GameEvent
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
@@ -57,9 +60,11 @@ class Main : JavaPlugin() {
         getCommand("arena")?.setExecutor(MainCommand)
 
         server.pluginManager.registerEvents(EventListener, instance)
+        server.pluginManager.registerEvents(GameEventListener, instance)
         server.pluginManager.registerEvents(MenuEventListener, instance)
         server.pluginManager.registerEvents(WandEventListener, instance)
         server.pluginManager.registerEvents(SkillEventListener, instance)
+        server.pluginManager.registerEvents(StorageItemEventListener, instance)
     }
 
     override fun onDisable() {

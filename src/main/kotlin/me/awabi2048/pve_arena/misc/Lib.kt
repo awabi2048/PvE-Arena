@@ -11,7 +11,6 @@ import org.bukkit.attribute.Attribute
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.AbstractArrow
-import org.bukkit.entity.Arrow
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
@@ -76,42 +75,43 @@ object Lib {
         val filled = (current.toDouble() / max).toInt() * length
         val unfilled = length - filled
 
-        println("$filled / $unfilled==========================")
         var bar = "§a"
-        println(bar)
-
         bar += "|".repeat(filled)
-        println(bar)
         bar += "§7"
-        println(bar)
         bar += "|".repeat(unfilled)
-        println(bar)
-
-        println("==========================")
 
         return bar
     }
 
+    /**
+     * プレイヤーの体力を回復します。
+     */
     fun healPlayer(player: Player, amount: Double) {
         val healedHealth = player.health + amount
         val playerMaxHealth = player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
         player.health = if (healedHealth > playerMaxHealth) playerMaxHealth else healedHealth
     }
 
+    /**
+     * 音・再生半径・ピッチを指定して周囲のプレイヤーに音を再生します。
+     */
     fun playGlobalSound(player: Player, sound: org.bukkit.Sound, radius: Double, pitch: Float) {
-        player.getNearbyEntities(radius, radius, radius).filter { it != player}.forEach {
+        player.getNearbyEntities(radius, radius, radius).filter { it != player }.forEach {
             player.playSound(it, sound, 1.0f, pitch)
         }
 
         player.playSound(player, sound, 1.0f, pitch)
     }
 
+    /**
+     * 発射された矢に必要なデータを適用します。
+     */
     fun setArrowAttribute(arrowEntity: AbstractArrow, bowItem: ItemStack, arrowType: ArrowType) {
         // tag
         arrowEntity.addScoreboardTag("$arrowType")
 
         // damage
-        val baseDamage = when(arrowType) {
+        val baseDamage = when (arrowType) {
             ArrowType.FLINT_TIPPED -> 2.0
             ArrowType.IRON_TIPPED -> 4.0
             ArrowType.DIAMOND_TIPPED -> 7.0
@@ -125,8 +125,33 @@ object Lib {
         arrowEntity.damage = arrowDamage
     }
 
-    fun getUUID(world: World): String {
-        return world.name.substringAfter("arena_session.")
+    /**
+     * World から アリーナセッションを取得します。
+     */
+    fun getUUID(world: World): Generic? {
+        if (!world.name.startsWith("arena_session.")) return null
+        val uuid = world.name.substringAfter("arena_session.")
+        return lookForSession(uuid)
+    }
+
+    /**
+     * key に参照する項、value に重み付けを入れたmapを入力することで、weightに基づくランダムピックを行います。
+     */
+    fun simulateWeight(map: Map<Any, Int>): Any? {
+        val weightSum = map.values.sum()
+        val pickupSeed = (1..weightSum).random()
+        var weightPreliminary = 1
+
+        for (index in map.keys) {
+            if (pickupSeed in weightPreliminary..<weightPreliminary + map[index]!!) {
+                return index
+
+            } else {
+                weightPreliminary += map[index]!!
+            }
+        }
+
+        return null
     }
 
     class SidebarManager(player: Player) {

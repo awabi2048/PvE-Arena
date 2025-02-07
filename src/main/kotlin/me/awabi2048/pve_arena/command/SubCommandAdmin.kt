@@ -13,7 +13,6 @@ import me.awabi2048.pve_arena.misc.sendError
 import me.awabi2048.pve_arena.quest.DailyQuest
 import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
@@ -184,6 +183,7 @@ class SubCommandAdmin(private val sender: Player, private val args: Array<out St
                     in EnchantmentItem.list -> EnchantmentItem.get(itemKind)
                     in EnterCostItem.list -> EnterCostItem.get(itemKind)
                     in KeyItem.list -> KeyItem.get(itemKind)
+                    in StorageItem.list -> StorageItem.get(itemKind)
                     in SacrificeItem.list -> SacrificeItem.get(itemKind)
                     in SwordItem.list -> SwordItem.get(itemKind)
                     in TicketItem.list -> TicketItem.get(itemKind)

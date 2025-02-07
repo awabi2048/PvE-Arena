@@ -38,7 +38,9 @@ abstract class ItemManager {
         STEADY_BOW,
         SCULK_BOW,
         DRAGON_BORN_BOW,
-        MULTI_SHOT_BOW
+        MULTI_SHOT_BOW,
+        MOB_DROP_SACK,
+        TICKET_SACK,
     }
 
     abstract val list: List<ArenaItem>

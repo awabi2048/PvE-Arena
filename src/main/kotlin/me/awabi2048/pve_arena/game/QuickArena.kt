@@ -120,7 +120,7 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
             Bukkit.getScheduler().runTaskLater(
                 instance,
                 Runnable {
-                    timeTracking()
+                    timeTracking(3)
                 },
                 1L
             )

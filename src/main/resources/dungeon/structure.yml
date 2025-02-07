@@ -4,7 +4,7 @@ structure_type:
     possible_structure:
       - room_3
     possible_mob:
-      - armored_zombie
-      - skeleton_soldier
-      - mother_spider
+      armored_zombie: 10
+      skeleton_soldier: 10
+      mother_spider: 10
 

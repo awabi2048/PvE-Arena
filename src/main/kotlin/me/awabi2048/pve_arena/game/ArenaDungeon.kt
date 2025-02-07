@@ -4,12 +4,14 @@ import me.awabi2048.pve_arena.Main.Companion.displayScoreboardMap
 import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.Main.Companion.prefix
 import me.awabi2048.pve_arena.config.DataFile
+import me.awabi2048.pve_arena.misc.Lib
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.block.structure.Mirror
 import org.bukkit.block.structure.StructureRotation
+import org.bukkit.entity.Monster
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Criteria
 import org.bukkit.scoreboard.DisplaySlot
@@ -22,15 +24,21 @@ class ArenaDungeon(uuid: String, players: Set<Player>, status: Status, val struc
     private fun roomUpdate(floorChanged: Boolean) {
         val floor = if (status is Status.InGame) {
             (status as Status.InGame).floor
-        } else 1
+        } else 0
+
         val room = if (status is Status.InGame) {
             (status as Status.InGame).room
-        } else 1
+        } else 0
 
-        // 次floorへ進むか判定
-        val structureName = if (room >= floor + 2) {
+        val roomCount = floor + 2
+        val isFirstEntry = floor == 0 && room == 0
+
+        // ストラクチャ選択
+        val structureName = if (room >= roomCount) { // ある一定の部屋数を越えたら、次フロアの階段をだすように
             "stairs_room"
-        } else {
+        } else if (floor == 0 && room == 0) { // 最初は入場前の部屋
+            "entrance"
+        } else { // いずれでもなければ普通に部屋選択
             // random choose
             DataFile.dungeonStructure.getStringList(
                 "structure_type.${
@@ -63,9 +71,50 @@ class ArenaDungeon(uuid: String, players: Set<Player>, status: Status, val struc
 
         println("${structureType.toString().lowercase()}/$structureName.nbt, room: $room, floor: $floor")
 
+        // 初回入場でなければ・・
+        if (status is Status.InGame) {
+
+            // モブサモン
+            val summonCount = (8 * ((status as Status.InGame).floor * 0.25 + 1.0)).roundToInt()
+
+            for (spawnLocationEntity in getSessionWorld()!!.entities.filter { it.scoreboardTags.contains("arena.game.dungeon_mob_spawn") }) {
+                for (i in 1..summonCount) {
+                    mobSpawn(spawnLocationEntity.location)
+                }
+            }
+
+            getSessionWorld()!!.entities.filter{it.scoreboardTags.contains("arena.mob")}.forEach {
+                (it as Monster).target = getSessionWorld()!!.players.random()
+            }
+
+            //
+
+        }
+
+        // プレイヤーのスコアボード
+        getSessionWorld()!!.players.forEach {
+            val displayScoreboard = displayScoreboardMap[it]!!
+            if (floor == 1 && room == 1) {
+                displayScoreboard.scoreboard!!.resetScores("§fFloor §7---")
+                displayScoreboard.scoreboard!!.resetScores("§fRoom §7---")
+            } else {
+                displayScoreboard.scoreboard!!.resetScores("§fRoom §a${room - 1}§7/$roomCount")
+            }
+
+            displayScoreboard.getScore("§fRoom §a${room}§7/$roomCount").score = 2
+            if (floorChanged) {
+                displayScoreboard.scoreboard!!.resetScores("§fFloor §7---")
+
+                displayScoreboard.scoreboard!!.resetScores("§fFloor §6${floor - 1}§7/$roomCount")
+                displayScoreboard.getScore("§fFloor §6${floor}§7/$roomCount").score = 2
+            }
+        }
+
+        timeTracking(1)
+
         // status update
         if (status !is Status.InGame) {
-            status = Status.InGame(1, 1)
+            status = Status.InGame(1, 1, 0)
         } else {
             if (floorChanged) {
                 (status as Status.InGame).floor += 1
@@ -73,24 +122,30 @@ class ArenaDungeon(uuid: String, players: Set<Player>, status: Status, val struc
 
             (status as Status.InGame).room += 1
         }
-
-        // mob
-        val summonCount = (8 * ((status as Status.InGame).floor * 0.25 + 1.0)).roundToInt()
-
-        for (spawnLocationEntity in getSessionWorld()!!.entities.filter { it.scoreboardTags.contains("arena.game.dungeon_mob_spawn") }) {
-            for (i in 1..summonCount){ mobSpawn(spawnLocationEntity.location) }
-        }
     }
 
     private fun mobSpawn(location: Location) {
-        val spawnMobId = DataFile.dungeonStructure.getStringList(
+        val spawnCandidate = DataFile.dungeonStructure.getConfigurationSection(
             "structure_type.${
                 structureType.toString().lowercase()
             }.possible_mob"
-        )
-            .random()
+        )!!
 
-        val spawnLocation = Location(location.world, location.x + (-15..15).random() * 0.1, location.y, location.z + (-15..15).random() * 0.1)
+        val spawnCandidateKey = spawnCandidate.getKeys(false)
+        val spawnCandidateMap: MutableMap<String, Int> = mutableMapOf()
+
+        for (key in spawnCandidateKey) {
+            spawnCandidateMap[key] = spawnCandidate.getInt(key)
+        }
+
+        val spawnMobId = Lib.simulateWeight(spawnCandidateMap.toMap()) as String
+
+        val spawnLocation = Location(
+            location.world,
+            location.x + (-15..15).random() * 0.1,
+            location.y,
+            location.z + (-15..15).random() * 0.1
+        )
         val mob = summonMobFromId(spawnMobId, getSessionWorld()!!, spawnLocation)
 
         location.world.spawnParticle(Particle.TRIAL_SPAWNER_DETECTION_OMINOUS, spawnLocation, 10, 0.1, 0.1, 0.1, 0.1)
@@ -161,7 +216,7 @@ class ArenaDungeon(uuid: String, players: Set<Player>, status: Status, val struc
     }
 
     override fun start() {
-        status = Status.InGame(1, 1)
+        status = Status.InGame(1, 1, 0)
     }
 
     override fun setupScoreboard(player: Player) {
@@ -191,7 +246,7 @@ class ArenaDungeon(uuid: String, players: Set<Player>, status: Status, val struc
         data object Standby : Status()
         data object WaitingGeneration : Status()
         data object WaitingStart : Status()
-        data class InGame(var floor: Int, var room: Int) : Status()
+        data class InGame(var floor: Int, var room: Int, var timeElapsed: Int) : Status()
     }
 
     enum class StructureType {

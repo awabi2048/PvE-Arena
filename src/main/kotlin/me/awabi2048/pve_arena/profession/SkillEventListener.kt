@@ -25,6 +25,8 @@ object SkillEventListener : Listener {
     fun onPlayerUsedActiveSkill(event: PlayerInteractEvent) {
 //        println("called. ${event.action}")
         if (event.action !in listOf(
+                Action.LEFT_CLICK_BLOCK,
+                Action.RIGHT_CLICK_BLOCK,
                 Action.LEFT_CLICK_AIR,
                 Action.RIGHT_CLICK_AIR
             )

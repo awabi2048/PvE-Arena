@@ -197,8 +197,8 @@ interface WaveProcessingMode {
         mob.maximumNoDamageTicks = 2
 
         mob.getAttribute(Attribute.GENERIC_FOLLOW_RANGE)!!.baseValue = 64.0
-        (mob as Monster).target = world.players.random()
-        mob.startBehavior()
+//        (mob as Monster).target = world.players.random()
+        (mob as Monster).startBehavior()
 
         world.spawnParticle(Particle.TRIAL_SPAWNER_DETECTION, spawnLocation, 10, 0.1, 0.1, 0.1, 0.1)
 
@@ -241,7 +241,6 @@ interface WaveProcessingMode {
         SKELETON,
         SPIDER,
         BLAZE,
-        SLIME,
         GUARDIAN,
         ENDERMAN;
     }

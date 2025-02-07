@@ -86,7 +86,7 @@ abstract class Generic(val uuid: String, val players: Set<Player>, var status: S
         return Bukkit.getWorld("arena_session.${uuid}")
     }
 
-    fun timeTracking() {
+    fun timeTracking(order: Int) {
         object : BukkitRunnable() {
             override fun run() {
                 try { // タイム加算
@@ -103,7 +103,7 @@ abstract class Generic(val uuid: String, val players: Set<Player>, var status: S
                         displayScoreboard.scoreboard!!.resetScores("§fTime §7$timeBefore")
                         if (timeElapsed == 1) displayScoreboard.scoreboard!!.resetScores("§fTime §700:00.00")
 
-                        displayScoreboard.getScore("§fTime §7$time").score = 3
+                        displayScoreboard.getScore("§fTime §7$time").score = order
                     }
                 } catch (e: Exception) {
                     cancel()

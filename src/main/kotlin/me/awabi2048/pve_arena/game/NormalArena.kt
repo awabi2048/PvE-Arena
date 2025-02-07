@@ -124,7 +124,7 @@ class NormalArena(
 
         if (wave == 1) {
             // タイム計測開始
-            timeTracking()
+            timeTracking(3)
             startWatchMobMovement()
         }
     }
