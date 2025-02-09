@@ -64,7 +64,7 @@ class Launcher(private val type: Type) {
         val structureManager = Bukkit.getStructureManager()
         structureManager.loadStructure(
             File(
-                Main.instance.dataFolder.toString() + File.separator + "structure/stage/$fileName.nbt".replace(
+                Main.instance.dataFolder.toString() + File.separator + "structure/$fileName.nbt".replace(
                     "/",
                     File.separator
                 )
