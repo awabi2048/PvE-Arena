@@ -93,7 +93,7 @@ interface WaveProcessingMode {
             return modifiedValue
         }
 
-        val mobTypeSection = DataFile.mobType.getConfigurationSection(mobTypeToString(mobType))!!
+        val mobTypeSection = DataFile.mobType.getConfigurationSection("${mobTypeToString(mobType)}.mobs")!!
 
         val spawnLocation =
             listOf(

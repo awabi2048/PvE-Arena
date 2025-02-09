@@ -22,7 +22,7 @@ class QuickArena(uuid: String, players: Set<Player>) : Generic(uuid, players), W
 
         val launcher = Launcher(Launcher.Type.QUICK)
         launcher.prepareWorld(uuid)
-        launcher.prepareStructure(uuid)
+        launcher.prepareStructure(uuid, "standard")
 
         println("$prefix Started arena session for uuid: ${uuid}, type: QUICK, STATUS: $status")
 

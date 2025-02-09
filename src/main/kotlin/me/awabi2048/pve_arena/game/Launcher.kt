@@ -53,18 +53,11 @@ class Launcher(private val type: Type) {
         }
     }
 
-    fun prepareStructure(uuid: String) {
-        val fileName = when(type) {
-            NORMAL -> "normal"
-            QUICK -> "normal"
-            DUNGEON -> "dungeon_start"
-            BOSS_LOBBY -> "boss_lobby"
-        }
-
+    fun prepareStructure(uuid: String, path: String) {
         val structureManager = Bukkit.getStructureManager()
         structureManager.loadStructure(
             File(
-                Main.instance.dataFolder.toString() + File.separator + "structure/$fileName.nbt".replace(
+                Main.instance.dataFolder.toString() + File.separator + "structure/$path.nbt".replace(
                     "/",
                     File.separator
                 )

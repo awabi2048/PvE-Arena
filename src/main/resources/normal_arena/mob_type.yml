@@ -6,7 +6,7 @@ zombie:
     level_experience: 10
   base_cost: 2
   base_summon_count: 12
-  structure: "standard"
+  structure: "normal/standard"
   mobs:
     normal_zombie:
       base_multiplier: 1.0
@@ -43,7 +43,7 @@ skeleton:
     level_experience: 10
   base_cost: 3
   base_summon_count: 12
-  structure: "standard"
+  structure: "normal/standard"
   mobs:
     normal_skeleton:
       base_multiplier: 1.0
@@ -85,7 +85,7 @@ spider:
     level_experience: 10
   base_cost: 3
   base_summon_count: 12
-  structure: "standard"
+  structure: "normal/standard"
   mobs:
     normal_spider:
       base_multiplier: 1.0
@@ -122,7 +122,7 @@ blaze:
     level_experience: 10
   base_cost: 3
   base_summon_count: 12
-  structure: "standard"
+  structure: "normal/standard"
   mobs:
     normal_blaze:
       base_multiplier: 1.0
@@ -154,7 +154,7 @@ guardian:
     level_experience: 10
   base_cost: 4
   base_summon_count: 12
-  structure: "water"
+  structure: "normal/water"
   mobs:
     guardian:
       base_multiplier: 1.0
@@ -186,7 +186,7 @@ enderman:
     level_experience: 10
   base_cost: 5
   base_summon_count: 12
-  structure: "standard"
+  structure: "normal/standard"
   mobs:
     enderman:
       base_multiplier: 1.0

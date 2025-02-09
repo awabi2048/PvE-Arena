@@ -39,7 +39,7 @@ class NormalArena(
             launcher.prepareWorld(uuid)
         }
 
-        launcher.prepareStructure(uuid)
+        launcher.prepareStructure(uuid, DataFile.mobType.getString("${mobTypeToString(mobType)}.structure")!!)
 
         println("$prefix Started arena session for uuid: ${uuid}, type: NORMAL, STATUS: $status")
 
