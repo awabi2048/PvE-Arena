@@ -6,6 +6,7 @@ easy:
   reward_ticket: easy
   reward_point: false
   icon: MOSS_BLOCK
+  collection_weight: 1
 
 normal:
   name: "§eノーマル"
@@ -15,6 +16,7 @@ normal:
   reward_ticket: normal
   reward_point: true
   icon: DEEPSLATE
+  collection_weight: 2
 
 hard:
   name: "§cハード"
@@ -24,6 +26,7 @@ hard:
   reward_ticket: hard
   reward_point: true
   icon: MAGMA_BLOCK
+  collection_weight: 3
 
 expert:
   name: "§dエキスパート"
@@ -33,6 +36,7 @@ expert:
   reward_ticket: extreme
   reward_point: true
   icon: OBSIDIAN
+  collection_weight: 4
 
 nightmare:
   name: "§4ナイトメア"
@@ -42,4 +46,5 @@ nightmare:
   reward_ticket: extreme
   reward_point: false
   icon: CRYING_OBSIDIAN
+  collection_weight: 5
 

@@ -1,7 +1,6 @@
 package me.awabi2048.pve_arena.game
 
 import me.awabi2048.pve_arena.Main
-import me.awabi2048.pve_arena.game.Launcher.Type.*
 import org.bukkit.*
 import org.bukkit.block.structure.Mirror
 import org.bukkit.block.structure.StructureRotation
@@ -10,7 +9,7 @@ import java.io.File
 import java.util.*
 import javax.annotation.Nonnull
 
-class Launcher(private val type: Type) {
+class Launcher(private val type: GameType) {
     fun prepareWorld(uuid: String) {
 
         val sessionWorldCreator = WorldCreator("arena_session.$uuid")
@@ -71,12 +70,5 @@ class Launcher(private val type: Type) {
             1.0f,
             Random(0)
         )
-    }
-
-    enum class Type {
-        NORMAL,
-        QUICK,
-        DUNGEON,
-        BOSS_LOBBY;
     }
 }

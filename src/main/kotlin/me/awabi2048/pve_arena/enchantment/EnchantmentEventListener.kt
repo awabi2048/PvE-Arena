@@ -5,10 +5,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 
 object EnchantmentEventListener {
-    @EventHandler
-    fun onPlayerAttack(event: EntityDamageByEntityEvent) {
-        if (event.damager is Player) {
-
-        }
-    }
+//    @EventHandler
+//    fun onPlayerAttack(event: EntityDamageByEntityEvent) {
+//    }
 }

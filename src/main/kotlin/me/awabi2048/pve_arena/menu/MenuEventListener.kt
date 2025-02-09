@@ -147,7 +147,7 @@ object MenuEventListener : Listener {
                 }
 
                 if (slot == 24) {
-                    party.disband()
+                    activeParty -= party
                     player.closeInventory()
                     player.playSound(player, Sound.BLOCK_ANVIL_USE, 1.0f, 1.5f)
                     player.sendMessage("$prefix §cパーティーを解散しました。")

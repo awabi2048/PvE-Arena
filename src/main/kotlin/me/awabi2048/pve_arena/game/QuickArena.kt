@@ -20,7 +20,7 @@ class QuickArena(uuid: String, players: Set<Player>) : Generic(uuid, players), W
     override fun generate() {
         status = Status.WaitingGeneration
 
-        val launcher = Launcher(Launcher.Type.QUICK)
+        val launcher = Launcher(GameType.Quick)
         launcher.prepareWorld(uuid)
         launcher.prepareStructure(uuid, "standard")
 

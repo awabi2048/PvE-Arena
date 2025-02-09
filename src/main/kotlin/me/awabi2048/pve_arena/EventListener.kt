@@ -34,69 +34,6 @@ import org.bukkit.scheduler.BukkitRunnable
 import kotlin.math.roundToInt
 
 object EventListener : Listener {
-
-
-    @EventHandler
-    fun onPlayerKillInArena(event: EntityDeathEvent) {
-        if (event.entity.world.name.startsWith("arena_session")) {
-            val uuid = event.entity.world.name.substringAfter("arena_session.")
-            val session = Lib.lookForSession(uuid)!!
-            if (session.status !is Generic.Status.InGame) return
-
-            if (event.entity.world.entities.none { it.scoreboardTags.contains("arena.mob") } && session is WaveProcessingMode) {
-                val lastWave = when (session) {
-                    is NormalArena -> session.lastWave
-                    is QuickArena -> DataFile.config.getInt("misc.game.quick_arena", 10)
-                    else -> 1
-                }
-
-                if (session is QuickArena && (session.status as Generic.Status.InGame).wave != lastWave) return
-
-                // ウェーブ終了処理
-                Bukkit.getScheduler().runTaskLater(
-                    instance,
-                    Runnable {
-                        session.finishWave(
-                            event.entity.world,
-                            (session.status as Generic.Status.InGame).wave,
-                            lastWave,
-                            (session.status as Generic.Status.InGame).timeElapsed
-                        )
-
-                        if ((session.status as Generic.Status.InGame).wave == lastWave) Lib.lookForSession(uuid)!!.status =
-                            Generic.Status.WaitingFinish
-                    },
-                    40L
-                )
-            }
-
-            // scoreboard
-            if (session is QuickArena) return
-
-            val totalMobCount = when (session) {
-                is NormalArena -> session.summonCountCalc((session.status as Generic.Status.InGame).wave)
-                else -> 0
-            }
-
-            event.entity.world.players.forEach { it ->
-                val displayScoreboard = Main.displayScoreboardMap[it]!!
-                val currentMobCount =
-                    event.entity.world.entities.filter { it.scoreboardTags.contains("arena.mob") }.size
-
-                if (currentMobCount == totalMobCount - 1) displayScoreboard.scoreboard!!.resetScores("§fMobs §c$totalMobCount§7/$totalMobCount")
-                spawnSessionKillCount[uuid] = spawnSessionKillCount[uuid]!! + 1
-
-                for (count in 0..totalMobCount) {
-                    displayScoreboard.scoreboard!!.resetScores("§fMobs §c${count}§7/$totalMobCount")
-                }
-
-                displayScoreboard.getScore("§fMobs §c${totalMobCount - spawnSessionKillCount[uuid]!!}§7/$totalMobCount").score =
-                    1
-                if (spawnSessionKillCount[uuid]!! == totalMobCount) spawnSessionKillCount.remove(uuid)
-            }
-        }
-    }
-
     @EventHandler
     fun onPlayerMoveDimension(event: PlayerChangedWorldEvent) {
         if (Main.displayScoreboardMap[event.player] != null && !event.player.world.name.startsWith("arena_session.")) {

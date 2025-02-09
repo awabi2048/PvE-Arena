@@ -8,10 +8,7 @@ import me.awabi2048.pve_arena.item.WandItem
 import me.awabi2048.pve_arena.item.wand.WandAbility
 import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.entity.AbstractArrow
-import org.bukkit.entity.Enemy
-import org.bukkit.entity.LivingEntity
-import org.bukkit.entity.Monster
+import org.bukkit.entity.*
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
@@ -107,7 +104,7 @@ object SkillEventListener : Listener {
     @EventHandler
     fun onArrowHit(event: ProjectileHitEvent) {
         if (event.entity is AbstractArrow) {
-            if (event.hitEntity is Enemy) {
+            if (event.hitEntity is Enemy && event.entity.shooter is Player) {
                 (event.hitEntity as LivingEntity).damage((event.entity as AbstractArrow).damage)
             }
 

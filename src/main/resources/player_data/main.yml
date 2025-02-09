@@ -10,9 +10,18 @@ uuid:
   profession_exp_current: 0
   profession_exp_all_time: 0
 
-  # チケットポーチ
-#  ticket_pouch_easy: 0
-#  ticket_pouch_normal: 0
-#  ticket_pouch_hard: 0
+  # デイリー
+  # Last Updated: {date}
+  dailies:
+    quick_roll: false
+
+  record:
+    clear_count_collection:
+      zombie: 0
+      skeleton: 0
+      spider: 0
+      blaze: 0
+      guardian: 0
+      enderman: 0
 
 

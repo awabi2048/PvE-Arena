@@ -6,14 +6,15 @@ import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.Main.Companion.lobbyOriginLocation
 import me.awabi2048.pve_arena.Main.Companion.prefix
 import me.awabi2048.pve_arena.config.DataFile
+import me.awabi2048.pve_arena.config.YamlUtil
 import me.awabi2048.pve_arena.misc.Lib
+import me.awabi2048.pve_arena.quest.GenericQuest
+import me.awabi2048.pve_arena.quest.GenericQuest.Criteria.*
 import org.bukkit.*
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.*
 import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitRunnable
-import org.bukkit.scoreboard.Objective
-import org.codehaus.plexus.util.FileUtils
 
 abstract class Generic(val uuid: String, val players: Set<Player>, var status: Status = Status.Standby) {
 
@@ -146,6 +147,7 @@ abstract class Generic(val uuid: String, val players: Set<Player>, var status: S
             }
         }.runTaskTimer(instance, 0, secondToTimeout)
     }
+
     fun startWatchMobMovement() {
         object: BukkitRunnable() {
             override fun run() {
@@ -157,6 +159,85 @@ abstract class Generic(val uuid: String, val players: Set<Player>, var status: S
                 if (status !is Status.InGame) cancel()
             }
         }.runTaskTimer(instance, 0, 1)
+    }
+
+    fun writePlayerData(gameType: GameType, player: Player) {
+        // コレクション加算
+            val path = when(gameType) {
+                is GameType.Normal -> "${player.uniqueId}.record.clear_count_collection.${gameType.mobType!!.name.lowercase()}"
+                is GameType.Quick -> "${player.uniqueId}.record.clear_count_quick."
+                else -> null
+            }!!
+
+        val collectionCount = when(gameType) {
+            is GameType.Normal -> DataFile.mobDifficulty.getInt("${gameType.mobDifficulty!!.name.lowercase()}.collection_weight")
+            is GameType.Quick -> 1
+            else -> 0
+        }
+
+        DataFile.playerData.set(path, DataFile.stats.getInt(path) + collectionCount)
+        DataFile.playerData.save("player_data/main.yml")
+
+        // クエスト処理
+        // daily
+        for (dailyQuest in DataFile.ongoingQuestData.getConfigurationSection("daily")!!.getKeys(false) - "date") {
+            println("checking: $dailyQuest")
+
+            val dataSection = DataFile.ongoingQuestData.getConfigurationSection("daily.$dailyQuest")!!
+            val criteria = GenericQuest.Criteria.valueOf(dataSection.getString("criteria")!!.substringBefore("."))
+
+            // 各種値を取得
+            val goalValue = dataSection.getInt("value")
+            val currentValue = DataFile.playerQuestData.getInt("${player.uniqueId}.daily_$dailyQuest.current")
+            val hasCompleted = DataFile.playerQuestData.getBoolean("${player.uniqueId}.daily_$dailyQuest.has_completed")
+            println("criteria = $criteria goal value = $goalValue, current value = $currentValue, has completed = $hasCompleted")
+
+            if (hasCompleted) continue
+
+            // このクエスト項目がチェックを必要とするか
+            val requireChecking = when(criteria) {
+                GAIN_EXP -> true
+                CLEAR_TIME_QUICK -> gameType is GameType.Quick
+                CLEAR_COUNT_ALL -> true
+                CLEAR_COUNT_QUICK -> gameType is GameType.Quick
+                CLEAR_COUNT_BOSS -> gameType is GameType.Boss
+                CLEAR_COUNT_MOB_TYPE -> gameType is GameType.Normal
+                CLEAR_COUNT_MOB_DIFFICULTY -> gameType is GameType.Normal
+                SLAY_MOB -> false
+            }
+            println("require checking = $requireChecking")
+            if (!requireChecking) continue
+
+            // GAIN_EXPのみ特殊（加算される値が1でない）なので、先に処理
+            if (criteria == GenericQuest.Criteria.GAIN_EXP) {
+                continue
+            }
+
+            val countedAsQuestCompletion = when(criteria) {
+                CLEAR_COUNT_MOB_TYPE -> {
+                    val objectiveMobType = dataSection.getString("criteria")!!.substringAfter(".")
+                    println(objectiveMobType)
+                    (gameType as GameType.Normal).mobType == WaveProcessingMode.MobType.valueOf(objectiveMobType)
+                }
+                CLEAR_COUNT_MOB_DIFFICULTY -> {
+                    val objectiveMobDifficulty = dataSection.getString("criteria")!!.substringAfter(".")
+                    (gameType as GameType.Normal).mobDifficulty!!.ordinal >= WaveProcessingMode.MobDifficulty.valueOf(objectiveMobDifficulty).ordinal
+                }
+                in listOf(CLEAR_COUNT_BOSS, CLEAR_COUNT_QUICK, CLEAR_COUNT_ALL) -> true // 合っていれば何でも良い族
+                CLEAR_TIME_QUICK -> {
+                    val objectiveTime = dataSection.getString("criteria")!!.substringAfter(".").toInt()
+                    val clearTime = (status as Status.InGame).timeElapsed
+                    clearTime <= objectiveTime
+                }
+                else -> false
+            }
+            println("counted as quest completion = $countedAsQuestCompletion")
+
+            if (countedAsQuestCompletion) {
+                DataFile.playerQuestData.set("${player.uniqueId}.daily.$dailyQuest.current", currentValue + 1)
+                YamlUtil.save("player_data/quest.yml", DataFile.playerQuestData)
+            }
+        }
     }
 
     abstract fun joinPlayer(player: Player)

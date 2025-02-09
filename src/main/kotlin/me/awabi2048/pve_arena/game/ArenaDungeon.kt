@@ -206,7 +206,7 @@ class ArenaDungeon(uuid: String, players: Set<Player>, status: Status, val struc
         // status
         this.status = Status.WaitingGeneration
 
-        val launcher = Launcher(Launcher.Type.DUNGEON)
+        val launcher = Launcher(GameType.Dungeon)
 
         if (Bukkit.getWorlds().any { it.name == "arena_session.$uuid" }) {
             val sessionWorld = getSessionWorld()!!

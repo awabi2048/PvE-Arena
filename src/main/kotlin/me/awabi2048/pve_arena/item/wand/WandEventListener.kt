@@ -39,14 +39,14 @@ object WandEventListener: Listener {
         event.isCancelled = true
     }
 
-    @EventHandler
-    fun onWandLeftClickEntity(event: EntityDamageByEntityEvent) {
-        if (event.damager !is Player) return
-        if (event.cause != DamageCause.ENTITY_ATTACK) return
-
-        val item = (event.damager as Player).equipment.itemInMainHand
-        if (WandItem.getFromItem(item) !in WandItem.list) return
-
-        event.isCancelled = true
-    }
+//    @EventHandler
+//    fun onWandLeftClickEntity(event: EntityDamageByEntityEvent) {
+//        if (event.damager !is Player) return
+//        if (event.cause != DamageCause.ENTITY_ATTACK) return
+//
+//        val item = (event.damager as Player).equipment.itemInMainHand
+//        if (WandItem.getFromItem(item) !in WandItem.list) return
+//
+//        event.isCancelled = true
+//    }
 }

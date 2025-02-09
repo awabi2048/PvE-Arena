@@ -56,11 +56,11 @@ daily:
       icon: DIAMOND_HELMET
 
     clear_time_quick:
-      base_value: 1
+      base_value: 600 # sec
       index_min: 1
       index_max: 1
       title: "§bもっとクイック"
-      description: "クイックアリーナを{value}分以内にクリアしよう。"
+      description: "クイックアリーナを{value}以内にクリアしよう。"
       reward:
         point: 3
         quest_note: 1

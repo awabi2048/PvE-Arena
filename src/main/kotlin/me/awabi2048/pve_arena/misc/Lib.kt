@@ -166,7 +166,6 @@ object Lib {
         return minValue..maxValue
     }
 
-
     class SidebarManager(player: Player) {
         fun unregister(scoreboard: String) {
 

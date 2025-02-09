@@ -31,103 +31,77 @@ class SubCommandAdmin(private val sender: Player, private val args: Array<out St
         }
 
         fun startSession() {
+            //
+            try {
+                sender.sendMessage("$prefix §7開始処理を実行中です。通常§n2秒程度§7掛かります。")
 
-            val type = Launcher.Type.valueOf(args[1])
-//
+                val type = when(args[1]){
+                    "NORMAL" -> GameType.Normal(null, null)
+                    "QUICK" -> GameType.Quick
+                    "DUNGEON" -> GameType.Dungeon
+                    else -> null
+                }
+
                 val uuid = sender.uniqueId.toString()
                 val players = setOf(sender)
 
-            if (type == Launcher.Type.DUNGEON) {
-                val session = ArenaDungeon(
-                    uuid = uuid,
-                    players = players,
-                    status = ArenaDungeon.Status.WaitingGeneration,
-                    structureType = ArenaDungeon.StructureType.DESERT_TEMPLE
-                )
+                if (type is GameType.Normal) {
+                    val mobType = WaveProcessingMode.MobType.valueOf(args[2])
+                    val difficulty = WaveProcessingMode.MobDifficulty.valueOf(args[3])
+                    val sacrifice = args[4].toInt()
 
-                activeSession += session
-                session.generate()
+//                    val initialStatus = NormalArena.Status(0, players.toMutableSet(), Generic.StatusCode.WAITING_GENERATION)
+                    val session = NormalArena(uuid, players, mobType, difficulty, sacrifice)
 
-                Bukkit.getScheduler().runTaskLater(
-                    instance,
-                    Runnable {
-                        session.joinPlayer(sender)
-                        session.start()
-                    },
-                    40L
-                )
+                    activeSession += session
+                    session.generate()
+
+                    Bukkit.getScheduler().runTaskLater(
+                        instance,
+                        Runnable {
+                            session.joinPlayer(sender)
+                            session.start()
+                        },
+                        40L
+                    )
+                }
+
+                if (type is GameType.Quick) {
+
+                    val session = QuickArena(uuid, players)
+
+                    activeSession += session
+                    session.generate()
+
+                    Bukkit.getScheduler().runTaskLater(
+                        instance,
+                        Runnable {
+                            session.joinPlayer(sender)
+                            session.start()
+                        },
+                        40L
+                    )
+                }
+
+                if (type is GameType.Dungeon) {
+                    val session = ArenaDungeon(uuid, players, ArenaDungeon.Status.WaitingGeneration, ArenaDungeon.StructureType.DESERT_TEMPLE)
+
+                    activeSession += session
+                    session.generate()
+
+                    Bukkit.getScheduler().runTaskLater(
+                        instance,
+                        Runnable {
+                            session.joinPlayer(sender)
+                            session.start()
+                        },
+                        40L
+                    )
+                }
+
+            } catch (e: Exception) {
+                sender.sendError("無効なセッション情報です: start_session <TYPE> <MobType?> <Difficulty?> <Sacrifice?>")
             }
-
-//            try {
-//                sender.sendMessage("$prefix §7開始処理を実行中です。通常§n2秒程度§7掛かります。")
-//
-//                val type = Launcher.Type.valueOf(args[1])
-//
-//                val uuid = sender.uniqueId.toString()
-//                val players = setOf(sender)
-//
-//                if (type == Launcher.Type.NORMAL) {
-//                    val mobType = WaveProcessingMode.MobType.valueOf(args[2])
-//                    val difficulty = WaveProcessingMode.MobDifficulty.valueOf(args[3])
-//                    val sacrifice = args[4].toInt()
-//
-////                    val initialStatus = NormalArena.Status(0, players.toMutableSet(), Generic.StatusCode.WAITING_GENERATION)
-//                    val session = NormalArena(uuid, players, mobType, difficulty, sacrifice)
-//
-//                    activeSession += session
-//                    session.generate()
-//
-//                    Bukkit.getScheduler().runTaskLater(
-//                        instance,
-//                        Runnable {
-//                            session.joinPlayer(sender)
-//                            session.start()
-//                        },
-//                        40L
-//                    )
-//                }
-//
-//                if (type == Launcher.Type.QUICK) {
-//
-//                    val session = QuickArena(uuid, players)
-//
-//                    activeSession += session
-//                    session.generate()
-//
-//                    Bukkit.getScheduler().runTaskLater(
-//                        instance,
-//                        Runnable {
-//                            session.joinPlayer(sender)
-//                            session.start()
-//                        },
-//                        40L
-//                    )
-//                }
-//
-//                if (type == Launcher.Type.DUNGEON) {
-//                    val session = ArenaDungeon(
-//                        uuid = uuid,
-//                        players = players,
-//                        status = ArenaDungeon.Status.WaitingGeneration,
-//                        structureType = ArenaDungeon.StructureType.DESERT_TEMPLE
-//                    )
-//
-//                    activeSession += session
-//                    session.generate()
-//
-//                    Bukkit.getScheduler().runTaskLater(
-//                        instance,
-//                        Runnable {
-//                            session.joinPlayer(sender)
-//                            session.start()
-//                        },
-//                        40L
-//                    )
-//                }
-//
-//            } catch (e: Exception) {
-//                sender.sendError("無効なセッション情報です: start_session <TYPE> <MobType> <Difficulty> <Sacrifice>")
-//            }
         }
 
         fun stopSession() {

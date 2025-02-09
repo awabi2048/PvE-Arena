@@ -11,10 +11,6 @@ data class Party(val uuid: String = UUID.randomUUID().toString(), var name: Stri
         activeParty += this
     }
 
-    fun disband() {
-        activeParty -= this
-    }
-
     fun changeName(newName: String) {
         this.name = newName
         this.sendPartyMessage(null, "§7パーティーの名前が §a${newName}§7 に変更されました。")
