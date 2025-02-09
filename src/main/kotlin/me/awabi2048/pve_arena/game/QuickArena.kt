@@ -15,9 +15,7 @@ import org.bukkit.scoreboard.Criteria
 import org.bukkit.scoreboard.DisplaySlot
 import org.bukkit.scoreboard.Objective
 
-class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), WaveProcessingMode {
-
-    val lastWave = 10
+class QuickArena(uuid: String, players: Set<Player>) : Generic(uuid, players), WaveProcessingMode {
 
     override fun generate() {
         status = Status.WaitingGeneration
@@ -80,7 +78,8 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
     }
 
     override fun waveProcession() {
-        if (status is Status.WaitingStart) status = Status.InGame(WaveProcessingMode.MobType.entries.random(), WaveProcessingMode.MobDifficulty.NORMAL, 0, 0)
+        if (status is Status.WaitingStart) status =
+            Status.InGame(WaveProcessingMode.MobType.entries.random(), WaveProcessingMode.MobDifficulty.NORMAL, 0, 0)
 
         (status as Status.InGame).wave += 1
         val wave = (status as Status.InGame).wave
@@ -128,7 +127,11 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
     }
 
     override fun setupScoreboard(player: Player) {
-        val scoreboard = Bukkit.getScoreboardManager().newScoreboard.registerNewObjective("arena_scoreboard_display.${player.uniqueId}", Criteria.DUMMY, "§7« §e§lQuick Arena §7»")
+        val scoreboard = Bukkit.getScoreboardManager().newScoreboard.registerNewObjective(
+            "arena_scoreboard_display.${player.uniqueId}",
+            Criteria.DUMMY,
+            "§7« §e§lQuick Arena §7»"
+        )
         scoreboard.displaySlot = DisplaySlot.SIDEBAR
 //        scoreboard.numberFormat(NumberFormat.blank()) → 1.21.4までおあずけ
 
@@ -157,7 +160,8 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
         val mobType = WaveProcessingMode.MobType.entries.random()
         spawnSessionKillCount[uuid] = 0
 
-        for (i in 1..12) {
+        val maxWave = DataFile.config.getInt("misc.game.quick_arena_mobs")
+        repeat(maxWave) {
             Bukkit.getScheduler().runTaskLater(
                 instance,
                 Runnable {
@@ -170,7 +174,7 @@ class QuickArena(uuid: String, players: Set<Player>): Generic(uuid, players), Wa
                         )
                     }
                 },
-                (10 * i).toLong()
+                (10 * it).toLong()
             )
         }
     }

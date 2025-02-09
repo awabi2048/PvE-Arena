@@ -18,6 +18,7 @@ object DataFile {
     lateinit var customModelData: YamlConfiguration
     lateinit var dungeonStructure: YamlConfiguration
     lateinit var playerSkill: YamlConfiguration
+    lateinit var enchanting: YamlConfiguration
 
     private val resourceSet = setOf(
         "normal_arena/mob_type.yml",
@@ -33,6 +34,7 @@ object DataFile {
         "misc/custom_model_data.yml",
         "dungeon/structure.yml",
         "misc/player_skill.yml",
+        "misc/enchanting.yml",
     )
 
     fun loadAll() {
@@ -49,6 +51,7 @@ object DataFile {
         customModelData = YamlUtil.load("misc/custom_model_data.yml")
         dungeonStructure = YamlUtil.load("dungeon/structure.yml")
         playerSkill = YamlUtil.load("misc/player_skill.yml")
+        enchanting = YamlUtil.load("misc/enchanting.yml")
     }
 
     fun copy() {

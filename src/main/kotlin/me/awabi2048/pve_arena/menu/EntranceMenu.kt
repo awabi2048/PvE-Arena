@@ -386,10 +386,10 @@ class EntranceMenu(player: Player) : MenuManager(player, MenuType.Entrance) {
 
     private fun calcCostItemMap(rawCost: Int): Map<ItemManager.ArenaItem, Int> {
         // normal
-        val normal = rawCost % 6
+        val normal = rawCost % DataFile.config.getInt("misc.game.cost_item_unit")
 
         // rare
-        val rare = rawCost / 6
+        val rare = rawCost / DataFile.config.getInt("misc.game.cost_item_unit")
 
         return mapOf(
             ItemManager.ArenaItem.ENTER_COST_ITEM to normal, ItemManager.ArenaItem.ENTER_COST_ITEM_RARE to rare

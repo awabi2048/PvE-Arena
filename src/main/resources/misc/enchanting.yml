@@ -1,0 +1,71 @@
+minecraft:sharpness:
+  soul: 5
+  exp_level: 10
+  level: 6..7
+
+minecraft:smite:
+  cost:
+    soul: 3
+    exp_level: 10
+  level: 6..7
+
+minecraft:bane_of_arthropods:
+  cost:
+    soul: 2
+    exp_level: 10
+  level: 6..7
+
+minecraft:impaling:
+  cost:
+    soul: 2
+    exp_level: 10
+  max_level: 6..7
+
+pve_arena:nether_killer:
+  cost:
+    soul: 3
+    exp_level: 10
+  max_level: 1..7
+
+pve_arena:end_killer:
+  cost:
+    soul: 2
+    exp_level: 10
+  max_level: 1..7
+
+pve_arena:giant_killer:
+  cost:
+    soul: 2
+    exp_level: 10
+  max_level: 1..5
+
+minecraft:protection:
+  cost:
+    soul: 3
+    exp_level: 5
+  level: 5..6
+
+minecraft:fire_protection:
+  cost:
+    soul: 2
+    exp_level: 5
+  level: 5..5
+
+minecraft:blast_protection:
+  cost:
+    soul: 2
+    exp_level: 5
+  level: 5..5
+
+minecraft:projectile_protection:
+  cost:
+    soul: 2
+    exp_level: 5
+  level: 5..5
+
+minecraft:looting:
+  cost:
+    soul: 8
+    exp_level: 12
+  level: 4..5
+

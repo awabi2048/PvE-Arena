@@ -25,12 +25,16 @@ misc:
     # クイックアリーナ: 全ウェーブ数
     quick_arena_wave: 10
 
+    # クイックアリーナ: 全ウェーブ数
+    quick_arena_mobs: 10
+
     # クイックアリーナ: ウェーブ間インターバル（秒）
     quick_arena_time: 45
 
     # 入場時の最大数
     player_max: 6
     sacrifice_max: 4
+    cost_item_unit: 6
 
     # 入場コストのプレイヤーによる倍率: {player_count} ^ {cost_increase_per_player_pow}
     cost_increase_per_player_pow: 0.613 # = log_6(3)
@@ -47,7 +51,6 @@ misc:
     collection_scale_hard: 3
     collection_scale_expert: 5
     collection_scale_nightmare: 7
-
 
   item:
     #

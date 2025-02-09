@@ -14,6 +14,7 @@ abstract class MenuManager(val player: Player, val menuType: MenuType) {
         data class Ranking(val display: RankingMenu.Subject?): MenuType()
         data object Forging: MenuType()
         data object Party: MenuType()
+        data object Enchanting: MenuType()
     }
 
     val black = Lib.getHiddenItem(Material.BLACK_STAINED_GLASS_PANE)

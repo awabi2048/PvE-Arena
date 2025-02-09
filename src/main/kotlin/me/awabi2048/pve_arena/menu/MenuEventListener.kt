@@ -4,6 +4,7 @@ import me.awabi2048.pve_arena.Main.Companion.activeParty
 import me.awabi2048.pve_arena.Main.Companion.instance
 import me.awabi2048.pve_arena.Main.Companion.prefix
 import me.awabi2048.pve_arena.config.DataFile
+import me.awabi2048.pve_arena.misc.Lib
 import me.awabi2048.pve_arena.party.ChatChannel
 import me.awabi2048.pve_arena.party.Party.Companion.playerChatListening
 import me.awabi2048.pve_arena.party.Party.Companion.playerChatState
@@ -17,7 +18,6 @@ import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.player.PlayerChatEvent
 import org.bukkit.event.player.PlayerInteractAtEntityEvent
-import org.bukkit.metadata.FixedMetadataValue
 
 object MenuEventListener : Listener {
     @EventHandler
@@ -27,8 +27,13 @@ object MenuEventListener : Listener {
         val slot = event.slot
         val player = event.whoClicked as Player
 
+        fun menuContains(string: String): Boolean {
+            return event.clickedInventory?.any { it != null && it.itemMeta.itemName == string } == true
+        }
+        val menuTitle = event.view.title
+
         // 入場メニュー
-        if (event.clickedInventory?.any { it != null && it.itemMeta.itemName == "§cゲートを開く" } == true) {
+        if (menuContains("§cゲートを開く")) {
             event.isCancelled = true
             if (event.whoClicked.scoreboardTags.contains("arena.misc.in_click_interval")) return
 
@@ -68,10 +73,11 @@ object MenuEventListener : Listener {
         }
 
         // クエストメニュー
-        if (event.clickedInventory?.any { it != null && it.itemMeta.itemName == "§7« §6これまでのクリア実績 §7»" } == true) {
+        if (menuContains("§7« §6これまでのクリア実績 §7»")) {
             event.isCancelled = true
 
-            if (event.clickedInventory?.any { it != null && it.itemMeta.itemName == "§aデイリークエスト" } == true) {
+            // 最初のメニュー
+            if (menuContains("§aデイリークエスト")) {
                 if (slot !in listOf(20, 24, 41)) return
                 when (slot) {
                     20 -> {
@@ -99,12 +105,13 @@ object MenuEventListener : Listener {
                 }
             }
 
+            // weekly quest
             if (event.clickedInventory?.getItem(4)?.type == Material.GOLDEN_SWORD) {
             }
         }
 
         // パーティーメニュー
-        if (event.clickedInventory?.any { it != null && it.itemMeta.itemName == "§cパーティーを解散する" } == true) {
+        if (menuContains("§cパーティーを解散する")) {
             event.isCancelled = true
             val party = activeParty.find { player in it.players }!!
 
@@ -184,6 +191,69 @@ object MenuEventListener : Listener {
                 }
             }
         }
+
+        // エンチャント
+        if (menuContains("§c合成する")) {
+            event.isCancelled = true
+
+            if (slot !in listOf(11, 15, 40)) return
+            val menu = EnchantingMenu(player)
+
+            if (slot in listOf(11, 15)) {
+                // cursorに何もなければreturn
+                if (event.cursor.type == Material.AIR) return
+
+                // スロットをcursorのアイテムで置き換え
+                event.clickedInventory!!.setItem(slot, event.cursor)
+
+                // cursorをクリア
+                event.setCursor(null)
+
+                // 合成結果をシミュレーション
+                menu.simulateInfusion(event.clickedInventory!!.getItem(11)!!, event.clickedInventory!!.getItem(15)!!)
+
+                if (menu.isPossibleInfusion) {
+                    val costItem = menu.cost!!.first
+                    val costExpLevel = menu.cost.second
+
+                    val clickItem = event.clickedInventory!!.getItem(40)!!
+                    val clickItemMeta = clickItem.itemMeta!!
+                    clickItemMeta.lore = listOf(
+                        Lib.getBar(40, "§7"),
+                        "§bコスト§7: ",
+                        "§7- §3§lソウルエッセンス§7: $costItem",
+                        "§7- §2経験値レベル§7: $costExpLevel",
+                        Lib.getBar(40, "§7"),
+                    )
+                    event.clickedInventory!!.setItem(40, clickItem.apply { itemMeta = clickItemMeta })
+                }
+            }
+
+            if (slot == 40) {
+                 if (menu.isPossibleInfusion) {
+                     val resultItem = menu.infusionResult!!
+                     event.clickedInventory!!.setItem(40, resultItem)
+                     event.clickedInventory!!.setItem(11, null)
+                     event.clickedInventory!!.setItem(15, null)
+//                     player.scoreboardTags.add("arena.misc.gui_animation.enchanting")
+//
+//                     Bukkit.getScheduler().runTaskLater(instance, Runnable {
+//                         event.isCancelled
+//                         player.playSound(player, Sound.UI_BUTTON_CLICK, 1.0f, 0.5f)
+//                     }, 10L)
+//
+//                     Bukkit.getScheduler().runTaskLater(instance, Runnable {
+//                         player.playSound(player, Sound.UI_BUTTON_CLICK, 1.0f, 0.5f)
+//                     }, 20L)
+//
+//                     Bukkit.getScheduler().runTaskLater(instance, Runnable {
+//                         player.playSound(player, Sound.UI_BUTTON_CLICK, 1.0f, 0.5f)
+//                     }, 30L)
+                 } else {
+                     player.playSound(player, Sound.UI_BUTTON_CLICK, 1.0f, 0.5f)
+                 }
+            }
+        }
     }
 
     @EventHandler
@@ -204,6 +274,12 @@ object MenuEventListener : Listener {
         // クエストメニュー
         if (interactionTag.contains("arena.misc.quest_menu")) {
             val menu = QuestMenu(event.player, null)
+            menu.open()
+        }
+
+        // enchanting メニュー
+        if (interactionTag.contains("arena.misc.enchanting_menu")) {
+            val menu = EnchantingMenu(event.player)
             menu.open()
         }
     }
@@ -247,5 +323,11 @@ object MenuEventListener : Listener {
 
             playerChatListening.remove(event.player)
         }
+    }
+
+    @EventHandler
+    fun onPlayerMoveItem(event: InventoryClickEvent) {
+//        println("slot item: ${event.currentItem}, current item: ${event.cursor}")
+//        if (event.currentItem == null) return
     }
 }

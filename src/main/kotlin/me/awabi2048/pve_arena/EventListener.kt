@@ -131,14 +131,6 @@ object EventListener : Listener {
     }
 
     @EventHandler
-    fun regulateMobTarget(event: EntityTargetLivingEntityEvent) {
-        if (event.entity.world.name.startsWith("arena_session.") && event.target !is Player && event.entity.world.players.isNotEmpty()) {
-            event.isCancelled = true
-            event.target = event.entity.world.players.random()
-        }
-    }
-
-    @EventHandler
     fun onSneak(event: PlayerToggleSneakEvent) {
         val player = event.player
         if (SacrificeItem.getFromItem(player.equipment.itemInMainHand) == ItemManager.ArenaItem.SACRIFICE_ITEM) {

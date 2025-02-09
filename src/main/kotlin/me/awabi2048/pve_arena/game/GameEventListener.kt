@@ -115,4 +115,16 @@ object GameEventListener: Listener {
             }
         }
     }
+
+    @EventHandler // モブのターゲットを変更
+    fun regulateMobTarget(event: EntityTargetLivingEntityEvent) {
+        if (
+            event.entity.world.name.startsWith("arena_session.")
+            && event.target !is Player
+            && event.entity !is Guardian
+            && event.entity.world.players.isNotEmpty()
+            ) {
+            event.isCancelled = true
+        }
+    }
 }
